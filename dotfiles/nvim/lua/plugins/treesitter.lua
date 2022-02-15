@@ -1,0 +1,87 @@
+return {
+    "nvim-treesitter/nvim-treesitter",
+    lazy = false,
+    branch = "main",
+    build = ":TSUpdate",
+    config = function()
+        local ts = require("nvim-treesitter")
+
+        -- Install core parsers at startup
+        ts.install({
+            "bash",
+            "c",
+            "html",
+            "javascript",
+            "jsdoc",
+            "json",
+            "lua",
+            "luadoc",
+            "luap",
+            "markdown",
+            "markdown_inline",
+            "python",
+            "query",
+            "regex",
+            "tsx",
+            "typescript",
+            "vim",
+            "yaml",
+        })
+
+        -- Custom filetype mappings
+        vim.filetype.add({
+            pattern = {
+                [".*%.component%.html"] = "htmlangular",
+            },
+        })
+
+        -- The `zsh` tree-sitter grammar is broken here: opening a zsh file
+        -- (~/.zshrc) and reparsing aborts nvim
+        --   Assertion failed: (size == length), function deserialize, scanner.c
+        -- A fixed grammar exists upstream, but the archived nvim-treesitter (and
+        -- tree-sitter-manager) build it via tree-sitter CLI 0.26, whose ABI is
+        -- incompatible with the committed scanner → still crashes. Until the CLI
+        -- ABI is sorted, route zsh to the healthy `bash` parser (good shell
+        -- highlighting, no zsh.so loaded). See zsh_treesitter memory note.
+        vim.treesitter.language.register("bash", "zsh")
+
+        local group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true })
+
+        local ignore_filetypes = {
+            "checkhealth",
+            "lazy",
+            "mason",
+            "snacks_dashboard",
+            "snacks_notif",
+            "snacks_win",
+        }
+
+        -- Auto-install parsers and enable highlighting on FileType
+        vim.api.nvim_create_autocmd("FileType", {
+            group = group,
+            desc = "Enable treesitter highlighting and indentation",
+            callback = function(event)
+                if vim.tbl_contains(ignore_filetypes, event.match) then
+                    return
+                end
+
+                local lang = vim.treesitter.language.get_lang(event.match) or event.match
+                local buf = event.buf
+                local parsers = require('nvim-treesitter.parsers')
+
+                if parsers[lang] == nil then
+                    return
+                end
+
+                -- Start highlighting immediately (works if parser exists)
+                pcall(vim.treesitter.start, buf, lang)
+
+                -- Enable treesitter indentation
+                vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+                -- Install missing parsers (async, no-op if already installed)
+                ts.install({ lang })
+            end,
+        })
+    end,
+}

@@ -1,0 +1,278 @@
+if [[ "$(uname)" == "Darwin" ]]; then
+    fpath=($(brew --prefix)/share/zsh/site-functions $fpath)
+fi
+autoload -Uz compinit
+compinit
+
+# Using ghostty for terminal multiplexing instead of tmux
+
+# The rendering of zellij is still not up to snuff
+#
+# if [[ -z "$ZELLIJ" ]] ; t
+#   if [[ $(zellij ls 2>/dev/null |grep ^tiago$) = "tiago" ]]; then
+#     zellij attach 'tiago'
+#   else
+#     zellij attach -c 'tiago'
+#   fi
+# fi
+# Path additions
+#
+path+=("/usr/bin")
+path+=("$HOME/go/bin")
+export PATH
+export ZSH="$HOME/.oh-my-zsh"
+# Install wmill CLI if not already installed
+if ! command -v bat &> /dev/null; then
+    alias bat='batcat'
+fi
+if ! command -v fd &> /dev/null; then
+    export FZF_DEFAULT_COMMAND="fdfind --type file --color=always"
+    alias fd='fdfind'
+fi
+if command -v fdfind &> /dev/null; then
+    export FZF_DEFAULT_COMMAND="fdfind --type file --color=always"
+fi
+# eza is the maintained fork of exa
+if ! command -v eza &> /dev/null; then
+    echo "Warning: eza is not installed. Please install it for better ls functionality."
+fi
+
+setopt auto_menu # automatically use menu completion
+setopt always_to_end # move cursor to end if word had one match
+zstyle ':completion:*' menu select # select completions with arrow keys
+zstyle ':completion:*' group-name '' # group results by category
+zstyle ':completion:::::' completer _expand _complete _ignored _approximate # enable approximate matches for completion
+zstyle ":completion:*:git-checkout:*" sort false
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# Using ghostty's built-in splits instead of tmux popup
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle :omz:plugins:ssh-agent lazy yes
+zstyle :omz:plugins:ssh-agent quiet yes
+# My Custom command completions
+
+
+export REPOS_DIR="${HOME}/Documents/repos"
+zstyle ':fzf-tab:complete:repos:*' fzf-preview 'bat --color=always "${REPOS_DIR}/$word/README.md" 2>/dev/null || echo "No README found"'
+zstyle ':fzf-tab:complete:repos:*' fzf-flags --header='worktree  /  branch'
+repos() {
+   cd "${REPOS_DIR}/$1"
+}
+_repos() {
+  setopt localoptions nullglob
+  local -a entries dirs displays
+  local repo_dir wt_dir repo entry branch width=0 i
+  # First pass: collect each completion value and the dir it maps to.
+  for repo_dir in "${REPOS_DIR}"/*/; do
+    [[ -d "$repo_dir" ]] || continue
+    repo=$(basename "$repo_dir")
+    local -a subdirs=()
+    for wt_dir in "${repo_dir}"*/; do
+      [[ -d "$wt_dir" ]] && subdirs+=("$wt_dir")
+    done
+    if (( ${#subdirs[@]} > 0 )); then
+      for wt_dir in "${subdirs[@]}"; do
+        entry="${repo}/$(basename "$wt_dir")"
+        entries+=("$entry"); dirs+=("${wt_dir%/}")
+        (( ${#entry} > width )) && width=${#entry}
+      done
+    else
+      entries+=("$repo"); dirs+=("${repo_dir%/}")
+      (( ${#repo} > width )) && width=${#repo}
+    fi
+  done
+  # Second pass: build aligned display strings with the checked-out branch.
+  # Read HEAD directly instead of spawning `git` per worktree (that made tab slow
+  # with 100+ entries). No ANSI colour: fzf-tab feeds the display back into the
+  # match query, so an escape prefix breaks completion.
+  local g gd head sym=$'\u2387'   # \u2387 branch glyph; swap to a Nerd-Font glyph if you prefer
+  for (( i = 1; i <= ${#entries}; i++ )); do
+    g=${dirs[i]}/.git
+    if [[ -f $g ]]; then                 # linked worktree: .git is a pointer file
+      gd=$(<$g); g=${gd#gitdir: }
+      [[ $g != /* ]] && g=${dirs[i]}/$g
+    fi
+    branch=""
+    if [[ -r $g/HEAD ]]; then
+      head=$(<$g/HEAD)
+      [[ $head == ref:\ refs/heads/* ]] && branch=${head#ref: refs/heads/}
+    fi
+    if [[ -n $branch ]]; then
+      entry=${entries[i]}
+      displays+=("${(r:$width:)entry}  ${sym} ${branch}")
+    else
+      displays+=("${entries[i]}")
+    fi
+  done
+  compadd -d displays -a entries
+}
+compdef _repos repos
+
+gitclonewithtree() {
+  local url="$1"
+  local repo_name=$(basename "$url" .git)
+  mkdir -p "${REPOS_DIR}/${repo_name}"
+  git clone "$url" "${REPOS_DIR}/${repo_name}/main"
+  echo "Cloned into ${REPOS_DIR}/${repo_name}/main"
+  echo "Add worktrees with: git -C ${REPOS_DIR}/${repo_name}/main worktree add ../<branch-name> <branch>"
+}
+
+export PERSONAL_REPO_FOLDER="${HOME}/repos"
+zstyle ':fzf-tab:complete:prep:*' fzf-preview 'bat --color=always ${PERSONAL_REPO_FOLDER}/$realpath/README.md'
+prep() {
+    cd "${PERSONAL_REPO_FOLDER}/$1"
+}
+_prep() {
+   # this is one way of defining completion by directory, where 
+   ((CURRENT == 2)) && _files -/ -W ${PERSONAL_REPO_FOLDER}
+}
+compdef _prep prep
+
+export ARDUINO_DIR="${HOME}/Arduino"
+export ARDUINO_FQBN="${ARDUINO_FQBN:-arduino:avr:uno}"
+zstyle ':fzf-tab:complete:sketch:*' fzf-preview 'bat --color=always "${ARDUINO_DIR}/$word/$word.ino" 2>/dev/null || echo "No .ino found"'
+sketch() {
+    local monitor=0
+    if [[ "$1" == "-m" ]]; then
+        monitor=1
+        shift
+    fi
+    local name="$1"
+    local sketch_dir="${ARDUINO_DIR}/$name"
+    if [[ -z "$name" || ! -d "$sketch_dir" ]]; then
+        echo "Usage: sketch [-m] <name>" >&2
+        return 1
+    fi
+    local port
+    port=$(arduino-cli board list | awk '/^\/dev\// {print $1; exit}')
+    if [[ -z "$port" ]]; then
+        echo "No board detected. Plug one in or set the port manually." >&2
+        return 1
+    fi
+    arduino-cli compile --fqbn "$ARDUINO_FQBN" "$sketch_dir" \
+        && arduino-cli upload -p "$port" --fqbn "$ARDUINO_FQBN" "$sketch_dir" \
+        || return $?
+    if (( monitor )); then
+        arduino-cli monitor -p "$port" -c "baudrate=${ARDUINO_BAUD:-9600}"
+    fi
+}
+_sketch() {
+    local -a entries
+    local sketch_dir
+    for sketch_dir in "${ARDUINO_DIR}"/*/; do
+        [[ -d "$sketch_dir" ]] || continue
+        local n=$(basename "$sketch_dir")
+        [[ -f "${sketch_dir}${n}.ino" ]] && entries+=("$n")
+    done
+    compadd -a entries
+}
+compdef _sketch sketch
+
+# Setting up zsh plugins
+#
+#
+plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent )
+#Remember, for ssh to work as you like it you need to add the AddKeysToAgent on the ssh config
+source $ZSH/oh-my-zsh.sh
+
+
+if [[ -d /usr/share/fzf/shell/key-bindings.zsh ]];
+then
+    source /usr/share/fzf/shell/key-bindings.zsh
+fi
+
+# Default finder for fzf 
+export FZF_DEFAULT_COMMAND='fd .'
+export FZF_DEFAULT_OPTS="--ansi"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+enable-fzf-tab
+
+export EDITOR="nvim"
+
+nn() {
+    if [[ -d "${1}" ]];
+    then 
+        cd "${1}"
+    else
+      cd "$(dirname "${1}")"
+    fi
+  nvim
+}
+
+pn() {
+  cd ${HOME}/Documents/personal
+}
+
+gor() {
+    cd $(git rev-parse --show-toplevel)
+}
+
+newworktree() {
+  local repo branch wt_name main_dir
+  repo=$(ls -1 "$REPOS_DIR" | fzf --prompt="Repo> " \
+    --preview 'bat --color=always $REPOS_DIR/{}/main/README.md 2>/dev/null || echo "No README found in {}/main"') || return
+  [[ -z "$repo" ]] && return 1
+
+  echo "Selected repo: $repo"
+
+  read "branch?Branch name: "
+  [[ -z "$branch" ]] && { echo "Branch name required"; return 1; }
+
+  read "wt_name?Worktree directory name: "
+  [[ -z "$wt_name" ]] && { echo "Worktree name required"; return 1; }
+
+  main_dir="${REPOS_DIR}/${repo}/main"
+  [[ -d "$main_dir" ]] || { echo "No main/ in $repo"; return 1; }
+
+  git -C "$main_dir" worktree add "../${wt_name}" -b "$branch" && cd "${REPOS_DIR}/${repo}/${wt_name}"
+}
+
+# Aliases
+
+alias more='bat'
+alias ls='eza'
+
+# ls, the common ones I use a lot shortened for rapid fire usage
+alias l='ls -lFh'     #size,show type,human readable
+alias la='ls -laFh --icons'   #long list,show almost all,show type,human readable
+alias lr='ls -tRFh'   #sorted by date,recursive,show type,human readable
+alias lt='ls -ltFh'   #long list,sorted by date,show type,human readable
+
+alias ll='ls -l'      #long list
+alias ldot='ls -ld .*'
+alias lS='ls -1FSsh'
+
+alias lart='ls -1Fcart'
+alias lrt='ls -1Fcrt'
+alias lsr='ls -lARFh' #Recursive list of files and directories
+alias lsn='ls -1'     #A column contains name of files and directories
+
+eval "$(starship init zsh)"
+
+source_if_exists() {
+  [[ -s "$1" ]] && source "$1"
+}
+
+# SDKMAN
+export SDKMAN_DIR="$HOME/.sdkman"
+source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+source_if_exists "/opt/homebrew/opt/nvm/nvm.sh"
+source_if_exists "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+
+# Zsh functions for interactions with ghostty
+lo() {
+  if [[ "$1" == "code" ]]; then
+    ghostty +split:right -e zsh -ic "opencode"
+    sleep 0.1
+    ghostty +split:down -e zsh
+    nvim
+  fi
+}

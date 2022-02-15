@@ -1,0 +1,14 @@
+.DS_Store
+dotfiles/zed/prompts/
+tpm/
+packer_compiled.lua
+.config/
+dotfiles/tmux/plugins/
+*gitignore.lua
+*gitlab.lua
+*lazy-lock.json
+
+# Claude Code local artifacts: machine-specific paths and scratch worktrees.
+# Not for a public repo.
+**/.claude/settings.local.json
+**/.claude/worktrees/

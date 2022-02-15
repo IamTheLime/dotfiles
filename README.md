@@ -10,8 +10,13 @@
 ## Tools used by zshrc
 
 https://ohmyz.sh/
+
 https://github.com/sharkdp/bat
+
 https://github.com/sharkdp/fd#installation
+
 https://the.exa.website/
+
 https://github.com/Aloxaf/fzf-tab#oh-my-zsh
+
 https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/INSTALL.md

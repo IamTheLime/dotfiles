@@ -8,7 +8,7 @@ fi
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
-plugins=(git poetry ripgrep virtualenv zsh-autosuggestions fzf-git fzf-tab zsh-syntax-highlighting)
+plugins=(git poetry ripgrep virtualenv zsh-autosuggestions fzf-git fzf-tab zsh-syntax-highlighting ssh-agent)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -29,6 +29,9 @@ zstyle ":completion:*:git-checkout:*" sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:repos:*' fzf-preview 'bat --color=always --terminal-width=-20  ${UJ_DIR}/$realpath/README.md'
+zstyle :omz:plugins:ssh-agent lazy yes
+zstyle :omz:plugins:ssh-agent quiet yes
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -50,3 +53,17 @@ alias lart='ls -1Fcart'
 alias lrt='ls -1Fcrt'
 alias lsr='ls -lARFh' #Recursive list of files and directories
 alias lsn='ls -1'     #A column contains name of files and directories
+
+
+# Custom command completion
+# zstyle ':fzf-tab:complete:repos:*' fzf-preview 'bat --color=always --terminal-width=-20  ${UJ_DIR}/$realpath/README.md'
+# repos() {
+#     cd "${UJ_DIR}/$1"
+# }
+# _repos() {
+#     ((CURRENT == 2)) && _files -/ -W ${UJ_DIR}
+# }
+compdef _repos repos
+
+path+=("/Users/tiagolima/.local/bin")
+export PATH

@@ -8,10 +8,6 @@ vim.cmd [[packadd packer.nvim]]
 
 packer.startup(function(use)
   use 'wbthomason/packer.nvim'
-  use {
-    'svrana/neosolarized.nvim',
-    requires = { 'tjdevries/colorbuddy.nvim' }
-  }
   use 'nvim-lualine/lualine.nvim' -- Statusline
   use 'nvim-lua/plenary.nvim' -- Common utilities
   use 'onsails/lspkind-nvim' -- vscode-like pictograms
@@ -24,7 +20,14 @@ packer.startup(function(use)
   use 'williamboman/mason.nvim'
   use 'williamboman/mason-lspconfig.nvim'
   use 'folke/tokyonight.nvim'
-  use 'glepnir/lspsaga.nvim' -- LSP UIs
+  use({
+      "glepnir/lspsaga.nvim",
+      branch = "main",
+      requires = {
+          {"nvim-tree/nvim-web-devicons"},
+          {"nvim-treesitter/nvim-treesitter"}
+      }
+  })
   use 'L3MON4D3/LuaSnip'
   use {
     'nvim-treesitter/nvim-treesitter',

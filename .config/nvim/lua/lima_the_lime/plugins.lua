@@ -36,7 +36,8 @@ packer.startup(function(use)
   use 'MunifTanjim/prettier.nvim' -- Prettier plugin for Neovim's built-in LSP client
   use 'williamboman/mason.nvim'
   use 'williamboman/mason-lspconfig.nvim'
-  use 'folke/tokyonight.nvim'
+  use {'kartikp10/noctis.nvim', requires = { 'rktjmp/lush.nvim' }}
+  use({'rose-pine/neovim', as = 'rose-pine' })
   use({
       "glepnir/lspsaga.nvim",
       branch = "main",

@@ -9,7 +9,6 @@ mason.setup({
 
 lspconfig.setup {
   ensure_installed = { 
-    "isort",
     "rust_analyzer@nightly", 
     "lua_ls", 
     "pyright",

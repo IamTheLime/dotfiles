@@ -9,6 +9,9 @@ mason.setup({
 
 lspconfig.setup {
   ensure_installed = { 
+    "eslint_d",
+    "black",
+    "isort",
     "rust_analyzer@nightly", 
     "lua_ls", 
     "pyright",

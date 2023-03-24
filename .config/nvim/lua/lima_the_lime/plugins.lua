@@ -33,6 +33,11 @@ packer.startup(function(use)
       {'rafamadriz/friendly-snippets'}, -- Optional
     }
   }
+  use "jose-elias-alvarez/null-ls.nvim"
+  use {
+      "jay-babu/mason-null-ls.nvim",
+  }
+  use 'joechrisellis/lsp-format-modifications.nvim'
   use 'MunifTanjim/prettier.nvim' -- Prettier plugin for Neovim's built-in LSP client
   use 'williamboman/mason.nvim'
   use 'williamboman/mason-lspconfig.nvim'

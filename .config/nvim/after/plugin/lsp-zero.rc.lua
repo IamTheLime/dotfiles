@@ -48,8 +48,8 @@ lsp.on_attach(function(client, bufnr)
 end)
 lsp.format_on_save({
   servers = {
-    ['lua_ls'] = {'lua'},
-    ['rust_analyzer'] = {'rust'},
+    ['lua_ls'] = { 'lua' },
+    ['rust_analyzer'] = { 'rust' },
   }
 })
 
@@ -97,3 +97,21 @@ require('mason-null-ls').setup({
 
 -- Required when `automatic_setup` is true
 require('mason-null-ls').setup_handlers()
+
+local cmp = require('cmp')
+
+cmp.setup({
+  sources = {
+    { name = 'nvim_lsp' },
+  },
+  snippet = {
+    expand = function(args)
+      require('luasnip').lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+  })
+})

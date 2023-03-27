@@ -76,7 +76,7 @@ local null_opts = lsp.build_options('null-ls', {})
 -- Note: I might want toremove this in the future
 null_ls.setup({
   on_attach = function(client, bufnr)
-    print(vim.inspect(client), bufnr)
+    -- print(vim.inspect(client), bufnr)
     local lsp_format_modifications = require("lsp-format-modifications")
     lsp_format_modifications.attach(client, bufnr, { format_on_save = true })
     null_opts.on_attach(client, bufnr)

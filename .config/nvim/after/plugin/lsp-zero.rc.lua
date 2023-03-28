@@ -43,7 +43,7 @@ lsp.nvim_workspace()
 
 lsp.on_attach(function(client, bufnr)
   vim.keymap.set({ 'n', 'x' }, 'gq', function()
-    vim.lsp.buf.format({ async = false, timeout_ms = 10000 })
+    vim.lsp.buf.format({ async = true, timeout_ms = 10000 })
   end)
 end)
 lsp.format_on_save({

@@ -11,16 +11,17 @@ local fb_actions = require "telescope".extensions.file_browser.actions
 
 telescope.setup {
   defaults = {
-    prompt_prefix = "'N' to create a file? Or search 🔍  ",
+    prompt_prefix = "Search 🔍  ",
     mappings = {
       n = {
-        ["q"] = actions.close
+        ["q"] = actions.close,
       },
     },
   },
   extensions = {
     file_browser = {
       theme = "dropdown",
+      prompt_prefix = "'N' to create a file? Or search 🔍  ",
       -- disables netrw and use telescope-file-browser in its place
       hijack_netrw = true,
       mappings = {
@@ -47,7 +48,7 @@ vim.keymap.set('n', ';f',
   function()
     builtin.find_files({
       no_ignore = false,
-      hidden = true
+      hidden = false
     })
   end)
 vim.keymap.set('n', ';r', function()

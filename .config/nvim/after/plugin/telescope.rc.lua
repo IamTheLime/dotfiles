@@ -56,11 +56,14 @@ end)
 vim.keymap.set('n', '\\\\', function()
   builtin.buffers()
 end)
-vim.keymap.set('n', ';t', function()
-  builtin.help_tags()
+vim.keymap.set('n', ';q', function()
+  builtin.quickfix()
 end)
 vim.keymap.set('n', ';;', function()
   builtin.resume()
+end)
+vim.keymap.set('n', ';gc', function()
+  builtin.git_commits()
 end)
 vim.keymap.set('n', ';e', function()
   builtin.diagnostics()
@@ -69,7 +72,7 @@ vim.keymap.set("n", "sf", function()
   telescope.extensions.file_browser.file_browser({
     path = "%:p:h",
     cwd = telescope_buffer_dir(),
-    respect_gitignore = false,
+    respect_gitignore = true,
     hidden = true,
     grouped = true,
     previewer = false,

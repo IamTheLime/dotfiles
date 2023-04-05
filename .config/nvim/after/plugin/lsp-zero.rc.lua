@@ -78,7 +78,7 @@ null_ls.setup({
   on_attach = function(client, bufnr)
     -- print(vim.inspect(client), bufnr)
     local lsp_format_modifications = require("lsp-format-modifications")
-    lsp_format_modifications.attach(client, bufnr, { format_on_save = true })
+    lsp_format_modifications.attach(client, bufnr, { format_on_save = true, async = true })
     null_opts.on_attach(client, bufnr)
   end,
   sources = {

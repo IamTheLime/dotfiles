@@ -13,7 +13,7 @@ packer.startup(function(use)
     --use 'onsails/lspkind-nvim'    -- vscode-like pictograms
     use {
         'VonHeikemen/lsp-zero.nvim',
-        branch = 'v1.x',
+        branch = 'v2.x',
         requires = {
             -- LSP Support
             { 'neovim/nvim-lspconfig' },             -- Required

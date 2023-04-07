@@ -111,7 +111,27 @@ require('mason-null-ls').setup_handlers()
 
 local cmp = require('cmp')
 local cmp_action = require('lsp-zero').cmp_action()
+
+require('luasnip.loaders.from_vscode').lazy_load()
+
 cmp.setup({
+    formatting = {
+        -- changing the order of fields so the icon is the first
+        fields = { 'menu', 'abbr', 'kind' },
+        -- here is where the change happens
+        format = function(entry, item)
+            local menu_icon = {
+                nvim_lsp = 'λ',
+                luasnip = '⋗',
+                buffer = 'Ω',
+                path = '🖫',
+                nvim_lua = 'Π',
+            }
+
+            item.menu = menu_icon[entry.source.name]
+            return item
+        end,
+    },
     sources = {
         { name = 'nvim_lsp' },
         { name = 'nvim_lua' },

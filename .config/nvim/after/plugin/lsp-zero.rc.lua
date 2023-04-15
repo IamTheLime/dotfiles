@@ -106,8 +106,6 @@ require('mason-null-ls').setup({
     automatic_setup = true,
 })
 
--- Required when `automatic_setup` is true
-require('mason-null-ls').setup_handlers()
 
 local cmp = require('cmp')
 local cmp_action = require('lsp-zero').cmp_action()

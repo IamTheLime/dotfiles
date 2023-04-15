@@ -1,50 +1,17 @@
---require("indent_blankline").setup {
---  space_char_blankline = " ",
---  show_current_context = true,
---  show_current_context_start = false,
---  show_trailing_blankline_indent = false,
---}
+local util = {}
 
-vim.opt.termguicolors = true
-vim.opt.winblend = 30
-vim.opt.pumblend = 30
---vim.cmd [[highlight IndentBlanklineIndent1 guibg=#261619 gui=nocombine]]
---vim.cmd [[highlight IndentBlanklineIndent2 guibg=#211725 gui=nocombine]]
---vim.cmd [[highlight IndentBlanklineIndent3 guibg=#171825 gui=nocombine]]
---vim.cmd [[highlight IndentBlanklineIndent4 guibg=#171825 gui=nocombine]]
---vim.cmd [[highlight IndentBlanklineIndent5 guibg=#13241b gui=nocombine]]
---vim.cmd [[highlight IndentBlanklineIndent6 guibg=#1e2415 gui=nocombine]]
---vim.cmd [[highlight IndentBlanklineIndent1 guibg=#E06C75 guifg=NONE gui=nocombine blend=50]]
---vim.cmd [[highlight IndentBlanklineIndent2 guibg=#E5C07B guifg=NONE gui=nocombine blend=50]]
---vim.cmd [[highlight IndentBlanklineIndent3 guibg=#98C379 guifg=NONE gui=nocombine blend=50]]
---vim.cmd [[highlight IndentBlanklineIndent4 guibg=#56B6C2 guifg=NONE gui=nocombine blend=50]]
---vim.cmd [[highlight IndentBlanklineIndent5 guibg=#61AFEF guifg=NONE gui=nocombine blend=50]]
---vim.cmd [[highlight IndentBlanklineIndent6 guibg=#C678DD guifg=NONE gui=nocombine blend=50]]
---
---require("indent_blankline").setup {
---    char = "",
---    char_highlight_list = {
---        "IndentBlanklineIndent1",
---        "IndentBlanklineIndent2",
---        "IndentBlanklineIndent3",
---        "IndentBlanklineIndent4",
---        "IndentBlanklineIndent5",
---        "IndentBlanklineIndent6",
---    },
---    space_char_highlight_list = {
---        "IndentBlanklineIndent1",
---        "IndentBlanklineIndent2",
---        "IndentBlanklineIndent3",
---        "IndentBlanklineIndent4",
---        "IndentBlanklineIndent5",
---        "IndentBlanklineIndent6",
---    },
---    show_trailing_blankline_indent = false,
---    show_current_context = true,
---}
---
---#region
-local p = require('rose-pine.palette')
+local function byte(value, offset)
+    return bit.band(bit.rshift(value, offset), 0xFF)
+end
+local function rgb(color)
+    color = vim.api.nvim_get_color_by_name(color)
+
+    if color == -1 then
+        color = vim.opt.background:get() == 'dark' and 000 or 255255255
+    end
+
+    return { byte(color, 16), byte(color, 8), byte(color, 0) }
+end
 
 local function parse_color(color)
     if color == nil then
@@ -61,7 +28,10 @@ local function parse_color(color)
     return color
 end
 
-local function blend(fg, bg, alpha)
+---@param fg string foreground color
+---@param bg string background color
+---@param alpha number number between 0 (background) and 1 (foreground)
+util.blend = function(fg, bg, alpha)
     local fg_rgb = rgb(parse_color(fg))
     local bg_rgb = rgb(parse_color(bg))
 
@@ -78,16 +48,49 @@ local function blend(fg, bg, alpha)
     )
 end
 
+---@param group string
+---@param color table<string, any>
+util.highlight = function(group, color)
+    local fg = color.fg and parse_color(color.fg) or 'none'
+    local bg = color.bg and parse_color(color.bg) or 'none'
 
-vim.opt.termguicolors = true
-vim.cmd [[highlight IndentBlanklineIndent1 guifg=#E06C75 gui=nocombine]]
-vim.cmd [[highlight IndentBlanklineIndent2 guifg=#E5C07B gui=nocombine]]
-vim.cmd [[highlight IndentBlanklineIndent3 guifg=#98C379 gui=nocombine]]
-vim.cmd [[highlight IndentBlanklineIndent4 guifg=#56B6C2 gui=nocombine]]
-vim.cmd [[highlight IndentBlanklineIndent5 guifg=#61AFEF gui=nocombine]]
-vim.cmd [[highlight IndentBlanklineIndent6 guifg=#C678DD gui=nocombine]]
+    if
+        color.blend ~= nil
+        and (color.blend >= 0 or color.blend <= 100)
+    then
+        fg = util.blend(fg, parse_color('base') or '', color.blend / 100)
+    end
 
+    local colours = {}
+
+
+    if fg ~= nil then
+        colours["fg"] = fg
+    end
+
+    colours["sp"] = "none"
+    color = vim.tbl_extend('force', color, colours)
+    vim.api.nvim_set_hl(0, group, color)
+end
+
+
+
+local h = util.highlight
+local b = util.blend
 vim.opt.list = true
+vim.opt.listchars = {
+    -- eol = '↲',
+    -- tab = '▸ ',
+    trail = ' '
+}
+vim.opt.termguicolors = true
+h('IndentBlanklineIndent1', { fg = "#E06C75", blend = 10 })
+h('IndentBlanklineIndent2', { fg = "#E5C07B", blend = 10 })
+h('IndentBlanklineIndent3', { fg = "#98C379", blend = 10 })
+h('IndentBlanklineIndent4', { fg = "#56B6C2", blend = 10 })
+h('IndentBlanklineIndent5', { fg = "#61AFEF", blend = 10 })
+h('IndentBlanklineIndent6', { fg = "#C678DD", blend = 10 })
+
 
 require("indent_blankline").setup {
     space_char_blankline = " ",
@@ -99,6 +102,14 @@ require("indent_blankline").setup {
         "IndentBlanklineIndent5",
         "IndentBlanklineIndent6",
     },
-    show_trailing_blankline_indent = false,
-    show_current_context = true,
+    space_char_highlight_list = {
+        "IndentBlanklineIndent1",
+        "IndentBlanklineIndent2",
+        "IndentBlanklineIndent3",
+        "IndentBlanklineIndent4",
+        "IndentBlanklineIndent5",
+        "IndentBlanklineIndent6",
+    },
+    show_trailing_blankline_indent = true,
+    show_current_context = false,
 }

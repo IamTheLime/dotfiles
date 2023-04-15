@@ -67,4 +67,5 @@ packer.startup(function(use)
     use 'lewis6991/gitsigns.nvim'
     use 'dinhhuy258/git.nvim' -- For git blame & browse
     use "lukas-reineke/indent-blankline.nvim"
+    use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
 end)

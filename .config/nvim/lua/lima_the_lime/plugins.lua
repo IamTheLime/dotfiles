@@ -76,4 +76,7 @@ packer.startup(function(use)
             { 'MunifTanjim/nui.nvim' }
         }
     }
+    use {
+        "ray-x/lsp_signature.nvim",
+    }
 end)

@@ -33,11 +33,9 @@
 --    ]d: Move to the next diagnostic. See :help vim.diagnostic.goto_next().
 
 local lsp = require('lsp-zero').preset({
-    name = 'recommended',
-    set_lsp_keymaps = true,
-    manage_nvim_cmp = {
-        set_sources = 'recommended'
-    },
+    name = "recommended",
+    float_border = 'rounded',
+    manage_nvim_cmp = { set_sources = 'recommended' },
     suggest_lsp_servers = true,
 })
 
@@ -151,5 +149,12 @@ cmp.setup({
         ['<C-Space>'] = cmp.mapping.complete(),
         ['<C-d>'] = cmp.mapping.scroll_docs(-4),
         ['<C-u>'] = cmp.mapping.scroll_docs(4),
+    }
+})
+
+require "lsp_signature".setup({
+    bind = true, -- This is mandatory, otherwise border config won't get registered.
+    handler_opts = {
+        border = "rounded"
     }
 })

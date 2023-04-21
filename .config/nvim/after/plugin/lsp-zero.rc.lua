@@ -55,6 +55,24 @@ lsp.format_on_save({
     }
 })
 
+
+require('lspconfig').pyright.setup({
+    settings = {
+        python = {
+            analysis = {
+                autoSearchPaths = true,
+                diagnosticMode = "workspace",
+                useLibraryCodeForTypes = true,
+                extraPaths = { "app", "src" },
+            },
+        },
+    },
+    single_file_support = true,
+    --on_attach = function(client, bufnr)
+    --    print('pyright started')
+    --end
+})
+
 -- This works, but forces every buffer to be formatted in full on save
 -- lsp.on_attach(function(client, bufnr)
 --  lsp.buffer_autoformat()

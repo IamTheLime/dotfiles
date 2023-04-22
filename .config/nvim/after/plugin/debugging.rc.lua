@@ -32,7 +32,17 @@ dap.configurations.python = {
 
         program = "${file}", -- This configuration will launch the current file if used.
         pythonPath = pythonPath(),
-    },
+    }, {
+    -- The first three options are required by nvim-dap
+    type = 'python', -- the type here established the link to the adapter definition: `dap.adapters.python`
+    request = 'launch',
+    name = "custom_launch_springer",
+    -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
+
+    program = "${workspaceFolder}/app/springer_server.py", -- This configuration will launch the current file if used.
+    cwd = "${workspaceFolder}/app",
+    pythonPath = pythonPath(),
+},
 }
 
 vim.keymap.set("n", "<Leader>bp", function() dap.toggle_breakpoint() end)
@@ -45,5 +55,5 @@ vim.keymap.set('n', '<Leader>d', function()
     dapui.toggle()
 end)
 
-vim.fn.sign_define('DapBreakpoint', { text = '🛑', texthl = '', linehl = '', numhl = '' })
+vim.fn.sign_define('DapBreakpoint', { text = '⚫', texthl = '', linehl = '', numhl = '' })
 vim.fn.sign_define('DapStopped', { text = '▶️', texthl = '', linehl = '', numhl = '' })

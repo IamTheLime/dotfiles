@@ -85,4 +85,5 @@ packer.startup(function(use)
             require('Comment').setup()
         end
     }
+    use 'voldikss/vim-floaterm'
 end)

@@ -33,4 +33,5 @@ keymap.set('n', '<C-w><right>', '<C-w>>')
 keymap.set('n', '<C-w><up>', '<C-w>+')
 keymap.set('n', '<C-w><down>', '<C-w>-')
 
-keymap.set('t', '<C-Space>', "<C-\\><C-n><C-w>h",{silent = true})
+
+keymap.set('t', '<C-Space>', "<C-\\><C-n><C-w>h", { silent = true })

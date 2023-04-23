@@ -275,6 +275,11 @@ _G.packer_plugins = {
     path = "/home/tiago/.local/share/nvim/site/pack/packer/start/undotree",
     url = "https://github.com/mbbill/undotree"
   },
+  ["vim-floaterm"] = {
+    loaded = true,
+    path = "/home/tiago/.local/share/nvim/site/pack/packer/start/vim-floaterm",
+    url = "https://github.com/voldikss/vim-floaterm"
+  },
   ["vim-fugitive"] = {
     loaded = true,
     path = "/home/tiago/.local/share/nvim/site/pack/packer/start/vim-fugitive",

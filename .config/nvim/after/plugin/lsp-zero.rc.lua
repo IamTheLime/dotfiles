@@ -43,10 +43,10 @@ lsp.nvim_workspace()
 
 lsp.on_attach(function(client, bufnr)
     vim.keymap.set({ 'n', 'x' }, 'gq', function()
-        vim.lsp.buf.format({ async = true, timeout_ms = 10000 })
+        vim.lsp.buf.format({ async = true, timeout_ms = 1000 })
     end)
     lsp.default_keymaps({ buffer = bufnr })
-    vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', { buffer = true })
+    vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
 end)
 lsp.format_on_save({
     servers = {
@@ -60,17 +60,22 @@ require('lspconfig').pyright.setup({
     settings = {
         python = {
             analysis = {
-                autoSearchPaths = true,
-                diagnosticMode = "workspace",
+                -- autoSearchPaths = true,
+                -- diagnosticMode = "workspace",
+                -- useLibraryCodeForTypes = true,
+                -- extraPaths = { "app", "src" },
+                autoSearchPaths = false,
                 useLibraryCodeForTypes = true,
-                extraPaths = { "app", "src" },
+                diagnosticMode = 'openFilesOnly',
             },
         },
     },
     single_file_support = true,
-    --on_attach = function(client, bufnr)
-    --    print('pyright started')
-    --end
+    flags = {
+        debounce_text_changes = 50,
+    },
+    on_attach = function(client, bufnr)
+    end
 })
 
 -- This works, but forces every buffer to be formatted in full on save

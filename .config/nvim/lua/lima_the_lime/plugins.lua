@@ -79,4 +79,10 @@ packer.startup(function(use)
     use {
         "ray-x/lsp_signature.nvim",
     }
+    use {
+        'numToStr/Comment.nvim',
+        config = function()
+            require('Comment').setup()
+        end
+    }
 end)

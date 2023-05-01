@@ -7,12 +7,12 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
 echo "Creatin symboluc link for zshrc"
-ln -s "$(pwd)/dotfiles/zshrc" ~/.zshrc
+ln -sf "$(pwd)/dotfiles/zshrc" ~/.zshrc
 
 echo "Creating symbolic links for nvim, tmux";
 
-ln -s "$(pwd)/dotfiles/nvim" ~/.config
-ln -s "$(pwd)/dotfiles/tmux" ~/.config
+ln -sf "$(pwd)/dotfiles/nvim" ~/.config/nvim
+ln -sf "$(pwd)/dotfiles/tmux" ~/.config/tmux
 
 
 echo "Cloning tpm"

@@ -39,9 +39,9 @@ git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/
 echo "Creating nvim installer"
 git clone --depth 1 https://github.com/wbthomason/packer.nvim $HOME/.local/share/nvim/site/pack/packer/start/packer.nvim
 
-nvim --headless -c 'autocmd User PackerComplete quitall' -c 'silent PackerSync' >> /dev/null 
+nvim --headless -c 'autocmd User PackerComplete quitall' -c 'silent PackerSync' > /dev/null 2>&1
 
 tmux start-server
-tmux new-session -d
-~/.config/tmux/plugins/bin/install_plugins.sh
+tmux new-session -d -A -s main;
+~/.config/tmux/plugins/bin/install_plugins 
 tmux kill-server

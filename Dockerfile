@@ -1,6 +1,5 @@
 FROM fedora
 
-
 RUN dnf -y install bat
 RUN dnf -y install fd-find
 RUN dnf -y install exa
@@ -17,6 +16,7 @@ COPY . /root/install/
 
 WORKDIR /root/install/
 
+RUN chsh -s $(which zsh)
+
 RUN ./setup_environment.sh
 
-RUN chsh -s $(which zsh)

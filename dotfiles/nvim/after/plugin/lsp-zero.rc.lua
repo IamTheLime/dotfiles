@@ -111,7 +111,7 @@ vim.diagnostic.config({
 
 
 
-local status, null_ls = pcall(require, "null_ls")
+local status, null_ls = pcall(require, "null-ls")
 if (not status) then return end
 
 local null_opts = lsp.build_options('null-ls', {})

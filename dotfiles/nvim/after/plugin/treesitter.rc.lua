@@ -3,8 +3,7 @@ if (not status) then return end
 
 treesitter.setup {
     ensure_installed = { "c", "lua", "vim", "typescript", "html", "markdown", "javascript", "json", "yaml", "rust",
-        "vimdoc",
-        "query" },
+        "vimdoc", "query", "tsx" },
     sync_install = false,
     auto_install = true,
     highlight = {

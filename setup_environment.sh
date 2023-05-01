@@ -20,22 +20,28 @@ git clone https://github.com/Aloxaf/fzf-tab ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/p
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 
-echo "Creatin symboluc link for zshrc"
-ln -sf "$(pwd)/dotfiles/zshrc" $HOME/.zshrc
+echo "Creating symbolic link for zshrc"
+echo "source $(pwd)/dotfiles/zshrc" > ~/.zshrc
 
 echo "Creating symbolic links for nvim, tmux";
 
-ln -sf "$(pwd)/dotfiles/nvim" $HOME/.config/nvim
-ln -sf "$(pwd)/dotfiles/tmux" $HOME/.config/tmux
+mkdir -p ~/.config
+
+ln -sf "$(pwd)/dotfiles/nvim" ~/.config
+ln -sf "$(pwd)/dotfiles/tmux" ~/.config
 
 
 echo "Cloning tpm"
-git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+rm -rf ~/.config/tmux/plugins/
 
+git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/
 
 echo "Creating nvim installer"
 git clone --depth 1 https://github.com/wbthomason/packer.nvim $HOME/.local/share/nvim/site/pack/packer/start/packer.nvim
-nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
 
-# type this in terminal if tmux is already running
-tmux source ~/.config/tmux/tmux.conf
+nvim --headless -c 'autocmd User PackerComplete quitall' -c 'silent PackerSync' > /dev/null 2>&1
+
+tmux start-server
+tmux new-session -d -A -s main;
+~/.config/tmux/plugins/bin/install_plugins 
+tmux kill-server

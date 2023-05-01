@@ -1,6 +1,5 @@
 FROM fedora
 
-
 RUN dnf -y install bat
 RUN dnf -y install fd-find
 RUN dnf -y install exa
@@ -11,13 +10,13 @@ RUN dnf -y install zsh
 RUN dnf -y install util-linux-user
 RUN dnf -y install gcc
 RUN dnf -y install g++
-
-RUN mkdir /root/.config
+RUN dnf -y install fzf
 
 COPY . /root/install/
-# RUN /root/install/setup_environment.sh
-# RUN /root/install/setup_environment.sh
-#
+
+WORKDIR /root/install/
 
 RUN chsh -s $(which zsh)
-CMD zsh
+
+RUN ./setup_environment.sh
+

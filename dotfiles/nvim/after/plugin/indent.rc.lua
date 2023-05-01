@@ -1,3 +1,6 @@
+local status, lsp_signature = pcall(require, "rose-pine")
+if (not status) then return end
+
 local util = {}
 
 local function byte(value, offset)

@@ -1,4 +1,4 @@
-if [ "$TMUX" = "" ]; then tmux new-session -A -s main; fi
+if [ "$TMUX" = "" ]; then tmux new-session source ~/.config/tmux/tmux.conf -A -s main; fi
 if ! type "omz" > /dev/null; then
 fi
 if [ "$P9K_CONTENT" = "" ]; then git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k; fi

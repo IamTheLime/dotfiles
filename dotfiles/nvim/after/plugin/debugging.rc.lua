@@ -1,4 +1,5 @@
-local dap = require('dap')
+local status, dap = pcall(require, "dap")
+if (not status) then return end
 
 local pythonPath = function()
     -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
@@ -47,7 +48,8 @@ dap.configurations.python = {
 
 vim.keymap.set("n", "<Leader>bp", function() dap.toggle_breakpoint() end)
 
-local dapui = require("dapui")
+local status, dapui = pcall(require, "dapui")
+if (not status) then return end
 
 dapui.setup()
 

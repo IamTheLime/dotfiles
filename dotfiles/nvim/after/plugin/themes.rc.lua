@@ -1,5 +1,5 @@
-local status, noctis = pcall(require, "noctis")
 local status, rose_pine = pcall(require, "rose-pine")
+if (not status) then return end
 
 rose_pine.setup({
     --- @usage 'auto'|'main'|'moon'|'dawn'

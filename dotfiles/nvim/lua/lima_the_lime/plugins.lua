@@ -46,7 +46,11 @@ packer.startup(function(use)
     use 'mbbill/undotree'
     use {
         'nvim-treesitter/nvim-treesitter',
-        run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
+        run = function()
+            local status, treesitter_install = pcall(require, "nvim-treesitter.install")
+            if (not status) then return end
+            treesitter_install.update({ with_sync = true })
+        end,
     }
     use {
         'tpope/vim-fugitive',
@@ -55,7 +59,8 @@ packer.startup(function(use)
     use 'nvim-telescope/telescope.nvim'
     use 'nvim-telescope/telescope-file-browser.nvim'
     use 'windwp/nvim-autopairs'
-    use 'windwp/nvim-ts-autotag'
+
+    use { 'windwp/nvim-ts-autotag', requires = 'nvim-treesitter/nvim-treesitter' }
     use 'norcalli/nvim-colorizer.lua'
     use 'folke/zen-mode.nvim'
     use({
@@ -82,7 +87,9 @@ packer.startup(function(use)
     use {
         'numToStr/Comment.nvim',
         config = function()
-            require('Comment').setup()
+            local status, comment = pcall(require, "Comment")
+            if (not status) then return end
+            comment.setup()
         end
     }
     use 'voldikss/vim-floaterm'

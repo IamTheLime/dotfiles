@@ -32,7 +32,12 @@
 --
 --    ]d: Move to the next diagnostic. See :help vim.diagnostic.goto_next().
 
-local lsp = require('lsp-zero').preset({
+
+local status, lspzero = pcall(require, "lsp-zero")
+if (not status) then return end
+
+
+local lsp = lspzero.preset({
     name = "recommended",
     float_border = 'rounded',
     manage_nvim_cmp = { set_sources = 'recommended' },
@@ -56,7 +61,10 @@ lsp.format_on_save({
 })
 
 
-require('lspconfig').pyright.setup({
+local status, lspconfig = pcall(require, "lspconfig")
+if (not status) then return end
+
+lspconfig.pyright.setup({
     settings = {
         python = {
             analysis = {
@@ -103,7 +111,9 @@ vim.diagnostic.config({
 
 
 
-local null_ls = require("null-ls")
+local status, null_ls = pcall(require, "null_ls")
+if (not status) then return end
+
 local null_opts = lsp.build_options('null-ls', {})
 -- Note: I might want toremove this in the future
 null_ls.setup({
@@ -119,17 +129,23 @@ null_ls.setup({
     },
 })
 
+
+
+local status, mason_null_ls = pcall(require, "mason-null-ls")
+if (not status) then return end
 -- See mason-null-ls.nvim's documentation for more details:
 -- https://github.com/jay-babu/mason-null-ls.nvim#setup
-require('mason-null-ls').setup({
+mason_null_ls.setup({
     ensure_installed = nil,
     automatic_installation = false, -- You can still set this to `true`
     automatic_setup = true,
 })
 
 
-local cmp = require('cmp')
-local cmp_action = require('lsp-zero').cmp_action()
+
+local status, cmp = pcall(require, "cmp")
+if (not status) then return end
+local cmp_action = lspzero.cmp_action()
 
 require('luasnip.loaders.from_vscode').lazy_load()
 
@@ -175,7 +191,10 @@ cmp.setup({
     }
 })
 
-require "lsp_signature".setup({
+local status, lsp_signature = pcall(require, "lsp_signature")
+if (not status) then return end
+
+lsp_signature.setup({
     bind = true, -- This is mandatory, otherwise border config won't get registered.
     handler_opts = {
         border = "rounded"

@@ -1,4 +1,7 @@
-require 'nvim-treesitter.configs'.setup {
+local status, treesitter = pcall(require, "nvim-treesitter")
+if (not status) then return end
+
+treesitter.configs.setup {
     ensure_installed = { "c", "lua", "vim", "typescript", "html", "markdown", "javascript", "json", "yaml", "rust",
         "vimdoc",
         "query" },

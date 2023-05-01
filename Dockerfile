@@ -11,13 +11,12 @@ RUN dnf -y install zsh
 RUN dnf -y install util-linux-user
 RUN dnf -y install gcc
 RUN dnf -y install g++
-
-RUN mkdir /root/.config
+RUN dnf -y install fzf
 
 COPY . /root/install/
-# RUN /root/install/setup_environment.sh
-# RUN /root/install/setup_environment.sh
-#
+
+WORKDIR /root/install/
+
+RUN ./setup_environment.sh
 
 RUN chsh -s $(which zsh)
-CMD zsh

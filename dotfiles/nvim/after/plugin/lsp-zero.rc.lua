@@ -34,11 +34,14 @@
 
 
 local status, lspzero = pcall(require, "lsp-zero")
-if (not status) then return end
+if (not status) then
+    print("BAD")
+    return
+end
 
 
 local lsp = lspzero.preset({
-    name = "recommended",
+    name = 'recommended',
     float_border = 'rounded',
     manage_nvim_cmp = { set_sources = 'recommended' },
     suggest_lsp_servers = true,
@@ -51,7 +54,7 @@ lsp.on_attach(function(client, bufnr)
         vim.lsp.buf.format({ async = true, timeout_ms = 1000 })
     end)
     lsp.default_keymaps({ buffer = bufnr })
-    vim.keymap.set('n', 'gr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
+    vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
 end)
 lsp.format_on_save({
     servers = {
@@ -62,7 +65,10 @@ lsp.format_on_save({
 
 
 local status, lspconfig = pcall(require, "lspconfig")
-if (not status) then return end
+if (not status) then
+    print("BAD")
+    return
+end
 
 lspconfig.pyright.setup({
     settings = {
@@ -72,7 +78,7 @@ lspconfig.pyright.setup({
                 -- diagnosticMode = "workspace",
                 -- useLibraryCodeForTypes = true,
                 -- extraPaths = { "app", "src" },
-                autoSearchPaths = false,
+                autoSearchPaths = true,
                 useLibraryCodeForTypes = true,
                 diagnosticMode = 'openFilesOnly',
             },
@@ -112,7 +118,10 @@ vim.diagnostic.config({
 
 
 local status, null_ls = pcall(require, "null-ls")
-if (not status) then return end
+if (not status) then
+    print("BAD")
+    return
+end
 
 local null_opts = lsp.build_options('null-ls', {})
 -- Note: I might want toremove this in the future
@@ -132,7 +141,10 @@ null_ls.setup({
 
 
 local status, mason_null_ls = pcall(require, "mason-null-ls")
-if (not status) then return end
+if (not status) then
+    print("BAD")
+    return
+end
 -- See mason-null-ls.nvim's documentation for more details:
 -- https://github.com/jay-babu/mason-null-ls.nvim#setup
 mason_null_ls.setup({
@@ -144,7 +156,10 @@ mason_null_ls.setup({
 
 
 local status, cmp = pcall(require, "cmp")
-if (not status) then return end
+if (not status) then
+    print("BAD")
+    return
+end
 local cmp_action = lspzero.cmp_action()
 
 require('luasnip.loaders.from_vscode').lazy_load()
@@ -166,11 +181,6 @@ cmp.setup({
             item.menu = menu_icon[entry.source.name]
             return item
         end,
-    },
-    sources = {
-        { name = 'nvim_lsp' },
-        { name = 'nvim_lua' },
-        { name = 'luasnip' },
     },
     window = {
         completion = cmp.config.window.bordered(),

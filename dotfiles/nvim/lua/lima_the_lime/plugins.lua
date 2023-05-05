@@ -31,6 +31,7 @@ packer.startup(function(use)
             -- Snippets
             { 'L3MON4D3/LuaSnip' },             -- Required
             { 'rafamadriz/friendly-snippets' }, -- Optional
+            { "ray-x/lsp_signature.nvim" }
         }
     }
     use "jose-elias-alvarez/null-ls.nvim"
@@ -55,7 +56,6 @@ packer.startup(function(use)
     use 'nvim-telescope/telescope.nvim'
     use 'nvim-telescope/telescope-file-browser.nvim'
     use 'windwp/nvim-autopairs'
-
     use 'windwp/nvim-ts-autotag'
     use 'norcalli/nvim-colorizer.lua'
     use 'folke/zen-mode.nvim'
@@ -69,16 +69,12 @@ packer.startup(function(use)
     use 'dinhhuy258/git.nvim' -- For git blame & browse
     use "lukas-reineke/indent-blankline.nvim"
     use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
-
     use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
     use {
         'VonHeikemen/fine-cmdline.nvim',
         requires = {
             { 'MunifTanjim/nui.nvim' }
         }
-    }
-    use {
-        "ray-x/lsp_signature.nvim",
     }
     use {
         'numToStr/Comment.nvim',

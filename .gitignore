@@ -1,4 +1,5 @@
 .DS_Store
 tpm/
 packer_compiled.lua
+.config/
 dotfiles/tmux/plugins/

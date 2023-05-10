@@ -17,11 +17,22 @@ telescope.setup {
                 ["q"] = actions.close,
             },
         },
+        vimgrep_arguments = {
+            "rg",
+            "--color=never",
+            "--no-heading",
+            "--with-filename",
+            "--line-number",
+            "--column",
+            "--smart-case",
+            "--hidden",
+        },
     },
     extensions = {
         file_browser = {
             theme = "dropdown",
             prompt_prefix = "'N' to create a file? Or search 🔍  ",
+            hidden = true,
             -- disables netrw and use telescope-file-browser in its place
             hijack_netrw = true,
             mappings = {
@@ -41,6 +52,7 @@ telescope.setup {
             },
         },
     },
+
 }
 
 telescope.load_extension("file_browser")
@@ -49,11 +61,15 @@ vim.keymap.set('n', ';f',
     function()
         builtin.find_files({
             no_ignore = false,
-            hidden = false
+            hidden = true,
+            file_ignore_patterns = { 'node_modules', '.git/', '.venv' }
         })
     end)
 vim.keymap.set('n', ';r', function()
-    builtin.live_grep()
+    builtin.live_grep({
+        no_ignore = false,
+        hidden = true,
+    })
 end)
 vim.keymap.set('n', '\\\\', function()
     builtin.buffers()
@@ -77,7 +93,7 @@ vim.keymap.set("n", "sf", function()
         respect_gitignore = true,
         hidden = true,
         grouped = true,
-        previewer = false,
+        previewer = true,
         initial_mode = "normal",
         layout_config = { height = 40 }
     })

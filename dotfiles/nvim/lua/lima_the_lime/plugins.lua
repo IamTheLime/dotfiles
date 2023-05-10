@@ -79,8 +79,24 @@ packer.startup(function(use)
     use {
         'numToStr/Comment.nvim',
         config = function()
-            require('Comment').setup()
+            require('Comment').setup({
+                languages = {
+                    python = {
+                        template = {
+                            annotation_convention = "numpydoc" }
+                    }
+                }
+            })
         end
     }
     use 'voldikss/vim-floaterm'
+    use {
+        "danymat/neogen",
+        config = function()
+            require('neogen').setup {}
+        end,
+        requires = "nvim-treesitter/nvim-treesitter",
+        -- Uncomment next line if you want to follow only stable versions
+        -- tag = "*"
+    }
 end)

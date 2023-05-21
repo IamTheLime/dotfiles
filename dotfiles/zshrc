@@ -85,3 +85,9 @@ alias lrt='ls -1Fcrt'
 alias lsr='ls -lARFh' #Recursive list of files and directories
 alias lsn='ls -1'     #A column contains name of files and directories
 
+
+tcow() {
+    while tmux next-window 2> /dev/null; do
+        tmux kill-window
+    done
+}

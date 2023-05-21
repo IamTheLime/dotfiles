@@ -66,7 +66,6 @@ lsp.format_on_save({
 
 local status, lspconfig = pcall(require, "lspconfig")
 if (not status) then
-    print("BAD")
     return
 end
 
@@ -77,7 +76,7 @@ lspconfig.pyright.setup({
                 -- autoSearchPaths = true,
                 -- diagnosticMode = "workspace",
                 -- useLibraryCodeForTypes = true,
-                -- extraPaths = { "app", "src" },
+                extraPaths = { "app", "src", ".venv", ".local" },
                 autoSearchPaths = true,
                 useLibraryCodeForTypes = true,
                 diagnosticMode = 'openFilesOnly',
@@ -86,7 +85,8 @@ lspconfig.pyright.setup({
     },
     single_file_support = true,
     flags = {
-        debounce_text_changes = 50,
+        -- debounce_text_changes = 50,
+        debounce_text_changes = 250,
     },
     on_attach = function(client, bufnr)
     end
@@ -119,7 +119,6 @@ vim.diagnostic.config({
 
 local status, null_ls = pcall(require, "null-ls")
 if (not status) then
-    print("BAD")
     return
 end
 
@@ -128,8 +127,8 @@ local null_opts = lsp.build_options('null-ls', {})
 null_ls.setup({
     on_attach = function(client, bufnr)
         -- print(vim.inspect(client), bufnr)
-        local lsp_format_modifications = require("lsp-format-modifications")
-        lsp_format_modifications.attach(client, bufnr, { format_on_save = true, async = true })
+        -- local lsp_format_modifications = require("lsp-format-modifications")
+        -- lsp_format_modifications.attach(client, bufnr, { format_on_save = true, async = true })
         null_opts.on_attach(client, bufnr)
     end,
     sources = {
@@ -142,7 +141,6 @@ null_ls.setup({
 
 local status, mason_null_ls = pcall(require, "mason-null-ls")
 if (not status) then
-    print("BAD")
     return
 end
 -- See mason-null-ls.nvim's documentation for more details:
@@ -157,7 +155,6 @@ mason_null_ls.setup({
 
 local status, cmp = pcall(require, "cmp")
 if (not status) then
-    print("BAD")
     return
 end
 local cmp_action = lspzero.cmp_action()

@@ -47,3 +47,5 @@ vim.opt.formatoptions:append { 'r' }
 
 vim.opt.swapfile = false
 vim.opt.redrawtime = 20000
+
+vim.cmd('set noshowmode')

@@ -79,7 +79,7 @@ lspconfig.pyright.setup({
                 extraPaths = { "app", "src", ".venv", ".local" },
                 autoSearchPaths = true,
                 useLibraryCodeForTypes = true,
-                diagnosticMode = 'openFilesOnly',
+                diagnosticMode = 'workspace',
             },
         },
     },

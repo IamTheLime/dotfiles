@@ -1,3 +1,51 @@
+local status, lspkind = pcall(require, "lspkind")
+if (not status) then return end
+lspkind.init({
+    -- enables text annotations
+    --
+    -- default: true
+    mode = 'text_symbol',
+
+    -- default symbol map
+    -- can be either 'default' (requires nerd-fonts font) or
+    -- 'codicons' for codicon preset (requires vscode-codicons font)
+    --
+    -- default: 'default'
+    preset = 'codicons',
+    -- override preset symbols
+    --
+    -- default: {}
+    symbol_map = {
+        Text = "T",
+        Method = " ",
+        Function = " ",
+        Constructor = " ",
+        Field = "ﰠ ",
+        Variable = " ",
+        Class = "ﴯ ",
+        Interface = " ",
+        Module = " ",
+        Property = "ﰠ ",
+        Unit = "塞 ",
+        Value = " ",
+        Enum = " ",
+        Keyword = " ",
+        Snippet = " ",
+        Color = " ",
+        File = " ",
+        Reference = " ",
+        Folder = " ",
+        EnumMember = " ",
+        Constant = " ",
+        Struct = "פּ ",
+        Event = " ",
+        Operator = " ",
+        TypeParameter = " "
+    },
+})
+
+
+
 -- DEFAULT KEYBINDS
 --
 --    K: Displays hover information about the symbol under the cursor
@@ -35,7 +83,6 @@
 
 local status, lspzero = pcall(require, "lsp-zero")
 if (not status) then
-    print("BAD")
     return
 end
 
@@ -165,19 +212,20 @@ cmp.setup({
     formatting = {
         -- changing the order of fields so the icon is the first
         fields = { 'menu', 'abbr', 'kind' },
+        format = lspkind.cmp_format()
         -- here is where the change happens
-        format = function(entry, item)
-            local menu_icon = {
-                nvim_lsp = 'λ',
-                luasnip = '⋗',
-                buffer = 'Ω',
-                path = '🖫',
-                nvim_lua = 'Π',
-            }
-
-            item.menu = menu_icon[entry.source.name]
-            return item
-        end,
+        -- format = function(entry, item)
+        --     local menu_icon = {
+        --         nvim_lsp = 'λ',
+        --         luasnip = '⋗',
+        --         buffer = 'Ω',
+        --         path = '🖫',
+        --         nvim_lua = 'Π',
+        --     }
+        --
+        --     item.menu = menu_icon[entry.source.name]
+        --     return item
+        -- end,
     },
     window = {
         completion = cmp.config.window.bordered(),
@@ -205,5 +253,8 @@ lsp_signature.setup({
     bind = true, -- This is mandatory, otherwise border config won't get registered.
     handler_opts = {
         border = "rounded"
-    }
+    },
+    always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
+    toggle_key = '<M-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
+    timer_interval = 50
 })

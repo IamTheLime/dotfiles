@@ -109,4 +109,5 @@ packer.startup(function(use)
     use({
         "nvim-pack/nvim-spectre"
     })
+    use 'echasnovski/mini.surround'
 end)

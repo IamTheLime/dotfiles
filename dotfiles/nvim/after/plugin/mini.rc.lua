@@ -22,7 +22,7 @@ mini.setup(
             find = '<Leader>sf',      -- Find surrounding (to the right)
             find_left = '<Leader>sF', -- Find surrounding (to the left)
 
-            highlight = 'sh',         -- Highlight surrounding
+            highlight = '<Leader>sh', -- Highlight surrounding
             replace = 'sr',           -- Replace surrounding
 
             update_n_lines = 'sn',    -- Update `n_lines`

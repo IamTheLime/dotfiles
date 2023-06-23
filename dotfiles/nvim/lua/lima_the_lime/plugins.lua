@@ -10,7 +10,7 @@ packer.startup(function(use)
     use 'wbthomason/packer.nvim'
     use 'nvim-lualine/lualine.nvim' -- Statusline
     use 'nvim-lua/plenary.nvim'     -- Common utilities
-    use 'onsails/lspkind-nvim'    -- vscode-like pictograms
+    use 'onsails/lspkind-nvim'      -- vscode-like pictograms
     use {
         'VonHeikemen/lsp-zero.nvim',
         branch = 'v2.x',
@@ -110,4 +110,5 @@ packer.startup(function(use)
         "nvim-pack/nvim-spectre"
     })
     use 'echasnovski/mini.surround'
+    use "folke/flash.nvim"
 end)

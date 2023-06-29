@@ -81,6 +81,9 @@ lspkind.init({
 --    ]d: Move to the next diagnostic. See :help vim.diagnostic.goto_next().
 
 
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
+
 local status, lspzero = pcall(require, "lsp-zero")
 if (not status) then
     return
@@ -110,6 +113,8 @@ lsp.format_on_save({
     }
 })
 
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
 
 local status, lspconfig = pcall(require, "lspconfig")
 if (not status) then
@@ -163,6 +168,8 @@ vim.diagnostic.config({
 })
 
 
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
 
 local status, null_ls = pcall(require, "null-ls")
 if (not status) then
@@ -186,6 +193,9 @@ null_ls.setup({
 
 
 
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
+
 local status, mason_null_ls = pcall(require, "mason-null-ls")
 if (not status) then
     return
@@ -200,6 +210,9 @@ mason_null_ls.setup({
 
 
 
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
+
 local status, cmp = pcall(require, "cmp")
 if (not status) then
     return
@@ -213,19 +226,6 @@ cmp.setup({
         -- changing the order of fields so the icon is the first
         fields = { 'menu', 'abbr', 'kind' },
         format = lspkind.cmp_format()
-        -- here is where the change happens
-        -- format = function(entry, item)
-        --     local menu_icon = {
-        --         nvim_lsp = 'λ',
-        --         luasnip = '⋗',
-        --         buffer = 'Ω',
-        --         path = '🖫',
-        --         nvim_lua = 'Π',
-        --     }
-        --
-        --     item.menu = menu_icon[entry.source.name]
-        --     return item
-        -- end,
     },
     window = {
         completion = cmp.config.window.bordered(),
@@ -246,15 +246,19 @@ cmp.setup({
     }
 })
 
+------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------
+
 local status, lsp_signature = pcall(require, "lsp_signature")
 if (not status) then return end
 
 lsp_signature.setup({
     bind = true, -- This is mandatory, otherwise border config won't get registered.
     handler_opts = {
-        border = "rounded"
+        border = "rounded",
     },
     always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
     toggle_key = '<M-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
-    timer_interval = 50
+    timer_interval = 50,
+    transparency = 0,
 })

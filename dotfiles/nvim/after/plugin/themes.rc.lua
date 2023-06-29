@@ -25,6 +25,7 @@ rose_pine.setup({
         hint = 'iris',
         info = 'foam',
         warn = 'gold',
+        FlashMatch = 'iris',
         headings = {
             h1 = 'iris',
             h2 = 'foam',

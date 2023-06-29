@@ -141,6 +141,7 @@ lspconfig.pyright.setup({
         debounce_text_changes = 250,
     },
     on_attach = function(client, bufnr)
+        print("Attached")
     end
 })
 

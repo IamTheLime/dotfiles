@@ -25,7 +25,6 @@ rose_pine.setup({
         hint = 'iris',
         info = 'foam',
         warn = 'gold',
-        FlashMatch = 'iris',
         headings = {
             h1 = 'iris',
             h2 = 'foam',
@@ -44,6 +43,7 @@ rose_pine.setup({
         -- Blend colours against the "base" background
         CursorLine = { bg = 'foam', blend = 10 },
         StatusLine = { fg = 'love', bg = 'love', blend = 10 },
+        FlashMatch = { fg = 'iris', bg = 'love' },
     }
 })
 

@@ -172,42 +172,42 @@ vim.diagnostic.config({
 ------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------
 
-local status, null_ls = pcall(require, "null-ls")
-if (not status) then
-    return
-end
-
-local null_opts = lsp.build_options('null-ls', {})
--- Note: I might want toremove this in the future
-null_ls.setup({
-    on_attach = function(client, bufnr)
-        -- print(vim.inspect(client), bufnr)
-        -- local lsp_format_modifications = require("lsp-format-modifications")
-        -- lsp_format_modifications.attach(client, bufnr, { format_on_save = true, async = true })
-        null_opts.on_attach(client, bufnr)
-    end,
-    sources = {
-        null_ls.builtins.formatting.autopep8,
-        null_ls.builtins.formatting.black,
-    },
-})
+-- local status, null_ls = pcall(require, "null-ls")
+-- if (not status) then
+--     return
+-- end
+--
+-- local null_opts = lsp.build_options('null-ls', {})
+-- -- Note: I might want toremove this in the future
+-- null_ls.setup({
+--     on_attach = function(client, bufnr)
+--         -- print(vim.inspect(client), bufnr)
+--         -- local lsp_format_modifications = require("lsp-format-modifications")
+--         -- lsp_format_modifications.attach(client, bufnr, { format_on_save = true, async = true })
+--         null_opts.on_attach(client, bufnr)
+--     end,
+--     sources = {
+--         null_ls.builtins.formatting.autopep8,
+--         null_ls.builtins.formatting.black,
+--     },
+-- })
 
 
 
 ------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------
 
-local status, mason_null_ls = pcall(require, "mason-null-ls")
-if (not status) then
-    return
-end
--- See mason-null-ls.nvim's documentation for more details:
--- https://github.com/jay-babu/mason-null-ls.nvim#setup
-mason_null_ls.setup({
-    ensure_installed = nil,
-    automatic_installation = false, -- You can still set this to `true`
-    automatic_setup = true,
-})
+-- local status, mason_null_ls = pcall(require, "mason-null-ls")
+-- if (not status) then
+--     return
+-- end
+-- -- See mason-null-ls.nvim's documentation for more details:
+-- -- https://github.com/jay-babu/mason-null-ls.nvim#setup
+-- mason_null_ls.setup({
+--     ensure_installed = nil,
+--     automatic_installation = false, -- You can still set this to `true`
+--     automatic_setup = true,
+-- })
 
 
 

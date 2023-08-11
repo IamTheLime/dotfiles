@@ -1,4 +1,5 @@
 vim.cmd("autocmd!")
+vim.o.guifont = "IosevkaTiago Nerd Font:h14"
 
 vim.opt.termguicolors = true
 

@@ -103,4 +103,11 @@ packer.startup(function(use)
     })
     use 'echasnovski/mini.surround'
     use 'folke/flash.nvim'
+    use({
+        'akinsho/git-conflict.nvim',
+        tag = "*",
+        config = function()
+            require('git-conflict').setup()
+        end
+    })
 end)

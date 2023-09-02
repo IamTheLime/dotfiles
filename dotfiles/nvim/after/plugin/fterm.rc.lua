@@ -1,1 +1,0 @@
--- vim.command! nnn FloatermNew

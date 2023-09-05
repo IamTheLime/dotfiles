@@ -73,7 +73,7 @@ return {
                 hidden = true,
             })
         end)
-        vim.keymap.set('n', '\\\\', function()
+        vim.keymap.set('n', '<leader>\\', function()
             builtin.buffers()
         end)
         vim.keymap.set('n', ';q', function()

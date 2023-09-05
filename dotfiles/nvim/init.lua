@@ -1,3 +1,4 @@
+vim.g.mapleader = "\\"
 require('lima_the_lime.base')
 require('lima_the_lime.highlights')
 require('lima_the_lime.maps')
@@ -17,7 +18,6 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local lazy = require("lazy")
-vim.g.mapleader = "\\"
 
 -- This line will inject anything in
 -- ~/.config/nvim/lua/plugins.lua or ~/.config/nvim/lua/plugins/init.lua (this file is optional)

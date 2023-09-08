@@ -1,10 +1,6 @@
--- This will be the place to setup and initialise all mini related stuff
-local status, mini = pcall(require, "mini.surround")
-if (not status) then return end
-
-mini.setup(
--- No need to copy this inside `setup()`. Will be used automatically. I still copied
--- it because it makes it really easy to look up the keybindings
+return {
+    'echasnovski/mini.surround',
+    opts =
     {
         -- Add custom surroundings to be used on top of builtin ones. For more
         -- information with examples, see `:h MiniSurround.config`.
@@ -55,4 +51,4 @@ mini.setup(
 
         silent = false,
     }
-)
+}

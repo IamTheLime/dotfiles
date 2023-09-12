@@ -71,6 +71,7 @@ return {
             builtin.live_grep({
                 no_ignore = false,
                 hidden = true,
+                file_ignore_patterns = { '.git/' }
             })
         end)
         vim.keymap.set('n', '<leader>\\', function()

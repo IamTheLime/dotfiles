@@ -114,7 +114,7 @@ return {
 
         local lsp = lspzero.preset({
             name = 'recommended',
-            float_border = 'rounded',
+            float_border = 'single',
             manage_nvim_cmp = { set_sources = 'recommended' },
             suggest_lsp_servers = true,
         })
@@ -278,7 +278,7 @@ return {
         lsp_signature.setup({
             bind = true, -- This is mandatory, otherwise border config won't get registered.
             handler_opts = {
-                border = "rounded",
+                border = "single",
             },
             always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
             toggle_key = '<M-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'

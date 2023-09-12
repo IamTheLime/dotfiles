@@ -3,9 +3,9 @@ return {
     lazy = false,
     opts = {
         --- @usage 'auto'|'main'|'moon'|'dawn'
-        variant = 'moon',
+        variant = 'main',
         --- @usage 'main'|'moon'|'dawn'
-        dark_variant = 'moon',
+        dark_variant = 'main',
         bold_vert_split = true,
         dim_nc_background = false,
         disable_background = false,

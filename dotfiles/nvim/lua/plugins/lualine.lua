@@ -1,6 +1,7 @@
 return {
     'nvim-lualine/lualine.nvim', -- Statusline
     opts = {
+        theme = 'tokyonight-night',
         options = {
             icons_enabled = true,
             section_separators = { left = '░', right = '░' },

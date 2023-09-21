@@ -1,6 +1,6 @@
 return {
     'VonHeikemen/lsp-zero.nvim',
-    branch = 'v2.x',
+    branch = 'v3.x',
     dependencies = {
         -- LSP Support
         { 'neovim/nvim-lspconfig' },             -- Required
@@ -112,23 +112,23 @@ return {
         end
 
 
-        local lsp = lspzero.preset({
-            name = 'recommended',
-            float_border = 'single',
-            manage_nvim_cmp = { set_sources = 'recommended' },
-            suggest_lsp_servers = true,
+        require('mason').setup({})
+        require('mason-lspconfig').setup({
+            ensure_installed = { 'tsserver', 'rust_analyzer' },
+            handlers = {
+                lspzero.default_setup,
+            }
         })
 
-        lsp.nvim_workspace()
 
-        lsp.on_attach(function(client, bufnr)
+        lspzero.on_attach(function(client, bufnr)
             vim.keymap.set({ 'n', 'x' }, 'gq', function()
                 vim.lsp.buf.format({ async = true, timeout_ms = 1000 })
             end)
-            lsp.default_keymaps({ buffer = bufnr })
+            lspzero.default_keymaps({ buffer = bufnr })
             vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
         end)
-        lsp.format_on_save({
+        lspzero.format_on_save({
             servers = {
                 ['lua_ls'] = { 'lua' },
                 ['rust_analyzer'] = { 'rust' },
@@ -171,7 +171,7 @@ return {
         -- lsp.on_attach(function(client, bufnr)
         --  lsp.buffer_autoformat()
         -- end)
-        lsp.set_sign_icons({
+        lspzero.set_sign_icons({
             error = '✘',
             warn = '▲',
             hint = '⚑',
@@ -179,7 +179,7 @@ return {
         })
 
 
-        lsp.setup()
+        lspzero.setup()
 
         vim.diagnostic.config({
             virtual_text = true,
@@ -238,7 +238,9 @@ return {
             always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
             toggle_key = '<M-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
             timer_interval = 50,
-            transparency = 0,
+            transparency = 10,
+            floating_window_off_y = -5,
+            hi_parameter = "LspSignatureActiveParameter", -- how your parameter will be highlight
         })
 
         -- Ensures that the treesitter tockens priority is higher than then

@@ -155,6 +155,7 @@ return {
             }
         })
 
+        -- local default_node_modules = vim.fn.getcwd() .. "/node_modules"
         lspconfig.pyright.setup({
             settings = {
                 python = {
@@ -248,10 +249,10 @@ return {
                 border = "single",
             },
             always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
-            toggle_key = '<M-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
-            timer_interval = 50,
-            transparency = 10,
-            floating_window_off_y = -5,
+            toggle_key = '<C-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
+            timer_interval = 100,
+            transparency = 100,
+            floating_window_off_y = -2,
             hi_parameter = "LspSignatureActiveParameter", -- how your parameter will be highlight
         })
 

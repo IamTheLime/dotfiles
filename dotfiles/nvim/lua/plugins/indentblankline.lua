@@ -1,5 +1,6 @@
 return {
     'lukas-reineke/indent-blankline.nvim',
+    main = "ibl",
     dependencies = { 'rose-pine/neovim' },
     config = function()
         local util = {}
@@ -87,34 +88,30 @@ return {
             trail = ' '
         }
         vim.opt.termguicolors = true
-        h('IndentBlanklineIndent1', { fg = "#E06C75", blend = 10 })
-        h('IndentBlanklineIndent2', { fg = "#E5C07B", blend = 10 })
-        h('IndentBlanklineIndent3', { fg = "#98C379", blend = 10 })
-        h('IndentBlanklineIndent4', { fg = "#56B6C2", blend = 10 })
-        h('IndentBlanklineIndent5', { fg = "#61AFEF", blend = 10 })
-        h('IndentBlanklineIndent6', { fg = "#C678DD", blend = 10 })
+        local hooks = require "ibl.hooks"
+        -- create the highlight groups in the highlight setup hook, so they are reset
+        -- every time the colorscheme changes
+        hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
+            h('IndentBlanklineIndent1', { fg = "#E06C75", blend = 15 })
+            h('IndentBlanklineIndent2', { fg = "#E5C07B", blend = 15 })
+            h('IndentBlanklineIndent3', { fg = "#98C379", blend = 15 })
+            h('IndentBlanklineIndent4', { fg = "#56B6C2", blend = 15 })
+            h('IndentBlanklineIndent5', { fg = "#61AFEF", blend = 15 })
+            h('IndentBlanklineIndent6', { fg = "#C678DD", blend = 15 })
+        end)
 
-
-        require("indent_blankline").setup {
-            space_char_blankline = " ",
-            char_highlight_list = {
-                "IndentBlanklineIndent1",
-                "IndentBlanklineIndent2",
-                "IndentBlanklineIndent3",
-                "IndentBlanklineIndent4",
-                "IndentBlanklineIndent5",
-                "IndentBlanklineIndent6",
+        require("ibl").setup {
+            indent = {
+                highlight = {
+                    "IndentBlanklineIndent1",
+                    "IndentBlanklineIndent2",
+                    "IndentBlanklineIndent3",
+                    "IndentBlanklineIndent4",
+                    "IndentBlanklineIndent5",
+                    "IndentBlanklineIndent6",
+                },
             },
-            space_char_highlight_list = {
-                "IndentBlanklineIndent1",
-                "IndentBlanklineIndent2",
-                "IndentBlanklineIndent3",
-                "IndentBlanklineIndent4",
-                "IndentBlanklineIndent5",
-                "IndentBlanklineIndent6",
-            },
-            show_trailing_blankline_indent = true,
-            show_current_context = false,
+            scope = { enabled = false },
         }
     end,
 }

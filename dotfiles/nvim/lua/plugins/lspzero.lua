@@ -251,7 +251,6 @@ return {
             toggle_key = '<C-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
             timer_interval = 100,
             transparency = 100,
-            floating_window_off_y = -2,
             hi_parameter = "LspSignatureActiveParameter", -- how your parameter will be highlight
         })
 

@@ -38,23 +38,42 @@ return {
                         -- The first three options are required by nvim-dap
                         type = 'python', -- the type here established the link to the adapter definition: `dap.adapters.python`
                         request = 'launch',
-                        name = "default_launc_configuration",
+                        name = "Launch File",
                         -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
 
                         program = "${file}", -- This configuration will launch the current file if used.
                         pythonPath = pythonPath(),
                     }, {
-                    -- The first three options are required by nvim-dap
-                    type = 'python', -- the type here established the link to the adapter definition: `dap.adapters.python`
-                    request = 'launch',
-                    name = "custom_launch_springer",
-                    -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
-
-                    program = "${workspaceFolder}/app/springer_server.py", -- This configuration will launch the current file if used.
-                    cwd = "${workspaceFolder}/app",
+                    name = "Pytest: Current File",
+                    type = "python",
+                    request = "launch",
+                    module = "pytest",
+                    args = {
+                        "${file}",
+                        "-sv",
+                        "--log-cli-level=INFO",
+                        "--log-file=test_out.log"
+                    },
+                    console = "integratedTerminal",
                     pythonPath = pythonPath(),
-                },
+                } }
+
+                local config = {
+                    type = "python",
+                    request = "launch",
+                    name = "Omni launch Configuration",
+                    program = "",
+                    pythonPath = pythonPath(),
                 }
+                local results = {}
+
+                local utils = require("lima_the_lime/utils")
+                for entry in string.gmatch(vim.fn.system("fd -a '.*(server|main)\\.py'"), "[^%s]+") do
+                    local config_c = utils.deepcopy(config)
+                    config_c["program"] = entry
+
+                    table.insert(dap.configurations.python, config_c)
+                end
 
                 vim.keymap.set("n", "<Leader>bp", function() dap.toggle_breakpoint() end)
 

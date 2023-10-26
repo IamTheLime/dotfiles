@@ -1,6 +1,6 @@
 return {
     'rcarriga/nvim-dap-ui',
-    lazy = false,
+    lazy = true,
     keys = {
         { "<leader>d", function() require("dapui").toggle({}) end, desc = "Dap UI" },
     },

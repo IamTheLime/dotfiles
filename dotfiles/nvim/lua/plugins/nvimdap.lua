@@ -68,7 +68,7 @@ return {
                 local results = {}
 
                 local utils = require("lima_the_lime/utils")
-                for entry in string.gmatch(vim.fn.system("fd -a '.*(server|main)\\.py'"), "[^%s]+") do
+                for entry in string.gmatch(vim.fn.system("fd -d 3 -a '.*(server|main)\\.py'"), "[^%s]+") do
                     local config_c = utils.deepcopy(config)
                     config_c["program"] = entry
 

@@ -62,6 +62,7 @@ plugins=(git poetry ripgrep virtualenv zsh-autosuggestions fzf-tab zsh-syntax-hi
 source $ZSH/oh-my-zsh.sh
 
 
+source /usr/share/fzf/shell/key-bindings.zsh
 # Default finder for fzf 
 export FZF_DEFAULT_COMMAND="fd --type file --color=always"
 export FZF_DEFAULT_OPTS="--ansi"

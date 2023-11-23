@@ -64,14 +64,14 @@ return {
                 builtin.find_files({
                     no_ignore = false,
                     hidden = true,
-                    file_ignore_patterns = { 'node_modules', '.git/', '.venv' }
+                    file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' }
                 })
             end)
         vim.keymap.set('n', ';r', function()
             builtin.live_grep({
                 no_ignore = false,
                 hidden = true,
-                file_ignore_patterns = { '.git/' }
+                file_ignore_patterns = { '.git/', 'package-lock.json', '**/package-lock.json', '**/poetry.lock', '**/*.svg' }
             })
         end)
         vim.keymap.set('n', '<leader>\\', function()

@@ -122,7 +122,7 @@ return {
 
 
         lspzero.on_attach(function(client, bufnr)
-            vim.keymap.set({ 'n', 'x' }, 'gq', function()
+            vim.keymap.set({ 'n', 'x' }, 'gff', function()
                 vim.lsp.buf.format({ async = true, timeout_ms = 1000 })
             end)
             lspzero.default_keymaps({ buffer = bufnr })
@@ -214,6 +214,7 @@ return {
 
         cmp.setup({
             sources = {
+                { name = 'path' },
                 { name = 'nvim_lsp' },
                 { name = 'luasnip' },
             },

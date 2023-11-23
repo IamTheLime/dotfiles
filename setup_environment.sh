@@ -1,4 +1,4 @@
-echo "REPLY? 
+ho "REPLY? 
 Do you have the following installed ?
 
 - FD 
@@ -28,6 +28,8 @@ echo "Creating symbolic links for nvim, tmux";
 mkdir -p ~/.config
 
 ln -sf "$(pwd)/dotfiles/nvim" ~/.config
+ln -sf "$(pwd)/dotfiles/tmux" ~/.config
+ln -sf "$(pwd)/dotfiles/wezterm" ~/.wezterm.lua
 ln -sf "$(pwd)/dotfiles/zellij" ~/.config
 
 echo "Cloning tpm"

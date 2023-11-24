@@ -58,7 +58,7 @@ zstyle ':fzf-tab:complete:repos:*' fzf-preview 'bat --color=always --terminal-wi
 #
 #
 plugins=(git poetry ripgrep virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent)
-
+#Remember, for ssh to work as you like it you need to add the AddKeysToAgent on the ssh config
 source $ZSH/oh-my-zsh.sh
 
 
@@ -104,3 +104,4 @@ tcow() {
         tmux kill-window
     done
 }
+

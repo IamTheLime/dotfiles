@@ -1,8 +1,14 @@
-FROM fedora
+FROM fedora:40
 
+RUN dnf -y upgrade --refresh
+
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+
+ENV PATH="/root/.cargo/bin:${PATH}"
 RUN dnf -y install bat
 RUN dnf -y install fd-find
-RUN dnf -y install exa
+RUN dnf -y install gcc
+RUN cargo install exa 
 RUN dnf -y install neovim
 RUN dnf -y install tmux
 RUN dnf -y install git

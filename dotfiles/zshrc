@@ -75,7 +75,8 @@ enable-fzf-tab
 export EDITOR="nvim"
 
 nn() {
-  nvim "$(dirname "${1}")"
+  cd "$(dirname "${1}")"
+  nvim .
 }
 
 # Aliases

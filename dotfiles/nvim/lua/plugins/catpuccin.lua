@@ -5,7 +5,7 @@ return {
 
     config = function()
         require("catppuccin").setup({
-            flavour = "mocha", -- latte, frappe, macchiato, mocha
+            flavour = "latte", -- latte, frappe, macchiato, mocha
             background = {     -- :h background
                 light = "latte",
                 dark = "mocha",
@@ -50,7 +50,7 @@ return {
                 -- For more plugins integrations please scroll down (https://github.com/catppuccin/nvim#integrations)
             },
         })
-
+        -- vim.cmd.colorscheme "catppuccin"
         -- setup must be called before loading
     end
 

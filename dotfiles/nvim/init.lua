@@ -23,4 +23,9 @@ local lazy = require("lazy")
 -- ~/.config/nvim/lua/plugins.lua or ~/.config/nvim/lua/plugins/init.lua (this file is optional)
 -- but also load all the plugins in
 -- ~/.config/nvim/lua/plugins/*.lua
-lazy.setup("plugins")
+lazy.setup("plugins", {
+    change_detection = {
+        enabled = true,
+        notify = false,
+    }
+})

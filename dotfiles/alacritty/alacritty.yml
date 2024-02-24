@@ -16,7 +16,7 @@ env:
   #TERM: xterm-rose-pine6color
 
 window:
-  decorations: None 
+  decorations: full 
   
 
   padding:

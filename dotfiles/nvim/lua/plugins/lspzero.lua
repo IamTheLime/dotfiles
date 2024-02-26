@@ -132,6 +132,7 @@ return {
             servers = {
                 ['lua_ls'] = { 'lua' },
                 ['rust_analyzer'] = { 'rust' },
+                ['gopls'] = { 'go' },
             }
         })
 
@@ -147,9 +148,7 @@ return {
             settings = {
                 Lua = {
                     diagnostics = {
-
                         globals = { 'vim' }
-
                     }
                 }
             }
@@ -161,7 +160,6 @@ return {
                 python = {
                     analysis = {
                         -- autoSearchPaths = true,
-                        -- diagnosticMode = "workspace",
                         -- useLibraryCodeForTypes = true,
                         extraPaths = { "app", "src", ".venv", ".local" },
                         autoSearchPaths = true,
@@ -176,7 +174,7 @@ return {
                 debounce_text_changes = 250,
             },
             on_attach = function(client, bufnr)
-                print("Attached")
+                print("🐍")
             end
         })
 
@@ -199,7 +197,7 @@ return {
             signs = true,
             update_in_insert = true,
             underline = false,
-            severity_sort = false,
+            severity_sort = true,
             float = true,
         })
 

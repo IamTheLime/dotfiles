@@ -84,7 +84,7 @@ return {
         vim.opt.list = true
         vim.opt.listchars = {
             -- eol = '↲',
-            -- tab = '▸ ',
+            tab = '▸ ',
             trail = ' '
         }
         vim.opt.termguicolors = true

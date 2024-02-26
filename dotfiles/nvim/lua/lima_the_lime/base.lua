@@ -33,6 +33,17 @@ vim.opt.backspace = { 'start', 'eol', 'indent' }
 vim.opt.path:append { '**' } -- Finding files - Search down into subfolders
 vim.opt.wildignore:append { '*/node_modules/*' }
 
+vim.api.nvim_create_autocmd(
+    { "BufEnter", "BufWinEnter" }, {
+        pattern = { "*.go" },
+        callback = function(ev)
+            vim.opt_local.shiftwidth = 4
+            vim.opt_local.tabstop = 4
+            vim.opt_local.expandtab = false
+        end
+    }
+)
+
 -- Undercurl
 vim.cmd([[let &t_Cs = "\e[4:3m"]])
 vim.cmd([[let &t_Ce = "\e[4:0m"]])

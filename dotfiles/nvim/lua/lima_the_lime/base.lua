@@ -14,6 +14,7 @@ vim.opt.signcolumn = 'yes'
 vim.opt.title = true
 vim.opt.autoindent = true
 vim.opt.smartindent = true
+vim.opt.scrolloff = 10
 vim.opt.hlsearch = true
 vim.opt.backup = false
 vim.opt.showcmd = true

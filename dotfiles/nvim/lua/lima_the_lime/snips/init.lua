@@ -1,4 +1,4 @@
-local ls = require('luasnip')
+local ls = require 'luasnip'
 
 local snippet = ls.s
 local f = ls.function_node
@@ -11,6 +11,7 @@ local shortcut = function(val)
     end
 
     if type(val) == "table" then
+        print(vim.inspect(val))
         for k, v in ipairs(val) do
             if type(v) == "string" then
                 val[k] = t { v }

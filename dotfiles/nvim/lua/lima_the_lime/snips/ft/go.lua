@@ -1,8 +1,8 @@
 require("luasnip.session.snippet_collection").clear_snippets "go"
 -- This is a complete copy from tjdevries repo and video
 -- https://github.com/tjdevries/config_manager/blob/master/xdg_config/nvim/lua/tj/snips/ft/go.lua
+-- https://github.com/tjdevries/config_manager/blob/ee11710c4ad09e0b303e5030b37c86ad8674f8b2/xdg_config/nvim/after/plugin/luasnip.lua#L5
 -- https://www.youtube.com/watch?v=aNWx-ym7jjI&t=15s
-
 local ls = require('luasnip')
 
 local snippet_from_nodes = ls.sn
@@ -130,6 +130,7 @@ local function go_result_type(info)
       ]
     ]]
     )
+
     for _, node in query:iter_captures(function_node, 0) do
         if handlers[node:type()] then
             return handlers[node:type()](node, info)
@@ -138,6 +139,7 @@ local function go_result_type(info)
 end
 
 local go_ret_vals = function(args)
+    print(vim.inspect(args))
     return snippet_from_nodes(
         nil,
         go_result_type {

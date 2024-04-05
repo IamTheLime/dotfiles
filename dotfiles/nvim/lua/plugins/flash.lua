@@ -1,5 +1,8 @@
 return {
     "folke/flash.nvim",
+    dependencies = {
+        "nvim-telescope/telescope.nvim"
+    },
     event = "VeryLazy",
     ---@type Flash.Config
     opts = {
@@ -45,5 +48,5 @@ return {
             desc =
             "Toggle Flash Search"
         },
-    },
+    }
 }

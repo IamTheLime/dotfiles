@@ -1,5 +1,5 @@
 return {
-    'kyazdani42/nvim-web-devicons', -- File icons
+    'nvim-tree/nvim-web-devicons', -- File icons
     opts = {
         -- your personnal icons can go here (to override)
         -- DevIcon will be appended to `name`

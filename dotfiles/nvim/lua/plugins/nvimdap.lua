@@ -72,7 +72,6 @@ end
 
 local toggle_dapui = function()
     local dapui = require("dapui")
-    dapui.setup()
     dapui.toggle()
 end
 local toggle_breakpoint = function()
@@ -92,7 +91,10 @@ return {
         },
 
         "nvim-neotest/nvim-nio" },
-
+    config = function()
+        local dapui = require("dapui")
+        dapui.setup()
+    end,
     keys = {
         {
             "<leader>d",

@@ -18,14 +18,26 @@ return {
         "BufNewFile " .. get_obsidian_vault_location() .. "/**.md",
     },
     dependencies = {
-        -- Required.
         "nvim-lua/plenary.nvim",
-
-        -- see below for full list of optional dependencies 👇
     },
     opts = {
-
         dir = get_obsidian_vault_location()
         -- see below for full list of options 👇
+    },
+    keys = {
+        {
+            "<leader>nn",
+            function()
+                vim.cmd("ObsidianNew")
+            end,
+            desc = "Obsidian create"
+        },
+        {
+            "<leader>so",
+            function()
+                vim.cmd("ObsidianSearch")
+            end,
+            desc = "Obsidian create"
+        },
     },
 }

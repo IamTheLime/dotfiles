@@ -178,6 +178,12 @@ return {
             end
         })
 
+        lspconfig.angularls.setup({
+            filetypes = { "angular.html" },
+            on_attach = function(client, bufnr)
+                print("ng")
+            end
+        })
         -- This works, but forces every buffer to be formatted in full on save
         -- lsp.on_attach(function(client, bufnr)
         --  lsp.buffer_autoformat()

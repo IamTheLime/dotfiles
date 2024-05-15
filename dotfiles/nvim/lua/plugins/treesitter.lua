@@ -78,6 +78,19 @@ return {
             end
             require("nvim-treesitter.configs").setup(opts)
 
+
+            vim.filetype.add({
+                pattern = {
+                    [".*%.component%.html"] = "angular.html", -- Sets the filetype to `angular.html` if it matches the pattern
+                },
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "angular.html",
+                callback = function()
+                    vim.treesitter.language.register("angular", "angular.html") -- Register the filetype with treesitter for the `angular` language/parser
+                end,
+            })
             if load_textobjects then
                 -- PERF: no need to load the plugin, if we only need its queries for mini.ai
                 if opts.textobjects then

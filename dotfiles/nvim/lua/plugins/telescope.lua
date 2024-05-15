@@ -10,7 +10,6 @@ return {
         end
 
         local fb_actions = require "telescope".extensions.file_browser.actions
-
         telescope.setup {
             defaults = {
                 prompt_prefix = "Search 🔍  ",
@@ -87,7 +86,7 @@ return {
             builtin.resume()
         end)
         vim.keymap.set('n', ';t', function()
-            builtin.lsp_dynamic_workspace_symbols()
+            builtin.lsp_references()
         end)
         vim.keymap.set('n', ';sy', function()
             builtin.treesitter()

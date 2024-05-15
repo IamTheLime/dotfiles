@@ -64,7 +64,10 @@ return {
                 builtin.find_files({
                     no_ignore = false,
                     hidden = true,
-                    file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' }
+                    file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' },
+                    mappings = {
+                        ["r"] = fb_actions.rename,
+                    }
                 })
             end)
         vim.keymap.set('n', ';r', function()

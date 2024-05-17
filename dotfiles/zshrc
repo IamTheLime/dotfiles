@@ -75,8 +75,17 @@ enable-fzf-tab
 export EDITOR="nvim"
 
 nn() {
-  cd "$(dirname "${1}")"
+    if [[ -d "${1}" ]];
+    then 
+        cd "${1}"
+    else
+      cd "$(dirname "${1}")"
+    fi
   nvim .
+}
+
+pn() {
+  cd ${HOME}/Documents/personal
 }
 
 # Aliases

@@ -89,7 +89,15 @@ return {
                 setup_dap()
             end
         },
-
+        {
+            "nvim-dap-virtual-text",
+            config = function()
+                require("nvim-dap-virtual-text").setup({
+                    enabled = true,
+                    enabled_commands = true
+                })
+            end
+        },
         "nvim-neotest/nvim-nio" },
     config = function()
         local dapui = require("dapui")

@@ -111,7 +111,6 @@ return {
             return
         end
 
-
         require('mason').setup({})
         require('mason-lspconfig').setup({
             ensure_installed = { 'tsserver', 'rust_analyzer' },
@@ -188,15 +187,7 @@ return {
         -- lsp.on_attach(function(client, bufnr)
         --  lsp.buffer_autoformat()
         -- end)
-        lspzero.set_sign_icons({
-            error = '✘',
-            warn = '▲',
-            hint = '⚑',
-            info = '»'
-        })
 
-
-        lspzero.setup()
 
         vim.diagnostic.config({
             virtual_text = true,
@@ -207,6 +198,14 @@ return {
             float = true,
         })
 
+        lspzero.set_sign_icons({
+            error = '✘',
+            warn = '▲',
+            hint = '⚑',
+            info = '»'
+        })
+
+        lspzero.setup()
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then

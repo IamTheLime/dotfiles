@@ -15,7 +15,9 @@ return {
         vim.g.db_ui_use_nerd_fonts = 1
     end,
     config       = function()
-        vim.g.dbs = configured_dbs
+        local status, dadbod_config = pcall(require, "lima_the_lime/dadbodgitignore")
+        if (not status) then return end
+        vim.g.dbs = dadbod_config.dbs
         -- this is configured on a dadbod_gitignore.lua file
     end
 }

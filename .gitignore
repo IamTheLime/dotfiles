@@ -3,3 +3,4 @@ tpm/
 packer_compiled.lua
 .config/
 dotfiles/tmux/plugins/
+*gitignore.lua

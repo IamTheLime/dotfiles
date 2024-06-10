@@ -121,8 +121,8 @@ return {
 
 
         lspzero.on_attach(function(client, bufnr)
-            vim.keymap.set({ 'n', 'x' }, 'gff', function()
-                vim.lsp.buf.format({ async = true, timeout_ms = 1000 })
+            vim.keymap.set({ 'n', 'x' }, ';gfm', function()
+                vim.lsp.buf.format({ async = true, timeout_ms = 1000, bufnr = bufnr })
             end)
             lspzero.default_keymaps({ buffer = bufnr })
             vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })

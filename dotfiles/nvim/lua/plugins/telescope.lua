@@ -69,6 +69,18 @@ return {
                     }
                 })
             end)
+        vim.keymap.set('n', ';af',
+            function()
+                builtin.find_files({
+                    no_ignore = false,
+                    hidden = true,
+                    respect_gitignore = false,
+                    file_ignore_patterns = {},
+                    mappings = {
+                        ["r"] = fb_actions.rename,
+                    }
+                })
+            end)
         vim.keymap.set('n', ';r', function()
             builtin.live_grep({
                 no_ignore = false,
@@ -101,7 +113,7 @@ return {
             telescope.extensions.file_browser.file_browser({
                 path = "%:p:h",
                 cwd = telescope_buffer_dir(),
-                respect_gitignore = true,
+                respect_gitignore = false,
                 hidden = true,
                 grouped = true,
                 previewer = true,

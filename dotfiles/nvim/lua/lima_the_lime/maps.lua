@@ -32,3 +32,16 @@ keymap.set('n', '<C-w><down>', '<C-w>-')
 
 
 keymap.set('t', '<C-Space>', "<C-\\><C-n><C-w>h", { silent = true })
+
+keymap.set('n', '<C-n>n', function()
+    local status, error = pcall(vim.cmd, "cnext")
+    if error then
+        print("Hey dummy perhaps you want to try to create a quickfix list before")
+    end
+end)
+keymap.set('n', '<C-n>p', function()
+    local status, error = pcall(vim.cmd, "cprev")
+    if error then
+        print("Hey dummy perhaps you want to try to create a quickfix list before")
+    end
+end)

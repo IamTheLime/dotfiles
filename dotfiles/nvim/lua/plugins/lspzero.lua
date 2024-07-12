@@ -163,14 +163,14 @@ return {
                         extraPaths = { "app", "src", ".venv", ".local" },
                         autoSearchPaths = true,
                         useLibraryCodeForTypes = true,
-                        diagnosticMode = 'workspace',
+                        diagnosticMode = 'file',
                     },
                 },
             },
             single_file_support = true,
             flags = {
-                -- debounce_text_changes = 50,
-                debounce_text_changes = 250,
+                debounce_text_changes = 50,
+                -- debounce_text_changes = 250,
             },
             on_attach = function(client, bufnr)
                 print("🐍")

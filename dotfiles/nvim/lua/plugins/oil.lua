@@ -106,13 +106,13 @@ return {
             git = {
                 -- Return true to automatically git add/mv/rm files
                 add = function(path)
-                    return true
+                    return false
                 end,
                 mv = function(src_path, dest_path)
-                    return true
+                    return false
                 end,
                 rm = function(path)
-                    return true
+                    return false
                 end,
             },
             -- Configuration for the floating window in oil.open_float

@@ -12,6 +12,7 @@ return {
         local fb_actions = require "telescope".extensions.file_browser.actions
         telescope.setup {
             defaults = {
+                wrap_results = true,
                 prompt_prefix = "Search 🔍  ",
                 mappings = {
                     n = {
@@ -63,6 +64,7 @@ return {
                 builtin.find_files({
                     no_ignore = false,
                     hidden = true,
+                    path_display = { "filename_first" },
                     file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' },
                     mappings = {
                         ["r"] = fb_actions.rename,
@@ -76,6 +78,7 @@ return {
                     hidden = true,
                     respect_gitignore = false,
                     file_ignore_patterns = {},
+                    path_display = { "filename_first" },
                     mappings = {
                         ["r"] = fb_actions.rename,
                     }
@@ -99,6 +102,9 @@ return {
         end)
         vim.keymap.set('n', ';t', function()
             builtin.lsp_references()
+        end)
+        vim.keymap.set('n', ';mr', function()
+            builtin.lsp_document_symbols({ symbols = { 'method', 'class', 'function' } })
         end)
         vim.keymap.set('n', ';sy', function()
             builtin.treesitter()

@@ -67,7 +67,9 @@ return {
                     path_display = { "filename_first" },
                     file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' },
                     mappings = {
-                        ["r"] = fb_actions.rename,
+                        ["n"] = {
+                            ["r"] = fb_actions.rename
+                        },
                     }
                 })
             end)

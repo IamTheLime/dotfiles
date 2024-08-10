@@ -32,8 +32,9 @@ fi
 if ! command -v fd &> /dev/null; then
     export FZF_DEFAULT_COMMAND="fdfind --type file --color=always"
     alias fd='fdfind'
-else
-    export FZF_DEFAULT_COMMAND="fd --type file --color=always"
+fi
+if command -v fdfind &> /dev/null; then
+    export FZF_DEFAULT_COMMAND="fdfind --type file --color=always"
 fi
 if ! command -v exa &> /dev/null; then
     alias exa='eza'

@@ -30,7 +30,10 @@ if ! command -v bat &> /dev/null; then
     alias bat='batcat'
 fi
 if ! command -v fd &> /dev/null; then
+    export FZF_DEFAULT_COMMAND="fdfind --type file --color=always"
     alias fd='fdfind'
+else
+    export FZF_DEFAULT_COMMAND="fd --type file --color=always"
 fi
 if ! command -v exa &> /dev/null; then
     alias exa='eza'
@@ -47,7 +50,7 @@ zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 zstyle ':fzf-tab:complete:cd:*' popup-pad 200 0
-zstyle ':fzf-tab:complete:cd:*' fzf-preview ' eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle :omz:plugins:ssh-agent lazy yes
 zstyle :omz:plugins:ssh-agent quiet yes
 
@@ -71,9 +74,8 @@ plugins=(git poetry virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighti
 source $ZSH/oh-my-zsh.sh
 
 
-source /usr/share/fzf/shell/key-bindings.zsh
+# source /usr/share/fzf/shell/key-bindings.zsh
 # Default finder for fzf 
-export FZF_DEFAULT_COMMAND="fd --type file --color=always"
 export FZF_DEFAULT_OPTS="--ansi"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"

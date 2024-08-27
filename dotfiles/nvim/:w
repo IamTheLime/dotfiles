@@ -111,69 +111,37 @@ return {
             return
         end
 
-
-
         local lsp_attach = function(client, bufnr)
-            lspzero.default_keymaps({ buffer = bufnr })
-
-            -- Open diagnostics
-            vim.keymap.set({ 'n' }, 'gl', function()
-                vim.diagnostic.open_float()
-            end)
-
-            -- Format
-            vim.keymap.set({ 'n', 'x' }, ';gfm', function()
-                vim.lsp.buf.format({ async = true, timeout_ms = 1000, bufnr = bufnr })
-            end)
-
-            -- LSP references
-            lspzero.default_keymaps({ buffer = bufnr })
-            vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
-
-            -- format on save
-            lspzero.format_on_save({
-                servers = {
-                    ['lua_ls'] = { 'lua' },
-                    ['rust_analyzer'] = { 'rust' },
-                    ['gopls'] = { 'go' },
-                }
-            })
-            -- lspconfig
-            require('mason-lspconfig').setup({
-                ensure_installed = { 'tsserver', 'rust_analyzer' },
-                handlers = {
-                    lspzero.default_setup,
-                }
-            })
-
-
+            lsp_zero.default_keymaps({ buffer = bufnr })
         end
 
-        lspzero.extend_lspconfig({
+        lsp_zero.extend_lspconfig({
             lsp_attach = lsp_attach,
         })
 
-        lspzero.use("pyright", {
-            settings = {
-                python = {
-                    analysis = {
-                        extraPaths = { ".venv" },
-                        autoSearchPaths = false,
-                        useLibraryCodeForTypes = true,
-                        -- diagnosticMode = 'openFilesOnly',
-                    },
-                },
-            },
-            single_file_support = true,
-            flags = {
-                -- debounce_text_changes = 50,
-                debounce_text_changes = 250,
-            },
-            on_attach = function(client, bufnr)
-                print("PYTHON")
-            end
+        require('mason').setup({})
+        require('mason-lspconfig').setup({
+            ensure_installed = { 'tsserver', 'rust_analyzer' },
+            handlers = {
+                lspzero.default_setup,
+            }
         })
 
+
+        lspzero.on_attach(function(client, bufnr)
+            vim.keymap.set({ 'n', 'x' }, ';gfm', function()
+                vim.lsp.buf.format({ async = true, timeout_ms = 1000, bufnr = bufnr })
+            end)
+            lspzero.default_keymaps({ buffer = bufnr })
+            vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
+        end)
+        lspzero.format_on_save({
+            servers = {
+                ['lua_ls'] = { 'lua' },
+                ['rust_analyzer'] = { 'rust' },
+                ['gopls'] = { 'go' },
+            }
+        })
 
         ------------------------------------------------------------------------------------------------------------------
         ------------------------------------------------------------------------------------------------------------------
@@ -191,6 +159,27 @@ return {
                     }
                 }
             }
+        })
+
+        -- local default_node_modules = vim.fn.getcwd() .. "/node_modules"
+        lspconfig.pyright.setup({
+            settings = {
+                python = {
+                    analysis = {
+                        extraPaths = { ".venv" },
+                        autoSearchPaths = false,
+                        useLibraryCodeForTypes = true,
+                        -- diagnosticMode = 'openFilesOnly',
+                    },
+                },
+            },
+            single_file_support = true,
+            flags = {
+                -- debounce_text_changes = 50,
+                debounce_text_changes = 250,
+            },
+            on_attach = function(client, bufnr)
+            end
         })
 
         lspconfig.angularls.setup({
@@ -221,6 +210,8 @@ return {
             info = '»'
         })
 
+        lspzero.setup()
+
         local status, cmp = pcall(require, "cmp")
         if (not status) then
             return
@@ -245,6 +236,8 @@ return {
             },
             mapping = cmp.mapping.preset.insert({
                 ['<CR>'] = cmp.mapping.confirm({ select = false }),
+                -- ['<Tab>'] = cmp_action.tab_complete(),
+                -- ['<S-Tab>'] = cmp_action.select_prev_or_fallback(),
                 ['<C-Space>'] = cmp.mapping.complete(),
                 ['<C-d>'] = cmp.mapping.scroll_docs(-4),
                 ['<C-u>'] = cmp.mapping.scroll_docs(4),
@@ -258,6 +251,9 @@ return {
                 cmp.setup.buffer({ sources = { { name = 'vim-dadbod-completion' } } })
             end,
         })
+
+        ------------------------------------------------------------------------------------------------------------------
+        ------------------------------------------------------------------------------------------------------------------
 
         local status, lsp_signature = pcall(require, "lsp_signature")
         if (not status) then return end

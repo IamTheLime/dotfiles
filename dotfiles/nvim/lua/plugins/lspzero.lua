@@ -115,7 +115,6 @@ return {
 
         local lsp_attach = function(client, bufnr)
             lspzero.default_keymaps({ buffer = bufnr })
-
             -- Open diagnostics
             vim.keymap.set({ 'n' }, 'gl', function()
                 vim.diagnostic.open_float()
@@ -125,32 +124,44 @@ return {
             vim.keymap.set({ 'n', 'x' }, ';gfm', function()
                 vim.lsp.buf.format({ async = true, timeout_ms = 1000, bufnr = bufnr })
             end)
-
-            -- LSP references
-            lspzero.default_keymaps({ buffer = bufnr })
-            vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
-
-            -- format on save
-            lspzero.format_on_save({
-                servers = {
-                    ['lua_ls'] = { 'lua' },
-                    ['rust_analyzer'] = { 'rust' },
-                    ['gopls'] = { 'go' },
-                }
-            })
-            -- lspconfig
-            require('mason-lspconfig').setup({
-                ensure_installed = { 'tsserver', 'rust_analyzer' },
-                handlers = {
-                    lspzero.default_setup,
-                }
-            })
-
-
         end
+
 
         lspzero.extend_lspconfig({
             lsp_attach = lsp_attach,
+            sign_text = true,
+            capabilities = require('cmp_nvim_lsp').default_capabilities()
+        })
+
+
+        lspzero.ui({
+            float_border = 'rounded',
+            sign_text = {
+                error = '✘',
+                warn = '▲',
+                hint = '⚑',
+                info = '»',
+            },
+        })
+
+        -- LSP references
+        lspzero.default_keymaps({ buffer = bufnr })
+        vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
+
+        -- format on save
+        lspzero.format_on_save({
+            servers = {
+                ['lua_ls'] = { 'lua' },
+                ['rust_analyzer'] = { 'rust' },
+                ['gopls'] = { 'go' },
+            }
+        })
+        -- lspconfig
+        require('mason-lspconfig').setup({
+            ensure_installed = { 'tsserver', 'rust_analyzer' },
+            handlers = {
+                lspzero.default_setup,
+            }
         })
 
         lspzero.use("pyright", {
@@ -206,21 +217,14 @@ return {
         -- end)
 
 
-        vim.diagnostic.config({
-            virtual_text = true,
-            signs = true,
-            update_in_insert = true,
-            underline = false,
-            severity_sort = true,
-            float = true,
-        })
-
-        lspzero.set_sign_icons({
-            error = '✘',
-            warn = '▲',
-            hint = '⚑',
-            info = '»'
-        })
+        -- vim.diagnostic.config({
+        --     virtual_text = true,
+        --     signs = true,
+        --     update_in_insert = true,
+        --     underline = false,
+        --     severity_sort = true,
+        --     float = true,
+        -- })
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then

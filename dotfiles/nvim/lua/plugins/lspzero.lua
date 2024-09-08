@@ -111,8 +111,6 @@ return {
             return
         end
 
-
-
         local lsp_attach = function(client, bufnr)
             lspzero.default_keymaps({ buffer = bufnr })
             -- Open diagnostics
@@ -158,7 +156,7 @@ return {
         })
         -- lspconfig
         require('mason-lspconfig').setup({
-            ensure_installed = { 'tsserver', 'rust_analyzer' },
+            ensure_installed = { 'rust_analyzer' },
             handlers = {
                 lspzero.default_setup,
             }
@@ -211,20 +209,6 @@ return {
                 print("ng")
             end
         })
-        -- This works, but forces every buffer to be formatted in full on save
-        -- lsp.on_attach(function(client, bufnr)
-        --  lsp.buffer_autoformat()
-        -- end)
-
-
-        -- vim.diagnostic.config({
-        --     virtual_text = true,
-        --     signs = true,
-        --     update_in_insert = true,
-        --     underline = false,
-        --     severity_sort = true,
-        --     float = true,
-        -- })
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then
@@ -239,14 +223,12 @@ return {
             snippet = {
                 expand = function(args)
                     vim.snippet.expand(args.body)
-                    require('luasnip').lsp_expand(args.body)
-                    require("luasnip/loaders/from_vscode").lazy_load({}).lsp_expand(args.body)
                 end,
             },
             formatting = {
                 -- changing the order of fields so the icon is the first
                 fields = { 'menu', 'abbr', 'kind' },
-                format = lspkind.cmp_format()
+                format = lspkind.cmp_format(),
             },
             mapping = cmp.mapping.preset.insert({
                 ['<CR>'] = cmp.mapping.confirm({ select = false }),

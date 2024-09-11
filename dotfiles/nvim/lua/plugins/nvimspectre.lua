@@ -1,9 +1,14 @@
 return {
     'nvim-pack/nvim-spectre',
-    opts = {
-        live_update = true, -- auto execute search again when you write to any file in vim
-    },
     config = function()
+        require('spectre').setup({
+            live_update = true, -- auto execute search again when you write to any file in vim
+            default = {
+                replace = {
+                   cmd="sd" 
+                }
+            }
+        })
         vim.keymap.set('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', {
             desc = "Open Spectre"
         })

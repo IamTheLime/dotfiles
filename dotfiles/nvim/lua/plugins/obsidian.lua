@@ -1,7 +1,7 @@
 local function get_obsidian_vault_location()
     if vim.loop.os_uname().sysname == "Darwin" then
         return
-        "/Users/tiagolima/Library/CloudStorage/GoogleDrive-tafl.tiagolima@gmail.com/Other computers/My computer/notes/tiago_vault"
+        "~/Documents/obsidian/tiago_vault/"
     end
     return ""
 end

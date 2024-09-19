@@ -15,8 +15,12 @@ return {
                 wrap_results = true,
                 prompt_prefix = "Search 🔍  ",
                 mappings = {
+                    i = {
+                        ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
+                    },
                     n = {
                         ["q"] = actions.close,
+                        ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                     },
                 },
                 vimgrep_arguments = {

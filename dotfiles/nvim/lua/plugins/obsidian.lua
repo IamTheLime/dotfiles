@@ -3,7 +3,7 @@ local function get_obsidian_vault_location()
         return
         "~/Documents/obsidian/tiago_vault/"
     end
-    return ""
+    return "~/Obsidian/tiago_vault/"
 end
 
 

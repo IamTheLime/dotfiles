@@ -1,7 +1,6 @@
 return {
     "OXY2DEV/markview.nvim",
-    branch = 'dev',
-    lazy = false, -- Recommended
+    lazy = true, -- Recommended
     -- ft = "markdown" -- If you decide to lazy-load anyway
     dependencies = {
         -- You will not need this if you installed the
@@ -11,10 +10,10 @@ return {
 
         "nvim-tree/nvim-web-devicons"
     },
-    config = function()
-        vim.keymap.set("n", "mvt", function()
-            vim.cmd("Markview toggle");
-        end)
-        -- vim.keymap.set()
-    end,
+    -- config = function()
+    --     vim.keymap.set("n", "mvt", function()
+    --         vim.cmd("Markview toggle");
+    --     end)
+    --     -- vim.keymap.set()
+    -- end,
 }

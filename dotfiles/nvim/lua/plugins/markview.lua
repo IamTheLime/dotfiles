@@ -10,10 +10,10 @@ return {
 
         "nvim-tree/nvim-web-devicons"
     },
-    -- config = function()
-    --     vim.keymap.set("n", "mvt", function()
-    --         vim.cmd("Markview toggle");
-    --     end)
-    --     -- vim.keymap.set()
-    -- end,
+    config = function()
+        vim.keymap.set("n", "mvt", function()
+            vim.cmd("Markview toggle");
+        end)
+        -- vim.keymap.set()
+    end,
 }

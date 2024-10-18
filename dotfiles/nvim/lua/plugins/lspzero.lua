@@ -17,6 +17,7 @@ return {
 
         -- Snippets
         { 'L3MON4D3/LuaSnip' },             -- Required
+
         { 'rafamadriz/friendly-snippets' }, -- Optional
         { 'ray-x/lsp_signature.nvim' }
     },
@@ -211,6 +212,10 @@ return {
         if (not status) then
             return
         end
+
+
+        require('luasnip.loaders.from_snipmate').lazy_load()
+        require('luasnip.loaders.from_vscode').lazy_load()
         cmp.setup({
             sources = {
                 { name = 'path' },

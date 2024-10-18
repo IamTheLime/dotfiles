@@ -152,6 +152,7 @@ return {
                 ['lua_ls'] = { 'lua' },
                 ['rust_analyzer'] = { 'rust' },
                 ['gopls'] = { 'go' },
+                ['prettier'] = { 'typescript' },
             }
         })
         -- lspconfig
@@ -203,7 +204,6 @@ return {
         lspconfig.angularls.setup({
             filetypes = { "angular.html" },
             on_attach = function(client, bufnr)
-                print("ng")
             end
         })
 

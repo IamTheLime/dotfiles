@@ -172,7 +172,7 @@ return {
                         autoSearchPaths = false,
                         useLibraryCodeForTypes = true,
                         -- diagnosticMode = 'openFilesOnly',
-                        diagnosticMode = 'workspace',
+                        diagnosticMode = 'openFilesOnly',
                     },
                 },
             },

@@ -208,6 +208,12 @@ return {
             end
         })
 
+        lspconfig.tailwindcss.setup({
+            filetypes = { "angular.html" },
+            on_attach = function(client, bufnr)
+            end
+        })
+
         local status, cmp = pcall(require, "cmp")
         if (not status) then
             return

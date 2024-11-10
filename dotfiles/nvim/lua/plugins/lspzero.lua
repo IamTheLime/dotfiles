@@ -17,6 +17,7 @@ return {
 
         -- Snippets
         { 'L3MON4D3/LuaSnip' },             -- Required
+
         { 'rafamadriz/friendly-snippets' }, -- Optional
         { 'ray-x/lsp_signature.nvim' }
     },
@@ -152,6 +153,7 @@ return {
                 ['lua_ls'] = { 'lua' },
                 ['rust_analyzer'] = { 'rust' },
                 ['gopls'] = { 'go' },
+                ['prettier'] = { 'typescript' },
             }
         })
         -- lspconfig
@@ -170,7 +172,7 @@ return {
                         autoSearchPaths = false,
                         useLibraryCodeForTypes = true,
                         -- diagnosticMode = 'openFilesOnly',
-                        diagnosticMode = 'workspace',
+                        diagnosticMode = 'openFilesOnly',
                     },
                 },
             },
@@ -203,7 +205,12 @@ return {
         lspconfig.angularls.setup({
             filetypes = { "angular.html" },
             on_attach = function(client, bufnr)
-                print("ng")
+            end
+        })
+
+        lspconfig.tailwindcss.setup({
+            filetypes = { "angular.html" },
+            on_attach = function(client, bufnr)
             end
         })
 
@@ -211,6 +218,10 @@ return {
         if (not status) then
             return
         end
+
+
+        require('luasnip.loaders.from_snipmate').lazy_load()
+        require('luasnip.loaders.from_vscode').lazy_load()
         cmp.setup({
             sources = {
                 { name = 'path' },

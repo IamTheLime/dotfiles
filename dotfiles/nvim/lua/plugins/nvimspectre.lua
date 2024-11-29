@@ -5,7 +5,7 @@ return {
             live_update = true, -- auto execute search again when you write to any file in vim
             default = {
                 replace = {
-                   cmd="sd" 
+                   cmd="rg" 
                 }
             }
         })

@@ -1,8 +1,8 @@
-
-if [ "$TMUX" = "" ]; then tmux new-session -A -s main; fi
-
 autoload -Uz compinit
 compinit
+
+# if [ "$TMUX" = "" ]; then tmux new-session -A -s main; fi
+
 # The rendering of zellij is still not up to snuff
 #
 # if [[ -z "$ZELLIJ" ]] ; then
@@ -25,6 +25,7 @@ fi
 # Path additions
 #
 path+=("/usr/bin")
+path+=("$HOME/go/bin")
 export PATH
 export ZSH="$HOME/.oh-my-zsh"
 # Install wmill CLI if not already installed
@@ -56,8 +57,8 @@ zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle :omz:plugins:ssh-agent lazy yes
 zstyle :omz:plugins:ssh-agent quiet yes
-
 # My Custom command completions
+
 
 zstyle ':fzf-tab:complete:repos:*' fzf-preview 'bat --color=always ${UJ_DIR}/$realpath/README.md'
 repos() {
@@ -68,6 +69,17 @@ _repos() {
    ((CURRENT == 2)) && _files -/ -W ${UJ_DIR}
 }
 compdef _repos repos
+
+export PERSONAL_REPO_FOLDER="${HOME}/repos"
+zstyle ':fzf-tab:complete:prep:*' fzf-preview 'bat --color=always ${PERSONAL_REPO_FOLDER}/$realpath/README.md'
+prep() {
+    cd "${PERSONAL_REPO_FOLDER}/$1"
+}
+_prep() {
+   # this is one way of defining completion by directory, where 
+   ((CURRENT == 2)) && _files -/ -W ${PERSONAL_REPO_FOLDER}
+}
+compdef _prep prep
 
 # Setting up zsh plugins
 #

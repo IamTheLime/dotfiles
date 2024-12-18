@@ -29,13 +29,13 @@ return {
         vim.fn.sign_define('DiagnosticSignHint', { text = '', texthl = 'DiagnosticSignHint' })
 
         local lsp_config = require("lspconfig")
-        local lsp_default_config = lsp_config.util.default_config
+        local lsp_defconf = lsp_config.util.default_config
         local lspkind = require("lspkind")
 
-        lsp_default_config.capabilities = vim.tbl_dep_extend(
+        lsp_defconf.capabilities = vim.tbl_deep_extend(
             "force",
-            lsp_default_config.capabilities,
-            require("cmp_nvim_lsp").default_capabilities()
+            lsp_defconf.capabilities,
+            require("cmp_nvim_lsp").default_capabilities(),
         )
 
         vim.api.nvim_create_autocmd('LspAttach', {
@@ -85,12 +85,6 @@ return {
             { "▁", "FloatBorder" },
             { "🭼", "FloatBorder" },
             { "▏", "FloatBorder" },
-        }
-
-        -- LSP settings (for overriding per client)
-        local handlers = {
-            ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { border = border }),
-            ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border }),
         }
 
         lsp_config.pyright.setup({

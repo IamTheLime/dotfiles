@@ -87,6 +87,22 @@ return {
             { "▏", "FloatBorder" },
         }
 
+        lsp_config.yamlls.setup {
+            on_attach = function(client)
+                client.server_capabilities.documentFormattingProvider = true
+            end,
+            settings = {
+                yaml = {
+                    format = {
+                        enable = true
+                    },
+                    schemaStore = {
+                        enable = true
+                    }
+                }
+            }
+        }
+
         lsp_config.pyright.setup({
             settings = {
                 python = {

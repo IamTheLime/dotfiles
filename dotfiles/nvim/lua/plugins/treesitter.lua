@@ -85,10 +85,7 @@ return {
                     },
                 }
             }
-
-
             require("nvim-treesitter.configs").setup(opts)
-
             vim.filetype.add({
                 pattern = {
                     [".*%.component%.html"] = "htmlangular", -- Sets the filetype to `angular.html` if it matches the pattern

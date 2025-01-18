@@ -31,7 +31,7 @@ keymap.set('n', '<C-w><up>', '<C-w>+')
 keymap.set('n', '<C-w><down>', '<C-w>-')
 
 
-keymap.set('t', '<C-Space>', "<C-\\><C-n><C-w>h", { silent = true })
+keymap.set('t', '<C-Space>', "<C-\\><C-n>", { silent = true })
 
 keymap.set('n', '<C-n>n', function()
     local status, error = pcall(vim.cmd, "cnext")

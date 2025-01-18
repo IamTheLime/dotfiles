@@ -62,3 +62,11 @@ vim.opt.swapfile = false
 vim.opt.redrawtime = 20000
 
 vim.cmd('set noshowmode')
+
+vim.keymap.set("n", ";lf", 
+function()
+    vim.cmd(":%s/\r//g")
+    print("Formatted carriage returns")
+end
+)
+

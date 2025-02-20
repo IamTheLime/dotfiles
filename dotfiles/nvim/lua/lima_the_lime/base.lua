@@ -63,10 +63,22 @@ vim.opt.redrawtime = 20000
 
 vim.cmd('set noshowmode')
 
-vim.keymap.set("n", ";lf", 
-function()
-    vim.cmd(":%s/\r//g")
-    print("Formatted carriage returns")
-end
-)
+local uname = vim.fn.system("uname -a");
 
+if string.match(uname, "WSL2") then
+    print("In WSL2")
+    vim.g.clipboard = {
+        name = 'WslClipboard',
+        copy = {
+            ['+'] = 'clip.exe',
+            ['*'] = 'clip.exe',
+        },
+        paste = {
+            ['+'] =
+            'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+            ['*'] =
+            'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+        },
+        cache_enabled = 0,
+    }
+end

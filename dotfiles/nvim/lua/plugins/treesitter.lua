@@ -85,6 +85,8 @@ return {
                     },
                 }
             }
+
+
             require("nvim-treesitter.configs").setup(opts)
             vim.filetype.add({
                 pattern = {

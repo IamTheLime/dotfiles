@@ -10,11 +10,11 @@ return {
         "yaml",
     },
     keys = {
-        -- these keys are currently conflicting with the debug adapter
-        -- { "<leader>drf", "<cmd>DbtRun<cr>" },
-        -- { "<leader>drp", "<cmd>DbtRunAll<cr>" },
-        -- { "<leader>dtf", "<cmd>DbtTest<cr>" },
-        { "<leader>;dm", "<cmd>lua require('dbtpal.telescope').dbt_picker()<cr>" },
+        { "<leader><F9>", "<cmd>DbtRunModel +ld_v2b<cr>" },
+        { "<leader>drf", "<cmd>DbtRun<cr>" },
+        { "<leader>drp", "<cmd>DbtRunAll<cr>" },
+        { "<leader>dtf", "<cmd>DbtTest<cr>" },
+        { "<leader>dm", "<cmd>lua require('dbtpal.telescope').dbt_picker()<cr>" },
     },
     config = function()
         require("dbtpal").setup({
@@ -27,3 +27,5 @@ return {
         require("telescope").load_extension("dbtpal")
     end,
 }
+
+

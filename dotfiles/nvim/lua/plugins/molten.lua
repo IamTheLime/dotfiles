@@ -18,5 +18,14 @@ return {
             end
         end, { desc = "Initialize Molten for python3", silent = true }
         )
+
+        vim.api.nvim_create_autocmd("User", {
+            pattern = "MoltenInitPost",
+            callback = function()
+                vim.keymap.set("v", "<localleader>r", ":<C-u>MoltenEvaluateVisual<CR>gv",
+                    { desc = "execute visual selection", buffer = true, silent = true })
+                -- ... more mappings
+            end,
+        })
     end,
 }

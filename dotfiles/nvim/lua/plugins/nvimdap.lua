@@ -52,6 +52,7 @@ local setup_dap = function()
         request = "launch",
         name = "Omni launch Configuration",
         program = "",
+        justMyCode = false,
         pythonPath = pythonPath(),
     }
     local results = {}
@@ -70,8 +71,8 @@ local setup_dap = function()
     vim.keymap.set('n', '<F12>', function() dap.step_out() end)
     vim.keymap.set("n", "<Leader>bp", function() dap.toggle_breakpoint() end)
 
-    vim.fn.sign_define('DapBreakpoint', { text = '⚫', texthl = '', linehl = '', numhl = '' })
-    vim.fn.sign_define('DapStopped', { text = '▶️', texthl = '', linehl = '', numhl = '' })
+    vim.fn.sign_define('DapBreakpoint', { text = '🚨', texthl = '', linehl = '', numhl = '' })
+    vim.fn.sign_define('DapStopped', { text = '🛑', texthl = '', linehl = '', numhl = '' })
 end
 
 local toggle_dapui = function()

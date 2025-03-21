@@ -104,13 +104,35 @@ return {
             end
         },
         "nvim-neotest/nvim-nio" },
-    config = function()
+    opts = {
+        layouts = {
+            {
+                elements = {
+                    { id = "console", size = 0.2 },
+                    { id = "repl",    size = 0.8 },
+                },
+                position = "right",
+                size = 70,
+            },
+            {
+                elements = {
+                    { id = "scopes",      size = 0.50 },
+                    { id = "breakpoints", size = 0.20 },
+                    { id = "stacks",      size = 0.15 },
+                    { id = "watches",     size = 0.15 },
+                },
+                position = "left",
+                size = 50,
+            },
+        },
+    },
+    config = function(_,opts)
         local dapui = require("dapui")
-        dapui.setup()
+        dapui.setup(opts)
     end,
     keys = {
         {
-            "<leader>d",
+            "<leader>dd",
             function()
                 toggle_dapui()
             end,

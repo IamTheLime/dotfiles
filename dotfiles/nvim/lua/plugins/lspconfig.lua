@@ -154,6 +154,19 @@ return {
             end
         })
 
+<<<<<<< Updated upstream
+=======
+        lsp_config.zls.setup({
+            settings = {
+                zls =  {
+                    enable_build_on_save= true,
+                    build_on_save_step= "check",
+                }
+            },
+            on_attach = function(client, bufnr)
+            end
+        })
+>>>>>>> Stashed changes
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then

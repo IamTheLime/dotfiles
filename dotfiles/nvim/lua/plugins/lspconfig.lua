@@ -154,8 +154,6 @@ return {
             end
         })
 
-<<<<<<< Updated upstream
-=======
         lsp_config.zls.setup({
             settings = {
                 zls =  {
@@ -166,7 +164,6 @@ return {
             on_attach = function(client, bufnr)
             end
         })
->>>>>>> Stashed changes
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then

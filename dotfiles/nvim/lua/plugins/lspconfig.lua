@@ -23,11 +23,22 @@ return {
     config = function()
         vim.opt.signcolumn = 'yes'
 
-        vim.fn.sign_define('DiagnosticSignError', { text = '', texthl = 'DiagnosticSignError' })
-        vim.fn.sign_define('DiagnosticSignWarn', { text = '', texthl = 'DiagnosticSignWarn' })
-        vim.fn.sign_define('DiagnosticSignInfo', { text = '', texthl = 'DiagnosticSignInfo' })
-        vim.fn.sign_define('DiagnosticSignHint', { text = '', texthl = 'DiagnosticSignHint' })
-
+        vim.diagnostic.config({
+            signs = {
+                text = {
+                    [vim.diagnostic.severity.ERROR] = '',
+                    [vim.diagnostic.severity.WARN] = '',
+                    [vim.diagnostic.severity.INFO] = '',
+                    [vim.diagnostic.severity.HINT] = '',
+                },
+                linehl = {
+                    [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
+                },
+                numhl = {
+                    [vim.diagnostic.severity.WARN] = 'WarningMsg',
+                },
+            },
+        })
         local lsp_config = require("lspconfig")
         local lsp_defconf = lsp_config.util.default_config
         local lspkind = require("lspkind")
@@ -77,10 +88,10 @@ return {
         })
 
         vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-          pattern = "*.gitlab-ci*.{yml,yaml}",
-          callback = function()
-            vim.bo.filetype = "yaml.gitlab"
-          end,
+            pattern = "*.gitlab-ci*.{yml,yaml}",
+            callback = function()
+                vim.bo.filetype = "yaml.gitlab"
+            end,
         })
 
         local border = {

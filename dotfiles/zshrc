@@ -32,7 +32,6 @@ fi
 if ! command -v exa &> /dev/null; then
     alias exa='eza'
 fi
-ZSH_THEME="powerlevel10k/powerlevel10k"
 
 setopt auto_menu # automatically use menu completion
 setopt always_to_end # move cursor to end if word had one match

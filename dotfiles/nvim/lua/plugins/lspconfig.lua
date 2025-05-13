@@ -105,76 +105,76 @@ return {
             { "▏", "FloatBorder" },
         }
 
-        lsp_config.yamlls.setup {
-            on_attach = function(client)
-                client.server_capabilities.documentFormattingProvider = true
-            end,
-            settings = {
-                yaml = {
-                    format = {
-                        enable = true
-                    },
-                    schemaStore = {
-                        enable = true
-                    }
-                }
-            }
-        }
+        -- lsp_config.yamlls.setup {
+        --     on_attach = function(client)
+        --         client.server_capabilities.documentFormattingProvider = true
+        --     end,
+        --     settings = {
+        --         yaml = {
+        --             format = {
+        --                 enable = true
+        --             },
+        --             schemaStore = {
+        --                 enable = true
+        --             }
+        --         }
+        --     }
+        -- }
 
-        lsp_config.pyright.setup({
-            settings = {
-                python = {
-                    analysis = {
-                        extraPaths = { ".venv" },
-                        autoSearchPaths = false,
-                        useLibraryCodeForTypes = true,
-                        -- diagnosticMode = 'openFilesOnly',
-                        diagnosticMode = 'openFilesOnly',
-                    },
-                },
-            },
-            single_file_support = true,
-            flags = {
-                -- debounce_text_changes = 50,
-                debounce_text_changes = 250,
-            },
-            on_attach = function(client, bufnr)
-                print("PYTHON")
-            end
-        })
+        -- lsp_config.pyright.setup({
+        --     settings = {
+        --         python = {
+        --             analysis = {
+        --                 extraPaths = { ".venv" },
+        --                 autoSearchPaths = false,
+        --                 useLibraryCodeForTypes = true,
+        --                 -- diagnosticMode = 'openFilesOnly',
+        --                 diagnosticMode = 'openFilesOnly',
+        --             },
+        --         },
+        --     },
+        --     single_file_support = true,
+        --     flags = {
+        --         -- debounce_text_changes = 50,
+        --         debounce_text_changes = 250,
+        --     },
+        --     on_attach = function(client, bufnr)
+        --         print("PYTHON")
+        --     end
+        -- })
 
-        lsp_config.lua_ls.setup({
-            settings = {
-                Lua = {
-                    diagnostics = {
-                        globals = { 'vim' }
-                    }
-                }
-            }
-        })
-
-        lsp_config.angularls.setup({
-            filetypes = { "angular.html" },
-            on_attach = function(client, bufnr)
-            end
-        })
-
-        lsp_config.tailwindcss.setup({
-            filetypes = { "angular.html" },
-            on_attach = function(client, bufnr)
-            end
-        })
-
-        lsp_config.zls.setup({
-            settings = {
-                zls =  {
-                    enable_build_on_save= true,
-                    build_on_save_step= "check",
-                }
-            },
-            on_attach = function(client, bufnr)
-            end
-        })
+        -- lsp_config.lua_ls.setup({
+        --     settings = {
+        --         Lua = {
+        --             diagnostics = {
+        --                 globals = { 'vim' }
+        --             }
+        --         }
+        --     }
+        -- })
+        --
+        -- lsp_config.angularls.setup({
+        --     filetypes = { "angular.html" },
+        --     on_attach = function(client, bufnr)
+        --     end
+        -- })
+        --
+        -- lsp_config.tailwindcss.setup({
+        --     filetypes = { "angular.html" },
+        --     on_attach = function(client, bufnr)
+        --     end
+        -- })
+        --
+        -- lsp_config.zls.setup({
+        --     settings = {
+        --         zls =  {
+        --             enable_build_on_save= true,
+        --             build_on_save_step= "check",
+        --         }
+        --     },
+        --     on_attach = function(client, bufnr)
+        --     end
+        -- })
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then

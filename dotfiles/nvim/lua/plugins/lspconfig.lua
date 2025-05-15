@@ -79,13 +79,6 @@ return {
         })
 
         require('mason').setup({})
-        require('mason-lspconfig').setup({
-            handlers = {
-                function(server_name)
-                    require('lspconfig')[server_name].setup({})
-                end,
-            },
-        })
 
         vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
             pattern = "*.gitlab-ci*.{yml,yaml}",
@@ -105,76 +98,95 @@ return {
             { "▏", "FloatBorder" },
         }
 
-        -- lsp_config.yamlls.setup {
-        --     on_attach = function(client)
-        --         client.server_capabilities.documentFormattingProvider = true
-        --     end,
-        --     settings = {
-        --         yaml = {
-        --             format = {
-        --                 enable = true
-        --             },
-        --             schemaStore = {
-        --                 enable = true
-        --             }
-        --         }
-        --     }
-        -- }
+        local capabilities = require("cmp_nvim_lsp").default_capabilities()
+        require("mason-lspconfig").setup(
+            {
+                ensure_installed = {},
+                automatic_enable = true,
+                handlers = {
 
-        -- lsp_config.pyright.setup({
-        --     settings = {
-        --         python = {
-        --             analysis = {
-        --                 extraPaths = { ".venv" },
-        --                 autoSearchPaths = false,
-        --                 useLibraryCodeForTypes = true,
-        --                 -- diagnosticMode = 'openFilesOnly',
-        --                 diagnosticMode = 'openFilesOnly',
-        --             },
-        --         },
-        --     },
-        --     single_file_support = true,
-        --     flags = {
-        --         -- debounce_text_changes = 50,
-        --         debounce_text_changes = 250,
-        --     },
-        --     on_attach = function(client, bufnr)
-        --         print("PYTHON")
-        --     end
-        -- })
+                    ["yamlls"] = function()
+                        require("lspconfig").yamlls.setup({
+                            on_attach = function(client, bufnr)
+                                client.server_capabilities.documentFormattingProvider = true
+                            end,
+                            capabilities = capabilities,
+                            settings = {
+                                yaml = {
+                                    format = {
+                                        enable = true,
+                                    },
+                                    schemaStore = {
+                                        enable = true,
+                                    },
+                                },
+                            },
+                        })
+                    end,
 
-        -- lsp_config.lua_ls.setup({
-        --     settings = {
-        --         Lua = {
-        --             diagnostics = {
-        --                 globals = { 'vim' }
-        --             }
-        --         }
-        --     }
-        -- })
-        --
-        -- lsp_config.angularls.setup({
-        --     filetypes = { "angular.html" },
-        --     on_attach = function(client, bufnr)
-        --     end
-        -- })
-        --
-        -- lsp_config.tailwindcss.setup({
-        --     filetypes = { "angular.html" },
-        --     on_attach = function(client, bufnr)
-        --     end
-        -- })
-        --
-        -- lsp_config.zls.setup({
-        --     settings = {
-        --         zls =  {
-        --             enable_build_on_save= true,
-        --             build_on_save_step= "check",
-        --         }
-        --     },
-        --     on_attach = function(client, bufnr)
-        --     end
-        -- })
+                    ["pyright"] = function()
+                        require("lspconfig").pyright.setup({
+                            on_attach = function(client, bufnr)
+                                print("PYTHON")
+                            end,
+                            capabilities = capabilities,
+                            settings = {
+                                python = {
+                                    analysis = {
+                                        extraPaths = { ".venv" },
+                                        autoSearchPaths = false,
+                                        useLibraryCodeForTypes = true,
+                                        diagnosticMode = "openFilesOnly",
+                                    },
+                                },
+                            },
+                            single_file_support = true,
+                            flags = {
+                                debounce_text_changes = 250,
+                            },
+                        })
+                    end,
+
+                    ["lua_ls"] = function()
+                        require("lspconfig").lua_ls.setup({
+                            capabilities = capabilities,
+                            settings = {
+                                Lua = {
+                                    diagnostics = {
+                                        globals = { "vim" },
+                                    },
+                                },
+                            },
+                        })
+                    end,
+
+                    ["angularls"] = function()
+                        require("lspconfig").angularls.setup({
+                            capabilities = capabilities,
+                            filetypes = { "angular.html" },
+                        })
+                    end,
+
+                    ["tailwindcss"] = function()
+                        require("lspconfig").tailwindcss.setup({
+                            capabilities = capabilities,
+                            filetypes = { "angular.html" },
+                        })
+                    end,
+
+                    ["zls"] = function()
+                        require("lspconfig").zls.setup({
+                            capabilities = capabilities,
+                            settings = {
+                                zls = {
+                                    enable_build_on_save = true,
+                                    build_on_save_step = "check",
+                                },
+                            },
+                        })
+                    end,
+                },
+            })
 
         local status, cmp = pcall(require, "cmp")
         if (not status) then
@@ -192,7 +204,7 @@ return {
             },
             snippet = {
                 expand = function(args)
-                    vim.snippet.expand(args.body)
+                    require("luasnip").expand(args.body)
                 end,
             },
             formatting = {

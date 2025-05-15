@@ -204,7 +204,7 @@ return {
             },
             snippet = {
                 expand = function(args)
-                    require("luasnip").expand(args.body)
+                    vim.snippet.expand(args.body)
                 end,
             },
             formatting = {

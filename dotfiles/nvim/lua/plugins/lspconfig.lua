@@ -227,6 +227,37 @@ return {
             end,
         })
 
+
+        local default_pyright_mode = "openFilesOnly"
+        local function toggle_pyright_workspace_mode()
+            local bufnr = vim.api.nvim_get_current_buf()
+            for _, client in pairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+                if client.name == "pyright" then
+                    curr_mode = client.config.settings.python.analysis.diagnosticMode
+
+                    local new_mode = default_pyright_mode
+                    if curr_mode == default_pyright_mode then
+                        new_mode = "workspace"
+                    else
+                        new_mode = default_pyright_mode
+                    end
+
+                    client.config.settings = client.config.settings or {}
+                    client.config.settings.python = client.config.settings.python or {}
+                    client.config.settings.python.analysis = client.config.settings.python.analysis or {}
+                    client.config.settings.python.analysis.diagnosticMode = new_mode
+
+                    client.notify("workspace/didChangeConfiguration", {
+                        settings = client.config.settings,
+                    })
+
+                    vim.notify("Pyright workspace mode set to: " .. new_mode, vim.log.levels.INFO)
+                end
+            end
+        end
+
+        vim.keymap.set("n", "<leader>wm", function() toggle_pyright_workspace_mode() end)
+
         local status, lsp_signature = pcall(require, "lsp_signature")
         if (not status) then return end
 

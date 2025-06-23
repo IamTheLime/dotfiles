@@ -62,7 +62,7 @@ return {
                 color.blend ~= nil
                 and (color.blend >= 0 or color.blend <= 100)
             then
-                fg = util.blend(fg, parse_color('base') or '', color.blend / 100)
+                fg = util.blend(fg, parse_color('foam') or '', color.blend / 100)
             end
 
             local colours = {}

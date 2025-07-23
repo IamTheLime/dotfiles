@@ -78,7 +78,7 @@ plugins=(git poetry virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighti
 source $ZSH/oh-my-zsh.sh
 
 
-source /usr/share/fzf/shell/key-bindings.zsh
+# source /usr/share/fzf/shell/key-bindings.zsh
 # Default finder for fzf 
 export FZF_DEFAULT_COMMAND='fd .'
 export FZF_DEFAULT_OPTS="--ansi"
@@ -107,7 +107,7 @@ pn() {
 # Aliases
 
 alias more='bat'
-alias ls='eza'
+alias ls='exa'
 
 # ls, the common ones I use a lot shortened for rapid fire usage
 alias l='ls -lFh'     #size,show type,human readable
@@ -123,11 +123,4 @@ alias lart='ls -1Fcart'
 alias lrt='ls -1Fcrt'
 alias lsr='ls -lARFh' #Recursive list of files and directories
 alias lsn='ls -1'     #A column contains name of files and directories
-
-
-tcow() {
-    while tmux next-window 2> /dev/null; do
-        tmux kill-window
-    done
-}
 

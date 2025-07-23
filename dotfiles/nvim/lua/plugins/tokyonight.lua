@@ -41,7 +41,7 @@ return {
         ---@param colors ColorScheme
         on_highlights = function(highlights, colors) end,
     },
-    config = function()
-        -- vim.cmd.colorscheme "tokyonight-night"
-    end
+    config = function(_, opts)
+        vim.cmd("colorscheme tokyonight-night")
+    end,
 }

@@ -56,13 +56,12 @@ return {
         ---@param color table<string, any>
         util.highlight = function(group, color)
             local fg = color.fg and parse_color(color.fg) or 'none'
-            local bg = color.bg and parse_color(color.bg) or 'none'
 
             if
                 color.blend ~= nil
                 and (color.blend >= 0 or color.blend <= 100)
             then
-                fg = util.blend(fg, parse_color('base') or '', color.blend / 100)
+                fg = util.blend(fg, '#1A1B26', color.blend / 100)
             end
 
             local colours = {}

@@ -12,8 +12,8 @@ local term = {
 local function open_term_win()
     local width = math.ceil(vim.o.columns * 0.8)
     local height = math.ceil(vim.o.lines * 0.8)
-    local row = math.ceil((vim.o.lines - height) / 2)
-    local col = math.ceil((vim.o.columns - width) / 2)
+    local row = math.ceil((vim.o.lines - height)/2)
+    local col = math.ceil((vim.o.columns - width)/2)
 
     term.win = api.nvim_open_win(term.buf, true, {
         relative = "editor",
@@ -71,7 +71,10 @@ local function toggle()
     -- Now, open the window to display the terminal
     open_term_win()
 
-    local term = vim.api.nvim_open_term(term.buf, {
+    local width = math.ceil(vim.o.columns * 0.8)
+    local height = math.ceil(vim.o.lines * 0.8)
+    local job
+    local term_chan = vim.api.nvim_open_term(term.buf, {
         on_input = function(_, _, _, data)
             vim.api.nvim_chan_send(job, data)
         end,
@@ -80,10 +83,13 @@ local function toggle()
 
     job = vim.fn.jobstart({ 'opencode' }, {
         pty = true,
+        width = width,
+        height = height,
         on_stdout = function(_, data, _)
-            vim.api.nvim_chan_send(term, table.concat(data, '\n'))
+            vim.api.nvim_chan_send(term_chan, table.concat(data, '\n'))
         end,
     })
+    term.job_id = job
 end
 
 api.nvim_create_user_command("OpencodeToggle", toggle, {})

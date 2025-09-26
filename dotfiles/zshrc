@@ -73,12 +73,12 @@ compdef _prep prep
 # Setting up zsh plugins
 #
 #
-plugins=(git poetry virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent)
+plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent)
 #Remember, for ssh to work as you like it you need to add the AddKeysToAgent on the ssh config
 source $ZSH/oh-my-zsh.sh
 
 
-# source /usr/share/fzf/shell/key-bindings.zsh
+source /usr/share/fzf/shell/key-bindings.zsh
 # Default finder for fzf 
 export FZF_DEFAULT_COMMAND='fd .'
 export FZF_DEFAULT_OPTS="--ansi"

@@ -61,7 +61,8 @@ return {
                 color.blend ~= nil
                 and (color.blend >= 0 or color.blend <= 100)
             then
-                fg = util.blend(fg, '#1A1B26', color.blend / 100)
+                fg = util.blend(fg, string.format("#%06x", vim.api.nvim_get_hl_by_name("Normal", true).background),
+                    color.blend / 100)
             end
 
             local colours = {}
@@ -91,12 +92,12 @@ return {
         -- create the highlight groups in the highlight setup hook, so they are reset
         -- every time the colorscheme changes
         hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-            h('IndentBlanklineIndent1', { fg = "#E06C75", blend = 15 })
-            h('IndentBlanklineIndent2', { fg = "#E5C07B", blend = 15 })
-            h('IndentBlanklineIndent3', { fg = "#98C379", blend = 15 })
-            h('IndentBlanklineIndent4', { fg = "#56B6C2", blend = 15 })
-            h('IndentBlanklineIndent5', { fg = "#61AFEF", blend = 15 })
-            h('IndentBlanklineIndent6', { fg = "#C678DD", blend = 15 })
+            h('IndentBlanklineIndent1', { fg = "#E06C75", blend = 25 })
+            h('IndentBlanklineIndent2', { fg = "#E5C07B", blend = 25 })
+            h('IndentBlanklineIndent3', { fg = "#98C379", blend = 25 })
+            h('IndentBlanklineIndent4', { fg = "#56B6C2", blend = 25 })
+            h('IndentBlanklineIndent5', { fg = "#61AFEF", blend = 25 })
+            h('IndentBlanklineIndent6', { fg = "#C678DD", blend = 25 })
         end)
 
         require("ibl").setup {

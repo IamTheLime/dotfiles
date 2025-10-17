@@ -5,8 +5,8 @@ return {
     options = {
       theme = 'auto', -- or 'tokyonight', 'gruvbox', etc.
       icons_enabled = true,
-      component_separators = '|',
-      section_separators = '',
+      component_separators = '━',
+      section_separators = '━',
     },
     sections = {
       lualine_a = { 'mode' },

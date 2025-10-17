@@ -1,5 +1,9 @@
 return {
-    "folke/tokyonight.nvim",
+        "folke/tokyonight.nvim",
+    dependencies = {
+
+         "akinsho/horizon.nvim", version = "*",
+    },
     lazy = false,
     priority = 1000,
     opts = {

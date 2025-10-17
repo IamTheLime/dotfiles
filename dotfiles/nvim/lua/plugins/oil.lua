@@ -187,7 +187,7 @@ return {
                 },
             })
             vim.keymap.set("n", "sf", function()
-                oil.open_float("./")
+                oil.open_float(nil)
             end)
         end
     },

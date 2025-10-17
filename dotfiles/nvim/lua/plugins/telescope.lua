@@ -124,6 +124,9 @@ return {
         vim.keymap.set('n', ';ae', function()
             builtin.diagnostics()
         end)
+        vim.keymap.set('n', ';km', function()
+            builtin.keymaps()
+        end, { desc = 'Search keymaps' })
         vim.keymap.set("n", "sf", function()
             telescope.extensions.file_browser.file_browser({
                 path = "%:p:h",

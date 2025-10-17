@@ -17,7 +17,6 @@ return {
         { 'L3MON4D3/LuaSnip' },             -- Required
 
         { 'rafamadriz/friendly-snippets' }, -- Optional
-        { 'ray-x/lsp_signature.nvim' },
         { 'onsails/lspkind-nvim' },         -- vscode-like pictograms
     },
     config = function()
@@ -180,7 +179,6 @@ return {
                             settings = {
                                 zls = {
                                     enable_build_on_save = true,
-                                    build_on_save_step = "check",
                                 },
                             },
                         })
@@ -258,20 +256,18 @@ return {
 
         vim.keymap.set("n", "<leader>wm", function() toggle_pyright_workspace_mode() end)
 
-        local status, lsp_signature = pcall(require, "lsp_signature")
-        if (not status) then return end
 
-        lsp_signature.setup({
-            bind = true, -- This is mandatory, otherwise border config won't get registered.
-            handler_opts = {
-                border = "single",
-            },
-            always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
-            toggle_key = '<C-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
-            timer_interval = 100,
-            transparency = 100,
-            hi_parameter = "LspSignatureActiveParameter", -- how your parameter will be highlight
-        })
+        -- lsp_signature.setup({
+        --     bind = true, -- This is mandatory, otherwise border config won't get registered.
+        --     handler_opts = {
+        --         border = "single",
+        --     },
+        --     always_trigger = true, -- sometime show signature on new line or in middle of parameter can be confusing, set it to false for #58
+        --     toggle_key = '<C-s>',  -- toggle signature on and off in insert mode,  e.g. toggle_key = '<M-x>'
+        --     timer_interval = 100,
+        --     transparency = 100,
+        --     hi_parameter = "LspSignatureActiveParameter", -- how your parameter will be highlight
+        -- })
 
         -- Ensures that the treesitter tockens priority is higher than then
         -- lsp priority otherwise it will generate this jarring color changing effectV

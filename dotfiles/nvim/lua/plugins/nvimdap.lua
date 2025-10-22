@@ -54,6 +54,7 @@ local setup_dap = function()
         program = "",
         justMyCode = false,
         pythonPath = pythonPath(),
+        console = "integratedTerminal",
     }
     local results = {}
 
@@ -126,7 +127,7 @@ return {
             },
         },
     },
-    config = function(_,opts)
+    config = function(_, opts)
         local dapui = require("dapui")
         dapui.setup(opts)
     end,

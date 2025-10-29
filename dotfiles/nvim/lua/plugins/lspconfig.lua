@@ -31,7 +31,7 @@ return {
                     [vim.diagnostic.severity.HINT] = '',
                 },
                 linehl = {
-                    [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
+                    -- [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
                 },
                 numhl = {
                     [vim.diagnostic.severity.WARN] = 'WarningMsg',

@@ -80,7 +80,7 @@ return {
             builtin.resume()
         end)
         vim.keymap.set('n', ';t', function()
-            builtin.lsp_references()
+            builtin.lsp_dynamic_workspace_symbols({ symbols = { 'method', 'class', 'function' } })
         end)
         vim.keymap.set('n', ';mr', function()
             builtin.lsp_document_symbols({ symbols = { 'method', 'class', 'function' } })

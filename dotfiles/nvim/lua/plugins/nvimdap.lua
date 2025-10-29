@@ -57,11 +57,26 @@ local setup_dap = function()
         console = "integratedTerminal",
     }
     local results = {}
+    local function get_last_two_parts(path)
+        local parts = {}
+        for part in string.gmatch(path, "[^/]+") do
+            table.insert(parts, part)
+        end
 
+        local count = #parts
+        if count >= 2 then
+            return parts[count - 1] .. "/" .. parts[count]
+        elseif count == 1 then
+            return parts[1]
+        else
+            return ""
+        end
+    end
     local utils = require("lima_the_lime/utils")
     for entry in string.gmatch(vim.fn.system("fd -d 3 -a '.*(server|main)\\.py'"), "[^%s]+") do
         local config_c = utils.deepcopy(config)
         config_c["program"] = entry
+        config_c["name"] = config_c["name"] .. " " .. get_last_two_parts(entry)
 
         table.insert(dap.configurations.python, config_c)
     end
@@ -73,7 +88,7 @@ local setup_dap = function()
     vim.keymap.set("n", "<Leader>bp", function() dap.toggle_breakpoint() end)
 
     vim.fn.sign_define('DapBreakpoint', { text = '🚨', texthl = '', linehl = '', numhl = '' })
-    vim.fn.sign_define('DapStopped', { text = '🛑', texthl = '', linehl = '', numhl = '' })
+    vim.fn.sign_define('DapStopped', { text = '💂', texthl = '', linehl = '', numhl = '' })
 end
 
 local toggle_dapui = function()
@@ -110,6 +125,7 @@ return {
             {
                 elements = {
                     { id = "console", size = 0.2 },
+                    -- { id = "repl",    size = 0.8 },
                     { id = "repl",    size = 0.8 },
                 },
                 position = "right",

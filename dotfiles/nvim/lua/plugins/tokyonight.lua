@@ -4,7 +4,7 @@ return {
     config = function(_, opts)
         require('nightcity').setup({
             style = "afterlife",
-            terminal_colors = true, -- Use colors used when opening a `:terminal`
+            terminal_colors = false, -- Use colors used when opening a `:terminal`
             invert_colors = {
                 -- Invert colors for the following syntax groups
                 cursor = true,

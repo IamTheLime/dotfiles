@@ -14,7 +14,7 @@ local navigator = {}
 local CodeRange = {}
 
 
----Holds the Value for 
+---Holds the Value for
 ---@param line_start integer
 ---@param line_end integer
 ---@param column_start integer
@@ -22,11 +22,11 @@ local CodeRange = {}
 ---@return CodeRange
 function CodeRange:new(line_start, line_end, column_start, column_end)
     local obj = {
-    line_start = line_start,
-    line_end = line_end,
-    column_start = column_start,
-    column_end = column_end,
-}
+        line_start = line_start,
+        line_end = line_end,
+        column_start = column_start,
+        column_end = column_end,
+    }
     setmetatable(obj, self)
     return obj
 end
@@ -63,6 +63,8 @@ end
 -- Misc setup
 -------------------------------------------------
 ---------------------------------------------------
+---@type Journal[]
+Book = {}
 
 navigator.setup = function(opts)
     opts = opts or {}

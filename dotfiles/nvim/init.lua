@@ -38,3 +38,33 @@ vim.api.nvim_create_autocmd("TermOpen", {
         vim.opt.relativenumber = false
     end,
 })
+
+-- Profiling command 
+--
+--
+--
+-- 1. Define the state variable and log file path
+vim.g.profiling_active = 0
+local profile_log_file = vim.fn.expand('/tmp/profile.log')
+
+-- 2. Create the function
+local function profile_toggle()
+  if vim.g.profiling_active == 0 then
+    -- --- START PROFILING ---
+    print("Profiling started. Log: " .. profile_log_file)
+    vim.cmd('profile start ' .. profile_log_file)
+    vim.cmd('profile func *')
+    vim.cmd('profile file *')
+    vim.g.profiling_active = 1
+  else
+    -- --- STOP PROFILING ---
+    print("Profiling paused. Quitting Neovim to write the log...")
+    vim.cmd('profile pause')
+    -- Quits Neovim and writes the log
+    vim.cmd('noautocmd qall!')
+    vim.g.profiling_active = 0
+  end
+end
+
+-- 3. Map the function to the desired keybind: <Leader>sp
+vim.keymap.set('n', '<Leader>sp', profile_toggle, { desc = 'Toggle Neovim Profiling', silent = true })

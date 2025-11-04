@@ -7,25 +7,39 @@ local navigator = {}
 ---------------------------------------------------
 
 ---@class CodeRange
----@field line_start integer
----@field line_end integer
----@field column_start integer
----@field column_end integer
+---@field line_start_row integer
+---@field line_start_col integer
+---@field line_end_row integer
+---@field line_end_col integer
 local CodeRange = {}
 
 
 ---Holds the Value for
----@param line_start integer
----@param line_end integer
----@param column_start integer
----@param column_end integer
 ---@return CodeRange
-function CodeRange:new(line_start, line_end, column_start, column_end)
+function CodeRange:new()
+
+    local vim_mode = vim.api.nvim_get_mode()
+
+    local line_start_row = vim.fn.getpos("v")[2]
+    if vim_mode == "V" then
+        local line_start_col = 0
+    else
+        local line_start_col = vim.fn.getpos("v")[3]
+    end
+
+
+    local line_end_row = vim.fn.getpos(".")[2]
+    if vim_mode == "V" then
+        local line_start_col = 0
+    else
+        local line_start_col = vim.fn.getpos(".")[3]
+    end
+
     local obj = {
-        line_start = line_start,
-        line_end = line_end,
-        column_start = column_start,
-        column_end = column_end,
+        line_start_row = line_start_row,
+        linse_start_col = line_start_col,
+        line_end_row = line_end_row,
+        line_end_col = line_end_col,
     }
     setmetatable(obj, self)
     return obj
@@ -69,16 +83,16 @@ Book = {}
 navigator.setup = function(opts)
     opts = opts or {}
     -- Initialize state, commands, keymaps here
-    vim.api.nvim_create_user_command('NavigatorExplore', navigator.explore, {})
+    -- vim.api.nvim_create_user_command('NavigatorExplore', navigator.explore, {})
 end
 
-navigator.explore = function(opts)
-    -- Your code navigation logic
-    print(vim.inspect(vim.fn.getpos("v")), vim.inspect(vim.fn.getpos(".")))
-    -- print(vim.inspect(vim.api.nvim_buf_get_mark(0, '<')))
+navigator.test = function()
+    local test = CodeRange:new()
+    print(vim.inspect(test))
 end
 
 navigator.setup({})
 
-vim.keymap.set('v', 'nnn', navigator.explore, {})
+vim.keymap.set('v', 'mmm', navigator.test, {})
+
 return navigator

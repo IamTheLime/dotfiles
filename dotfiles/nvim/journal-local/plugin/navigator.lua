@@ -30,7 +30,7 @@ function CodeRange:new()
 
     local line_end_row = vim.fn.getpos(".")[2]
     if vim_mode == "V" then
-        local line_start_col = 0
+        local line_start_col = vim.fn.col(line_end_row)
     else
         local line_start_col = vim.fn.getpos(".")[3]
     end

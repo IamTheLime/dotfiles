@@ -13,31 +13,45 @@ local navigator = {}
 ---@field line_end_col integer
 local CodeRange = {}
 
+local print_res = {}
 
 ---Holds the Value for
 ---@return CodeRange
 function CodeRange:new()
-
-    local vim_mode = vim.api.nvim_get_mode()
-
-    local line_start_row = vim.fn.getpos("v")[2]
-    if vim_mode == "V" then
-        local line_start_col = 0
+    local vim_mode = vim.api.nvim_get_mode().mode
+    
+    local start = nil
+    local final = nil
+    if (vim.fn.getpos("v")[2] > vim.fn.getpos(".")[2]) then
+        start = "."
+        final ="v"
     else
-        local line_start_col = vim.fn.getpos("v")[3]
+        start = "v"
+        final ="."
+    end
+
+    local line_start_row = vim.fn.getpos(start)[2]
+    local line_start_col = nil
+    if vim_mode == "V" then
+        line_start_col = 0
+    else
+        line_start_col = vim.fn.getpos(start)[3]
     end
 
 
-    local line_end_row = vim.fn.getpos(".")[2]
+    local line_end_row = vim.fn.getpos(final)[2]
+    local line_end_col = nil
     if vim_mode == "V" then
-        local line_start_col = vim.fn.col(line_end_row)
+
+        local line = vim.fn.getline(line_end_row)
+        line_end_col = vim.fn.strdisplaywidth(line)
     else
-        local line_start_col = vim.fn.getpos(".")[3]
+        line_end_col = vim.fn.getpos(final)[3]
     end
 
     local obj = {
         line_start_row = line_start_row,
-        linse_start_col = line_start_col,
+        line_start_col = line_start_col,
         line_end_row = line_end_row,
         line_end_col = line_end_col,
     }
@@ -88,7 +102,8 @@ end
 
 navigator.test = function()
     local test = CodeRange:new()
-    print(vim.inspect(test))
+    print_res["code_range"] = test
+    print(vim.inspect(print_res))
 end
 
 navigator.setup({})

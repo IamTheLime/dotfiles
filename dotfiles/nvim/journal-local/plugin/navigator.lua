@@ -1,33 +1,33 @@
 local navigator = {}
-
+local log = require('plenary.log')
+local logger = log.new({ plugin = 'navigator', level = 'info', })
 ---------------------------------------------------
 ---------------------------------------------------
 -- Definition of state for the plugin
 ---------------------------------------------------
 ---------------------------------------------------
 
+local CodeRange = {}
 ---@class CodeRange
 ---@field line_start_row integer
 ---@field line_start_col integer
 ---@field line_end_row integer
 ---@field line_end_col integer
-local CodeRange = {}
 
-local print_res = {}
 
 ---Holds the Value for
 ---@return CodeRange
 function CodeRange:new()
     local vim_mode = vim.api.nvim_get_mode().mode
-    
+
     local start = nil
     local final = nil
     if (vim.fn.getpos("v")[2] > vim.fn.getpos(".")[2]) then
         start = "."
-        final ="v"
+        final = "v"
     else
         start = "v"
-        final ="."
+        final = "."
     end
 
     local line_start_row = vim.fn.getpos(start)[2]
@@ -42,7 +42,6 @@ function CodeRange:new()
     local line_end_row = vim.fn.getpos(final)[2]
     local line_end_col = nil
     if vim_mode == "V" then
-
         local line = vim.fn.getline(line_end_row)
         line_end_col = vim.fn.strdisplaywidth(line)
     else
@@ -59,14 +58,36 @@ function CodeRange:new()
     return obj
 end
 
+local JournalEntry = {}
 ---@class JournalEntry
 ---@field title string
----@field relevent_areas CodeRange[]
+---@field code_location CodeRange
 ---@field date string
+
+---@param id integer
+---@return JournalEntry
+function JournalEntry:create_new_entry_from_selection(id)
+    logger.info("Creating new entry")
+
+    local date = vim.fn.strftime("%Y %b %d %X")
+    local code_range = CodeRange:new()
+
+
+    local obj = {
+        title = title,
+        relevant_areas = code_range,
+        date = date,
+        id = id
+    }
+
+    logger.info(obj)
+    setmetatable(obj, self)
+    return obj
+end
 
 ---@class Journal
 ---@field entries JournalEntry[]
----@field current_entry JournalEntry | nil
+---@field current_entry integer
 local Journal = {}
 
 function Journal:new()
@@ -74,6 +95,11 @@ function Journal:new()
     setmetatable(obj, self)
     self.__index = self
     return obj
+end
+
+---@param path string 
+function Journal:load_journal(path)
+    error("Method not implemented")
 end
 
 ---@param entry JournalEntry
@@ -101,9 +127,7 @@ navigator.setup = function(opts)
 end
 
 navigator.test = function()
-    local test = CodeRange:new()
-    print_res["code_range"] = test
-    print(vim.inspect(print_res))
+    JournalEntry:create_new_entry_from_selection()
 end
 
 navigator.setup({})

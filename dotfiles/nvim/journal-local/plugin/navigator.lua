@@ -67,11 +67,12 @@ local JournalEntry = {}
 ---@param id integer
 ---@return JournalEntry
 function JournalEntry:create_new_entry_from_selection(id)
-    logger.info("Creating new entry")
-
     local date = vim.fn.strftime("%Y %b %d %X")
     local code_range = CodeRange:new()
-
+    local title = "Failed to receive input"
+    vim.ui.input({ prompt = 'Set title: ' }, function(input)
+        title = input
+    end)
 
     local obj = {
         title = title,
@@ -80,7 +81,6 @@ function JournalEntry:create_new_entry_from_selection(id)
         id = id
     }
 
-    logger.info(obj)
     setmetatable(obj, self)
     return obj
 end
@@ -90,14 +90,21 @@ end
 ---@field current_entry integer
 local Journal = {}
 
+---@return Journal
 function Journal:new()
-    local obj = { entries = {} }
+    local obj = { entries = {}, current_entry = -1, }
     setmetatable(obj, self)
     self.__index = self
     return obj
 end
 
----@param path string 
+function Journal:create_and_add_new_entry()
+    self.current_entry = self.current_entry + 1
+    local je = JournalEntry:create_new_entry_from_selection(self.current_entry)
+    table.insert(self.entries, je)
+end
+
+---@param path string
 function Journal:load_journal(path)
     error("Method not implemented")
 end
@@ -127,7 +134,9 @@ navigator.setup = function(opts)
 end
 
 navigator.test = function()
-    JournalEntry:create_new_entry_from_selection()
+    local j = Journal:new()
+    j:create_and_add_new_entry()
+    logger.info(j)
 end
 
 navigator.setup({})

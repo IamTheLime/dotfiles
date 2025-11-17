@@ -104,6 +104,10 @@ pn() {
   cd ${HOME}/Documents/personal
 }
 
+gitorig {
+    cd $(git rev-parse --show-toplevel)
+}
+
 # Aliases
 
 alias more='bat'

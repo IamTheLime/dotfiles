@@ -23,7 +23,6 @@ local function open_term_win()
         row = row,
         col = col,
         border = "rounded",
-        
     })
     vim.cmd("startinsert")
 end

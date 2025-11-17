@@ -1,3 +1,5 @@
+local layout = require('journal-local.plugin.layout')
+
 local navigator = {}
 local log = require('plenary.log')
 local logger = log.new({ plugin = 'navigator', level = 'info', })
@@ -134,9 +136,10 @@ navigator.setup = function(opts)
 end
 
 navigator.test = function()
-    local j = Journal:new()
-    j:create_and_add_new_entry()
-    logger.info(j)
+    -- local j = Journal:new()
+    -- j:create_and_add_new_entry()
+    -- logger.info(j)
+    layout.open_title_window({code_preview_ft="py"})
 end
 
 navigator.setup({})

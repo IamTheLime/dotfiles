@@ -5,3 +5,4 @@ packer_compiled.lua
 dotfiles/tmux/plugins/
 *gitignore.lua
 *gitlab.lua
+*lazy-lock.json

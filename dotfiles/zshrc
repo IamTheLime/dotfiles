@@ -104,7 +104,7 @@ pn() {
   cd ${HOME}/Documents/personal
 }
 
-gitorig {
+gor() {
     cd $(git rev-parse --show-toplevel)
 }
 

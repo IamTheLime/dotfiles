@@ -52,7 +52,7 @@ local setup_dap = function()
         request = "launch",
         name = "Omni launch Configuration",
         program = "",
-        justMyCode = false,
+        justMyCode = true,
         pythonPath = pythonPath(),
         console = "integratedTerminal",
     }
@@ -161,6 +161,15 @@ return {
                 toggle_breakpoint()
             end,
             desc = "Dap UI"
-        },
+        }, {
+            "<leader>bex",
+            function ()
+                local dap = require("dap")
+                dap.listeners.after.event_initialized["dap-exception-config"] = function()
+                    dap.set_exception_breakpoints({ "raised", "uncaught" })
+                end
+                    dap.set_exception_breakpoints({ "raised", "uncaught" })
+            end
+        }
     },
 }

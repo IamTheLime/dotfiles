@@ -158,6 +158,16 @@ return {
                             },
                         })
                     end,
+                    ["bqls"] = function()
+                        require("lspconfig").bqls.setup({
+                            capabilities = capabilities,
+                            filetypes = { "sql", "mysql" },
+                            settings = {
+                                project_id = "urbanjungle-data",
+                                location = "EU",
+                            },
+                        })
+                    end,
 
                     ["angularls"] = function()
                         require("lspconfig").angularls.setup({
@@ -221,7 +231,13 @@ return {
         vim.api.nvim_create_autocmd("FileType", {
             pattern = { "sql", "mysql", "plsql" },
             callback = function()
-                cmp.setup.buffer({ sources = { { name = 'vim-dadbod-completion' } } })
+                require("cmp").setup.buffer({
+                    sources = {
+                        { name = 'nvim_lsp' },              -- Add this line to enable BQLS!
+                        { name = 'vim-dadbod-completion' }, -- Keep this if you use vim-dadbod
+                        { name = 'luasnip' },               -- Optional: keep snippets working
+                    }
+                })
             end,
         })
 

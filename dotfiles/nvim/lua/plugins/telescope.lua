@@ -36,20 +36,20 @@ return {
             },
         }
 
-        vim.keymap.set('n', ';f',
-            function()
-                builtin.find_files({
-                    no_ignore = false,
-                    hidden = true,
-                    path_display = { "filename_first" },
-                    file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' },
-                    mappings = {
-                        ["n"] = {
-                            ["r"] = fb_actions.rename
-                        },
-                    }
-                })
-            end)
+        -- vim.keymap.set('n', ';f',
+        --     function()
+        --         builtin.find_files({
+        --             no_ignore = false,
+        --             hidden = true,
+        --             path_display = { "filename_first" },
+        --             file_ignore_patterns = { 'node_modules', '.git/', '.venv', 'node_modules' },
+        --             mappings = {
+        --                 ["n"] = {
+        --                     ["r"] = fb_actions.rename
+        --                 },
+        --             }
+        --         })
+        --     end)
         vim.keymap.set('n', ';af',
             function()
                 builtin.find_files({

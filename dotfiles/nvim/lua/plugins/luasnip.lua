@@ -7,9 +7,9 @@ return {
     config = function()
         local ls = require('luasnip')
 
-        for _, ft_path in ipairs(vim.api.nvim_get_runtime_file("lua/lima_the_lime/snips/ft/*.lua", true)) do
-            loadfile(ft_path)()
-        end
+        -- for _, ft_path in ipairs(vim.api.nvim_get_runtime_file("lua/lima_the_lime/snips/ft/*.lua", true)) do
+        --     loadfile(ft_path)()
+        -- end
 
         vim.keymap.set({ "i" }, "<C-K>", function() ls.expand() end, { silent = true })
         vim.keymap.set({ "i", "s" }, "<C-L>", function() ls.jump(1) end, { silent = true })

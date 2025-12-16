@@ -1,98 +1,73 @@
-local load_textobjects = false
 return {
-    -- Treesitter is a new parser generator tool that we can
-    -- use in Neovim to power faster and more accurate
-    -- syntax highlighting.
-    {
-        "nvim-treesitter/nvim-treesitter",
-        version = false, -- last release is way too old and doesn't work on Windows
-        build = ":TSUpdate",
-        event = { "BufReadPost", "BufNewFile" },
-        dependencies = {
-            {
-                "nvim-treesitter/nvim-treesitter-textobjects",
-            },
-        },
-        cmd = { "TSUpdateSync" },
-        keys = {
-            { "<c-space>", desc = "Increment selection" },
-            { "<bs>",      desc = "Decrement selection", mode = "x" },
-        },
-        ---@type TSConfig
-        opts = {
-            highlight = {
-                enable = true,
-                additional_vim_regex_highlighting = false,
-            },
-            indent = { enable = true },
-            ensure_installed = {
-                "bash",
-                "c",
-                "html",
-                "javascript",
-                "jsdoc",
-                "json",
-                "lua",
-                "luadoc",
-                "luap",
-                "markdown",
-                "markdown_inline",
-                "python",
-                "query",
-                "regex",
-                "tsx",
-                "typescript",
-                "vim",
-                "vimdoc",
-                "yaml",
-            },
-            incremental_selection = {
-                enable = true,
-                keymaps = {
-                    init_selection = "<C-space>",
-                    node_incremental = "<C-space>",
-                    scope_incremental = false,
-                    node_decremental = "<bs>",
-                },
-            },
-        },
-        config = function(_, opts)
-            if type(opts.ensure_installed) == "table" then
-                ---@type table<string, boolean>
-                local added = {}
-                opts.ensure_installed = vim.tbl_filter(function(lang)
-                    if added[lang] then
-                        return false
-                    end
-                    added[lang] = true
-                    return true
-                end, opts.ensure_installed)
-            end
+    "nvim-treesitter/nvim-treesitter",
+    lazy = false,
+    branch = "main",
+    build = ":TSUpdate",
+    config = function()
+        local ts = require("nvim-treesitter")
 
-            opts.textobjects = {
-                select = {
-                    enable = true,
+        -- Install core parsers at startup
+        ts.install({
+            "bash",
+            "c",
+            "html",
+            "javascript",
+            "jsdoc",
+            "json",
+            "lua",
+            "luadoc",
+            "luap",
+            "markdown",
+            "markdown_inline",
+            "python",
+            "query",
+            "regex",
+            "tsx",
+            "typescript",
+            "vim",
+            "vimdoc",
+            "yaml",
+        })
 
-                    keymaps = {
-                        ["af"] = "@function.outer",
-                        ["if"] = "@function.inner",
-                        ["ac"] = "@class.outer",
-                    },
-                    selection_modes = {
-                        ['@parameter.outer'] = 'v', -- charwise
-                        ['@function.outer'] = 'V',  -- linewise
-                        ['@class.outer'] = '<c-v>', -- blockwise
-                    },
-                }
-            }
+        -- Custom filetype mappings
+        vim.filetype.add({
+            pattern = {
+                [".*%.component%.html"] = "htmlangular",
+            },
+        })
 
+        local group = vim.api.nvim_create_augroup("TreesitterSetup", { clear = true })
 
-            require("nvim-treesitter.configs").setup(opts)
-            vim.filetype.add({
-                pattern = {
-                    [".*%.component%.html"] = "htmlangular", -- Sets the filetype to `angular.html` if it matches the pattern
-                },
-            })
-        end,
-    },
+        local ignore_filetypes = {
+            "checkhealth",
+            "lazy",
+            "mason",
+            "snacks_dashboard",
+            "snacks_notif",
+            "snacks_win",
+        }
+
+        -- Auto-install parsers and enable highlighting on FileType
+        vim.api.nvim_create_autocmd("FileType", {
+            group = group,
+            desc = "Enable treesitter highlighting and indentation",
+            callback = function(event)
+                if vim.tbl_contains(ignore_filetypes, event.match) then
+                    return
+                end
+
+                local lang = vim.treesitter.language.get_lang(event.match) or event.match
+                local buf = event.buf
+
+                -- Start highlighting immediately (works if parser exists)
+                pcall(vim.treesitter.start, buf, lang)
+
+                -- Enable treesitter indentation
+                vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+                -- Install missing parsers (async, no-op if already installed)
+                ts.install({ lang })
+            end,
+        })
+    end,
 }

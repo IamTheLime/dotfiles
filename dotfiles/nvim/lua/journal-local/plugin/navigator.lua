@@ -146,4 +146,24 @@ navigator.setup({})
 
 vim.keymap.set('v', 'mmm', navigator.test, {})
 
+-- Hot reload setup (development)
+if vim.fn.has('nvim-0.7') == 1 then
+    local ok, dev_utils = pcall(require, 'dev-utils')
+    if ok then
+        dev_utils.register_plugin('journal-navigator', {
+            pattern = '^journal%-local%.plugin',
+            entry_point = 'journal-local.plugin.navigator',
+            reset_globals = function()
+                -- Reset global state
+                Book = {}
+            end
+        })
+        
+        -- Create a command for quick reloading during development
+        vim.api.nvim_create_user_command('JournalReload', function()
+            dev_utils.reload_plugin('journal-navigator')
+        end, { desc = 'Hot reload journal navigator plugin' })
+    end
+end
+
 return navigator

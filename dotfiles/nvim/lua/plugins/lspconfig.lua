@@ -86,17 +86,6 @@ return {
             end,
         })
 
-        local border = {
-            { "🭽", "FloatBorder" },
-            { "▔", "FloatBorder" },
-            { "🭾", "FloatBorder" },
-            { "▕", "FloatBorder" },
-            { "🭿", "FloatBorder" },
-            { "▁", "FloatBorder" },
-            { "🭼", "FloatBorder" },
-            { "▏", "FloatBorder" },
-        }
-
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
         require("mason-lspconfig").setup(
             {
@@ -191,6 +180,23 @@ return {
                                     enable_build_on_save = true,
                                 },
                             },
+                        })
+                    end,
+
+                    ["kotlin_language_server"] = function()
+                        require("lspconfig").kotlin_language_server.setup({
+                            capabilities = capabilities,
+                            on_attach = function(client, bufnr)
+                                -- Optional: any Kotlin-specific setup
+                            end,
+                            -- Important: kotlin-lsp needs to know your project root
+                            root_dir = require("lspconfig").util.root_pattern(
+                                "settings.gradle.kts", -- Gradle Kotlin DSL
+                                "settings.gradle", -- Gradle Groovy DSL
+                                "build.gradle.kts",
+                                "build.gradle",
+                                "pom.xml" -- Maven
+                            ),
                         })
                     end,
                 },

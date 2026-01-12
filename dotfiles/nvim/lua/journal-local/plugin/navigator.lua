@@ -139,7 +139,7 @@ navigator.test = function()
     -- local j = Journal:new()
     -- j:create_and_add_new_entry()
     -- logger.info(j)
-    layout.open_title_window({code_preview_ft="py"})
+    layout.create_ui()
 end
 
 navigator.setup({})
@@ -158,7 +158,7 @@ if vim.fn.has('nvim-0.7') == 1 then
                 Book = {}
             end
         })
-        
+
         -- Create a command for quick reloading during development
         vim.api.nvim_create_user_command('JournalReload', function()
             dev_utils.reload_plugin('journal-navigator')

@@ -1,7 +1,7 @@
 autoload -Uz compinit
 compinit
 
-# if [ "$TMUX" = "" ]; then tmux new-session -A -s main; fi
+# Using ghostty for terminal multiplexing instead of tmux
 
 # The rendering of zellij is still not up to snuff
 #
@@ -29,8 +29,9 @@ fi
 if command -v fdfind &> /dev/null; then
     export FZF_DEFAULT_COMMAND="fdfind --type file --color=always"
 fi
-if ! command -v exa &> /dev/null; then
-    alias exa='eza'
+# eza is the maintained fork of exa
+if ! command -v eza &> /dev/null; then
+    echo "Warning: eza is not installed. Please install it for better ls functionality."
 fi
 
 setopt auto_menu # automatically use menu completion
@@ -41,8 +42,7 @@ zstyle ':completion:::::' completer _expand _complete _ignored _approximate # en
 zstyle ":completion:*:git-checkout:*" sort false
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-# zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
-# zstyle ':fzf-tab:complete:cd:*' popup-pad 600 0
+# Using ghostty's built-in splits instead of tmux popup
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle :omz:plugins:ssh-agent lazy yes
 zstyle :omz:plugins:ssh-agent quiet yes
@@ -111,7 +111,7 @@ gor() {
 # Aliases
 
 alias more='bat'
-alias ls='exa'
+alias ls='eza'
 
 # ls, the common ones I use a lot shortened for rapid fire usage
 alias l='ls -lFh'     #size,show type,human readable

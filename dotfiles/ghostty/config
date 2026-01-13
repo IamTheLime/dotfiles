@@ -1,0 +1,30 @@
+# Ghostty Terminal Configuration
+# For full options, see: https://github.com/mitchellh/ghostty
+
+# Font configuration
+font-family = "IosevkaTiago"
+font-size = 12
+
+
+# Window
+window-decoration = true
+
+# Terminal
+cursor-style = block
+cursor-style-blink = false
+
+# Shell integration
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title
+
+# Clipboard
+clipboard-read = allow
+clipboard-write = allow
+
+# Performance
+window-vsync = true
+
+# Keybindings
+# Tmux-style split keybindings (Ctrl+b prefix)
+keybind = ctrl+b>v=new_split:right
+keybind = ctrl+b>h=new_split:down

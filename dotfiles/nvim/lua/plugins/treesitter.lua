@@ -58,6 +58,11 @@ return {
 
                 local lang = vim.treesitter.language.get_lang(event.match) or event.match
                 local buf = event.buf
+                local parsers = require('nvim-treesitter.parsers')
+
+                if parsers[lang] == nil then
+                    return
+                end
 
                 -- Start highlighting immediately (works if parser exists)
                 pcall(vim.treesitter.start, buf, lang)

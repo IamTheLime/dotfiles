@@ -78,7 +78,11 @@ plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-
 source $ZSH/oh-my-zsh.sh
 
 
-source /usr/share/fzf/shell/key-bindings.zsh
+if [[ -d /usr/share/fzf/shell/key-bindings.zsh ]];
+then
+    source /usr/share/fzf/shell/key-bindings.zsh
+fi
+
 # Default finder for fzf 
 export FZF_DEFAULT_COMMAND='fd .'
 export FZF_DEFAULT_OPTS="--ansi"

@@ -183,20 +183,56 @@ return {
                         })
                     end,
 
-                    ["kotlin_language_server"] = function()
-                        require("lspconfig").kotlin_language_server.setup({
+                    ["kotlin_lsp"] = function()
+                        require("lspconfig").kotlin_lsp.setup({
                             capabilities = capabilities,
-                            on_attach = function(client, bufnr)
-                                -- Optional: any Kotlin-specific setup
-                            end,
-                            -- Important: kotlin-lsp needs to know your project root
+                            filetypes = { "kotlin" },
+                            init_options = {
+                                storagePath = vim.fn.stdpath("data") .. "/kotlin_lsp",
+                            },
+                            settings = {
+                                kotlin = {
+                                    compiler = {
+                                        jvm = {
+                                            target = "default"
+                                        }
+                                    },
+                                    indexing = {
+                                        enabled = true,
+                                    },
+                                    externalSources = {
+                                        useKlsScheme = true,
+                                        autoConvertToKotlin = true
+                                    },
+                                    completion = {
+                                        snippets = {
+                                            enabled = true
+                                        }
+                                    },
+                                    linting = {
+                                        debounceTime = 250
+                                    }
+                                }
+                            },
                             root_dir = require("lspconfig").util.root_pattern(
-                                "settings.gradle.kts", -- Gradle Kotlin DSL
-                                "settings.gradle", -- Gradle Groovy DSL
+                                "settings.gradle.kts",
+                                "settings.gradle",
                                 "build.gradle.kts",
                                 "build.gradle",
-                                "pom.xml" -- Maven
+                                "pom.xml"
                             ),
+                            flags = {
+                                debounce_text_changes = 500,
+                                allow_incremental_sync = true,
+                            },
+                            cmd = {
+                                "kotlin-language-server",
+                                "-J-Xmx4g",
+                                "-J-Xms1g",
+                                "-J-XX:+UseG1GC",
+                                "-J-XX:+UseStringDeduplication",
+                                "-J-Dkotlin.parallel.tasks.in.project=true",
+                            }
                         })
                     end,
                 },
@@ -218,13 +254,34 @@ return {
             },
             snippet = {
                 expand = function(args)
-                    vim.snippet.expand(args.body)
+                    vim.snippet.lsp_expand(args.body)
                 end,
             },
+            window = {
+                completion = cmp.config.window.bordered({
+                    winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None",
+                    col_offset = -3,
+                    side_padding = 1,
+                    scrollbar = true,
+                }),
+                documentation = cmp.config.window.bordered({
+                    winhighlight = "Normal:CmpDoc,FloatBorder:CmpDocBorder",
+                    max_width = 80,
+                    max_height = 20,
+                }),
+            },
             formatting = {
-                -- changing the order of fields so the icon is the first
-                fields = { 'menu', 'abbr', 'kind' },
-                format = lspkind.cmp_format(),
+                fields = { 'kind', 'abbr', 'menu' }, -- Reordered for better readability
+                format = lspkind.cmp_format({
+                    mode = 'symbol_text',
+                    maxwidth = 50, -- Prevent text from being too wide
+                    ellipsis_char = '...',
+                    before = function(entry, vim_item)
+                        -- Add wrapping by truncating long text
+                        vim_item.abbr = string.sub(vim_item.abbr, 1, 50)
+                        return vim_item
+                    end
+                }),
             },
             mapping = cmp.mapping.preset.insert({
                 ['<CR>'] = cmp.mapping.confirm({ select = false }),

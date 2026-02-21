@@ -6,7 +6,7 @@ return {
   dependencies = { 'nvim-tree/nvim-web-devicons' },
   opts = {
     options = {
-      theme = 'auto', -- or 'tokyonight', 'gruvbox', etc.
+      -- theme = 'auto', -- or 'tokyonight', 'gruvbox', etc.
       icons_enabled = true,
       component_separators = '━',
       section_separators = '━',

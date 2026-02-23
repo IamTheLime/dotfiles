@@ -29,6 +29,7 @@ for _, theme in ipairs(themes) do
     theme.priority = 1000
     theme.config = function()
       vim.cmd("colorscheme " .. active_theme)
+        vim.api.nvim_set_hl(0, "Normal", { bg = "#16121A" })
     end
   else
     theme.lazy = true

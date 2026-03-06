@@ -73,7 +73,7 @@ compdef _prep prep
 # Setting up zsh plugins
 #
 #
-plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent)
+plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent vi-mode)
 #Remember, for ssh to work as you like it you need to add the AddKeysToAgent on the ssh config
 source $ZSH/oh-my-zsh.sh
 
@@ -88,6 +88,8 @@ export FZF_DEFAULT_COMMAND='fd .'
 export FZF_DEFAULT_OPTS="--ansi"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 enable-fzf-tab
@@ -143,3 +145,4 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
 . "$HOME/.local/bin/env"
+

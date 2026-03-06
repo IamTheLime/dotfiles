@@ -136,13 +136,25 @@ alias lsn='ls -1'     #A column contains name of files and directories
 
 eval "$(starship init zsh)"
 
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+source_if_exists() {
+  [[ -s "$1" ]] && source "$1"
+}
+
+# SDKMAN
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
 
+# NVM
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+source_if_exists "/opt/homebrew/opt/nvm/nvm.sh"
+source_if_exists "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
-. "$HOME/.local/bin/env"
-
+# Zsh functions for interactions with ghostty
+lo() {
+  if [[ "$1" == "code" ]]; then
+    ghostty +split:right -e zsh -ic "opencode"
+    sleep 0.1
+    ghostty +split:down -e zsh
+    nvim
+  fi
+}

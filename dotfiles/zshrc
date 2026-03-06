@@ -5,7 +5,7 @@ compinit
 
 # The rendering of zellij is still not up to snuff
 #
-# if [[ -z "$ZELLIJ" ]] ; then
+# if [[ -z "$ZELLIJ" ]] ; t
 #   if [[ $(zellij ls 2>/dev/null |grep ^tiago$) = "tiago" ]]; then
 #     zellij attach 'tiago'
 #   else
@@ -73,7 +73,7 @@ compdef _prep prep
 # Setting up zsh plugins
 #
 #
-plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent vi-mode)
+plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent)
 #Remember, for ssh to work as you like it you need to add the AddKeysToAgent on the ssh config
 source $ZSH/oh-my-zsh.sh
 

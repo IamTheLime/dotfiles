@@ -134,7 +134,8 @@ if ask_yes_no "Do you want to setup zshrc?"; then
     fi
     
     # Create symlink to our zshrc
-    ln -sf "$DOTFILES_DIR/dotfiles/zshrc" "$HOME/.zshrc"
+    ln -sf "$DOTFILES_DIR/dotfiles/zshrc" "$HOME/.zshrc_dotfiles"
+    echo -e "source $HOME/.zshrc_dotfiles" > "$HOME/.zshrc"
     echo -e "${GREEN}✓ Created symlink: ~/.zshrc -> $DOTFILES_DIR/dotfiles/zshrc${NC}"
 else
     echo -e "${YELLOW}Skipping zshrc setup.${NC}"

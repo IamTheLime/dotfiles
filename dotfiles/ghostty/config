@@ -2,15 +2,15 @@
 # For full options, see: https://github.com/mitchellh/ghostty
 
 # Font configuration
-font-family = "IosevkaTiago"
-font-size = 12
+font-family = "IosevkaTiago Nerd Font"
+#font-family = "Cozette" 
+font-size = 14
 
-
-# Window
-window-decoration = true
+theme = "Blue Berry Pie"
+background = "#16121A"
 
 # Terminal
-cursor-style = block
+cursor-style = "block"
 cursor-style-blink = false
 
 # Shell integration
@@ -28,3 +28,15 @@ window-vsync = true
 # Tmux-style split keybindings (Ctrl+b prefix)
 keybind = ctrl+b>v=new_split:right
 keybind = ctrl+b>h=new_split:down
+
+# Pane resizing with CapsLock (mapped to F20)
+keybind = ctrl+shift+h=resize_split:left,5
+keybind = ctrl+shift+l=resize_split:right,5
+keybind = ctrl+shift+k=resize_split:up,3
+keybind = ctrl+shift+j=resize_split:down,3
+
+# Fast split navigation
+keybind = ctrl+shift+left=goto_split:left
+keybind = ctrl+shift+right=goto_split:right
+keybind = ctrl+shift+up=goto_split:up
+keybind = ctrl+shift+down=goto_split:down

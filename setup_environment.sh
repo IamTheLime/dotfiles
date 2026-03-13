@@ -190,6 +190,28 @@ fi
 
 echo ""
 
+# Setup Zed
+if ask_yes_no "Do you want to setup Zed editor config?"; then
+    echo -e "${BLUE}Setting up Zed config...${NC}"
+    
+    # Backup existing zed config if it exists and is not a symlink
+    if [ -e "$HOME/.config/zed" ] && [ ! -L "$HOME/.config/zed" ]; then
+        echo -e "${YELLOW}Backing up existing ~/.config/zed to ~/.config/zed.backup${NC}"
+        mv "$HOME/.config/zed" "$HOME/.config/zed.backup"
+    fi
+    
+    # Remove existing symlink if it exists
+    [ -L "$HOME/.config/zed" ] && rm "$HOME/.config/zed"
+    
+    # Create symlink
+    ln -sf "$DOTFILES_DIR/dotfiles/zed" "$HOME/.config/zed"
+    echo -e "${GREEN}✓ Created symlink: ~/.config/zed -> $DOTFILES_DIR/dotfiles/zed${NC}"
+else
+    echo -e "${YELLOW}Skipping Zed config setup.${NC}"
+fi
+
+echo ""
+
 # Setup Hyprland (optional)
 if ask_yes_no "Do you want to setup Hyprland config?"; then
     echo -e "${BLUE}Setting up Hyprland config...${NC}"

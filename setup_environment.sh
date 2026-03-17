@@ -233,6 +233,43 @@ else
 fi
 
 echo ""
+
+# Setup Sioyek
+if ask_yes_no "Do you want to setup Sioyek config?"; then
+    echo -e "${BLUE}Setting up Sioyek config...${NC}"
+
+    SIOYEK_SRC="$DOTFILES_DIR/dotfiles/sioyek"
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        # macOS: ~/Library/Application Support/sioyek/
+        SIOYEK_DIR="$HOME/Library/Application Support/sioyek"
+        mkdir -p "$SIOYEK_DIR"
+        for cfg in prefs_user.config keys_user.config; do
+            target="$SIOYEK_DIR/$cfg"
+            if [ -f "$target" ] && [ ! -L "$target" ]; then
+                echo -e "${YELLOW}Backing up existing $target to $target.backup${NC}"
+                mv "$target" "$target.backup"
+            fi
+            [ -L "$target" ] && rm "$target"
+            ln -sf "$SIOYEK_SRC/$cfg" "$target"
+            echo -e "${GREEN}✓ Created symlink: $target -> $SIOYEK_SRC/$cfg${NC}"
+        done
+    else
+        # Linux: ~/.config/sioyek/
+        SIOYEK_DIR="$HOME/.config/sioyek"
+        if [ -e "$SIOYEK_DIR" ] && [ ! -L "$SIOYEK_DIR" ]; then
+            echo -e "${YELLOW}Backing up existing ~/.config/sioyek to ~/.config/sioyek.backup${NC}"
+            mv "$SIOYEK_DIR" "$SIOYEK_DIR.backup"
+        fi
+        [ -L "$SIOYEK_DIR" ] && rm "$SIOYEK_DIR"
+        ln -sf "$SIOYEK_SRC" "$SIOYEK_DIR"
+        echo -e "${GREEN}✓ Created symlink: ~/.config/sioyek -> $SIOYEK_SRC${NC}"
+    fi
+else
+    echo -e "${YELLOW}Skipping Sioyek config setup.${NC}"
+fi
+
+echo ""
 echo -e "${GREEN}======================================${NC}"
 echo -e "${GREEN}   Setup Complete!${NC}"
 echo -e "${GREEN}======================================${NC}"

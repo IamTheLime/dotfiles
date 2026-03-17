@@ -210,7 +210,7 @@ return {
                                         }
                                     },
                                     linting = {
-                                        debounceTime = 250
+                                        debounceTime = 500
                                     }
                                 }
                             },
@@ -227,10 +227,7 @@ return {
                             },
                             cmd = {
                                 "kotlin-language-server",
-                                "-J-Xmx4g",
-                                "-J-Xms1g",
-                                "-J-XX:+UseG1GC",
-                                "-J-XX:+UseStringDeduplication",
+                                "-Xmx8g",  -- Increase max heap (useful for large projects)
                                 "-J-Dkotlin.parallel.tasks.in.project=true",
                             }
                         })

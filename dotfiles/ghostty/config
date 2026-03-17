@@ -3,11 +3,11 @@
 
 # Font configuration
 font-family = "IosevkaTiago Nerd Font"
-#font-family = "Cozette" 
+#font-family = "Cozette"
 font-size = 14
 
 theme = "Blue Berry Pie"
-background = "#16121A"
+background = "#000000"
 
 # Terminal
 cursor-style = "block"

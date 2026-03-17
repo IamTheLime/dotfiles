@@ -12,7 +12,7 @@ return {
             converter = { 'utftex', 'latex2text' },
         },
         bullet = {
-            right_pad = 1,
+            right_pad = 0,
         }
     },
 }

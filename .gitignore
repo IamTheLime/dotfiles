@@ -1,4 +1,5 @@
 .DS_Store
+dotfiles/zed/prompts/
 tpm/
 packer_compiled.lua
 .config/

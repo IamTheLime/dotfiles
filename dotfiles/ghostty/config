@@ -26,6 +26,12 @@ clipboard-write = allow
 # Performance
 window-vsync = true
 
+# Quick terminal (quake-style)
+quick-terminal-position = top
+quick-terminal-screen = mouse
+quick-terminal-animation-duration = 0.2
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
+
 # Keybindings
 # Tmux-style split keybindings (Ctrl+b prefix)
 keybind = ctrl+b>v=new_split:right

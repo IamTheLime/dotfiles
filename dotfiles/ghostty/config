@@ -12,6 +12,8 @@ background = "#000000"
 # Terminal
 cursor-style = "block"
 cursor-style-blink = false
+split-divider-color = #1D0122
+
 
 # Shell integration
 shell-integration = zsh

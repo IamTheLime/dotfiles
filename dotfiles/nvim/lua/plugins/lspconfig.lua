@@ -136,36 +136,19 @@ return {
 
         local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
+        vim.fn.mkdir(vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"), "p")
+
         vim.lsp.config("kotlin_lsp", {
-            cmd = { "kotlin-lsp", "--stdio" },
+            cmd = {
+                "env",
+                "JAVA_TOOL_OPTIONS=-Xmx4g -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=50 -XX:+UseStringDeduplication",
+                "kotlin-lsp", "--stdio",
+                "--system-path", vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
+            },
             filetypes = { "kotlin" },
             capabilities = capabilities,
             init_options = {
-                storagePath = vim.fn.stdpath("data") .. "/kotlin_lsp",
-            },
-            settings = {
-                kotlin = {
-                    compiler = {
-                        jvm = {
-                            target = "default"
-                        }
-                    },
-                    indexing = {
-                        enabled = true,
-                    },
-                    externalSources = {
-                        useKlsScheme = true,
-                        autoConvertToKotlin = true
-                    },
-                    completion = {
-                        snippets = {
-                            enabled = true
-                        }
-                    },
-                    linting = {
-                        debounceTime = 250
-                    }
-                }
+                storageUri = "file://" .. vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
             },
             root_markers = {
                 "settings.gradle.kts",

@@ -1,5 +1,45 @@
+-- Shared fixed-bottom terminal pane for all DAP processes.
+-- Always opens at the bottom of the screen, reuses the same window on restart.
+local dap_term = { winid = nil, bufnr = nil, job_id = nil }
+local DAP_TERM_HEIGHT = 15
+
+local function get_or_create_dap_term_win()
+    local prev_win = vim.api.nvim_get_current_win()
+
+    if dap_term.winid and vim.api.nvim_win_is_valid(dap_term.winid) then
+        vim.api.nvim_set_current_win(dap_term.winid)
+        -- Clean up old buffer if present
+        if dap_term.bufnr and vim.api.nvim_buf_is_valid(dap_term.bufnr) then
+            if dap_term.job_id then
+                pcall(vim.fn.jobstop, dap_term.job_id)
+                dap_term.job_id = nil
+            end
+            vim.api.nvim_buf_delete(dap_term.bufnr, { force = true })
+        end
+    else
+        vim.cmd('botright ' .. DAP_TERM_HEIGHT .. 'split')
+        dap_term.winid = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_set_option(dap_term.winid, 'winfixheight', true)
+    end
+
+    return prev_win
+end
+
 local setup_dap = function()
     local dap = require("dap")
+
+    -- Route all DAP integrated terminals to the fixed bottom pane
+    dap.defaults.fallback.terminal_win_cmd = function()
+        local prev_win = get_or_create_dap_term_win()
+        -- DAP expects us to return the buffer number; it will run the process in it
+        vim.cmd('enew')
+        local bufnr = vim.api.nvim_get_current_buf()
+        dap_term.bufnr = bufnr
+        dap_term.job_id = nil -- DAP manages the job for integrated terminals
+        vim.api.nvim_set_current_win(prev_win)
+        return bufnr
+    end
+
     local pythonPath = function()
         local cwd = vim.fn.getcwd()
         if vim.fn.executable(cwd .. '/venv/bin/python') == 1 then
@@ -168,6 +208,29 @@ local setup_dap = function()
         return paths
     end
 
+    -- Spawns a gradle process in the shared DAP bottom terminal pane.
+    local function gradle_spawn(label, cmd, port)
+        -- Kill anything on the debug port from a previous run
+        vim.fn.system('lsof -ti :' .. port .. ' | xargs kill -9 2>/dev/null')
+
+        local prev_win = get_or_create_dap_term_win()
+        vim.cmd('terminal ' .. cmd)
+        dap_term.bufnr = vim.api.nvim_get_current_buf()
+        dap_term.job_id = vim.b.terminal_job_id
+        vim.api.nvim_set_current_win(prev_win)
+
+        vim.notify("Waiting for JVM on :" .. port .. "...", vim.log.levels.INFO)
+        for _ = 1, 120 do
+            local result = vim.fn.system('lsof -ti :' .. port .. ' 2>/dev/null')
+            if result ~= '' then
+                vim.notify("JVM ready on :" .. port .. ", attaching.", vim.log.levels.INFO)
+                return
+            end
+            vim.fn.system('sleep 0.5')
+        end
+        vim.notify("Timed out waiting for JVM on :" .. port, vim.log.levels.WARN)
+    end
+
     dap.configurations.kotlin = {
         -- Configuration 1: Launch with auto-build and classpath detection
         {
@@ -208,18 +271,42 @@ local setup_dap = function()
             end,
             classPaths = build_and_get_classpath,
         },
+
+        -- Configuration 4: Spring Boot bootRun (starts process, waits, attaches)
+        {
+            type = 'kotlin',
+            request = 'attach',
+            name = 'Kotlin: bootRun',
+            projectRoot = find_gradle_root,
+            hostName = 'localhost',
+            port = function()
+                local port = vim.g.kotlin_debug_port or 5005
+                gradle_spawn('bootRun', './gradlew bootRun --debug-jvm', port)
+                return port
+            end,
+            timeout = 30000,
+        },
+
+        -- Configuration 5: Gradle test (starts test, waits, attaches)
+        {
+            type = 'kotlin',
+            request = 'attach',
+            name = 'Kotlin: Test',
+            projectRoot = find_gradle_root,
+            hostName = 'localhost',
+            port = function()
+                local port = vim.g.kotlin_debug_port or 5005
+                local filter = vim.fn.input('Test filter (empty for all): ')
+                local cmd = './gradlew test --debug-jvm'
+                if filter ~= '' then
+                    cmd = cmd .. ' --tests "' .. filter .. '"'
+                end
+                gradle_spawn('test', cmd, port)
+                return port
+            end,
+            timeout = 30000,
+        },
     }
-
-    -- Add keybinding to launch Gradle with debug in a terminal
-    vim.keymap.set('n', '<leader>kg', function()
-        -- Open a terminal and run gradlew with debug
-        vim.cmd('vsplit')
-        vim.cmd('terminal')
-        vim.api.nvim_chan_send(vim.b.terminal_job_id, './gradlew run --debug-jvm\n')
-        vim.cmd('wincmd p') -- Return to previous window
-
-        vim.notify("Gradle running with debug enabled. Press <leader>dd then <F5> to attach.", vim.log.levels.INFO)
-    end, { desc = 'Run Gradle with Debug' })
 
     -- Keymaps
     vim.keymap.set('n', '<F5>', function() dap.continue() end)

@@ -104,7 +104,55 @@ return {
                 end, opts)
                 vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
                 vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
-                vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts)
+                vim.keymap.set('n', 'go', function()
+                    local client = vim.lsp.get_clients({ bufnr = event.buf })[1]
+                    local params = vim.lsp.util.make_position_params(0, client and client.offset_encoding)
+                    vim.lsp.buf_request(event.buf, 'textDocument/typeDefinition', params, function(err, result, ctx)
+                        if err or not result then return end
+                        local locs = vim.islist(result) and result or { result }
+                        if #locs == 0 then return end
+                        local loc = locs[1]
+                        local uri = loc.targetUri or loc.uri or ""
+                        local range = loc.targetSelectionRange or loc.targetRange or loc.range or {}
+                        local row = (range.start and range.start.line or 0) + 1
+                        local col = range.start and range.start.character or 0
+
+                        if uri:match("^jar:") then
+                            local jar_path, inner_path = uri:match("^jar://(/[^!]+)!/(.+)$")
+                            if jar_path and inner_path then
+                                vim.cmd("edit zipfile://" .. jar_path .. "::" .. inner_path)
+                                pcall(vim.api.nvim_win_set_cursor, 0, { row, col })
+                            end
+                        elseif uri:match("^kls:") then
+                            local clients = vim.lsp.get_clients({ name = "kotlin_lsp" })
+                            if #clients == 0 then return end
+                            clients[1]:request("kotlin/jarClassContents", { uri = uri }, function(_, req_result)
+                                vim.schedule(function()
+                                    if not (req_result and req_result.contents) then return end
+                                    local lines = vim.split(req_result.contents, "\n")
+                                    local bufnr = vim.fn.bufnr(uri)
+                                    if bufnr == -1 then
+                                        bufnr = vim.api.nvim_create_buf(true, false)
+                                        vim.bo[bufnr].buftype = "nofile"
+                                        vim.bo[bufnr].swapfile = false
+                                        vim.api.nvim_buf_set_name(bufnr, uri)
+                                    end
+                                    vim.bo[bufnr].modifiable = true
+                                    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+                                    vim.bo[bufnr].filetype = "kotlin"
+                                    vim.bo[bufnr].modifiable = false
+                                    vim.api.nvim_set_current_buf(bufnr)
+                                    pcall(vim.api.nvim_win_set_cursor, 0, { math.min(row, #lines), col })
+                                end)
+                            end, ctx.bufnr)
+                        else
+                            local client = vim.lsp.get_client_by_id(ctx.client_id)
+                            if client then
+                                vim.lsp.util.show_document(loc, client.offset_encoding, { reuse_win = true, focus = true })
+                            end
+                        end
+                    end)
+                end, opts)
                 vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
                 vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
                 vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, opts)
@@ -156,6 +204,22 @@ return {
                 "build.gradle.kts",
                 "build.gradle",
                 "pom.xml",
+            },
+            handlers = {
+                ["textDocument/completion"] = function(err, result, ctx, config)
+                    -- Strip textEdit from completion items to work around
+                    -- kotlin-lsp off-by-one cursor placement bug
+                    if result and result.items then
+                        for _, item in ipairs(result.items) do
+                            item.textEdit = nil
+                        end
+                    elseif result and not result.items then
+                        for _, item in ipairs(result) do
+                            item.textEdit = nil
+                        end
+                    end
+                    return vim.lsp.handlers["textDocument/completion"](err, result, ctx, config)
+                end,
             },
         })
 

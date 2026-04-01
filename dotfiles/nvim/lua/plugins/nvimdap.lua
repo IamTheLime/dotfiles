@@ -209,6 +209,8 @@ local setup_dap = function()
     end
 
     -- Spawns a gradle process in the shared DAP bottom terminal pane.
+    -- Port polling is async via libuv timer so the editor stays responsive.
+    -- Once the port is up, it auto-attaches via dap.run().
     local function gradle_spawn(label, cmd, port)
         -- Kill anything on the debug port from a previous run
         vim.fn.system('lsof -ti :' .. port .. ' | xargs kill -9 2>/dev/null')
@@ -219,16 +221,40 @@ local setup_dap = function()
         dap_term.job_id = vim.b.terminal_job_id
         vim.api.nvim_set_current_win(prev_win)
 
-        vim.notify("Waiting for JVM on :" .. port .. "...", vim.log.levels.INFO)
-        for _ = 1, 120 do
-            local result = vim.fn.system('lsof -ti :' .. port .. ' 2>/dev/null')
-            if result ~= '' then
-                vim.notify("JVM ready on :" .. port .. ", attaching.", vim.log.levels.INFO)
-                return
-            end
-            vim.fn.system('sleep 0.5')
+        vim.notify("Waiting for JVM on :" .. port .. " (async)...", vim.log.levels.INFO)
+    end
+
+    local function poll_and_attach(port, attempts)
+        attempts = attempts or 0
+        if attempts >= 120 then
+            vim.notify("Timed out waiting for JVM on :" .. port, vim.log.levels.WARN)
+            return
         end
-        vim.notify("Timed out waiting for JVM on :" .. port, vim.log.levels.WARN)
+        vim.fn.jobstart('lsof -ti :' .. port .. ' 2>/dev/null', {
+            stdout_buffered = true,
+            on_stdout = function(_, data)
+                local output = table.concat(data, '')
+                if output ~= '' then
+                    vim.schedule(function()
+                        vim.notify("JVM ready on :" .. port .. ", attaching.", vim.log.levels.INFO)
+                        dap.run({
+                            type = 'kotlin',
+                            request = 'attach',
+                            name = 'auto-attach',
+                            projectRoot = find_gradle_root(),
+                            hostName = 'localhost',
+                            port = port,
+                            timeout = 30000,
+                        })
+                    end)
+                else
+                    -- Not ready yet, try again in 500ms
+                    vim.defer_fn(function()
+                        poll_and_attach(port, attempts + 1)
+                    end, 500)
+                end
+            end,
+        })
     end
 
     dap.configurations.kotlin = {
@@ -272,29 +298,23 @@ local setup_dap = function()
             classPaths = build_and_get_classpath,
         },
 
-        -- Configuration 4: Spring Boot bootRun (starts process, waits, attaches)
+    }
+
+    -- Async spawn-and-attach configs. These appear in the F5 picker alongside
+    -- the standard configs above, but they spawn the process and poll
+    -- asynchronously instead of blocking the editor.
+    local async_kotlin_configs = {
         {
-            type = 'kotlin',
-            request = 'attach',
             name = 'Kotlin: bootRun',
-            projectRoot = find_gradle_root,
-            hostName = 'localhost',
-            port = function()
+            run = function()
                 local port = vim.g.kotlin_debug_port or 5005
                 gradle_spawn('bootRun', './gradlew bootRun --debug-jvm', port)
-                return port
+                poll_and_attach(port)
             end,
-            timeout = 30000,
         },
-
-        -- Configuration 5: Gradle test (starts test, waits, attaches)
         {
-            type = 'kotlin',
-            request = 'attach',
             name = 'Kotlin: Test',
-            projectRoot = find_gradle_root,
-            hostName = 'localhost',
-            port = function()
+            run = function()
                 local port = vim.g.kotlin_debug_port or 5005
                 local filter = vim.fn.input('Test filter (empty for all): ')
                 local cmd = './gradlew test --debug-jvm'
@@ -302,11 +322,53 @@ local setup_dap = function()
                     cmd = cmd .. ' --tests "' .. filter .. '"'
                 end
                 gradle_spawn('test', cmd, port)
-                return port
+                poll_and_attach(port)
             end,
-            timeout = 30000,
         },
     }
+
+    -- Override dap.continue() to inject async configs into the picker
+    local original_continue = dap.continue
+    dap.continue = function(opts)
+        -- If a session is active, just continue normally
+        if dap.session() then
+            return original_continue(opts)
+        end
+
+        -- Build combined list: standard kotlin configs + async configs
+        local configs = dap.configurations.kotlin or {}
+        local items = {}
+        for _, cfg in ipairs(configs) do
+            table.insert(items, { name = cfg.name, type = 'config', config = cfg })
+        end
+        for _, acfg in ipairs(async_kotlin_configs) do
+            table.insert(items, { name = acfg.name, type = 'async', run = acfg.run })
+        end
+
+        -- Check if we have configs for the current filetype too
+        local ft = vim.bo.filetype
+        if ft ~= 'kotlin' and dap.configurations[ft] then
+            for _, cfg in ipairs(dap.configurations[ft]) do
+                table.insert(items, { name = cfg.name, type = 'config', config = cfg })
+            end
+        end
+
+        if #items == 0 then
+            return original_continue(opts)
+        end
+
+        vim.ui.select(items, {
+            prompt = 'Debug configuration:',
+            format_item = function(item) return item.name end,
+        }, function(choice)
+            if not choice then return end
+            if choice.type == 'async' then
+                choice.run()
+            else
+                dap.run(choice.config)
+            end
+        end)
+    end
 
     -- Keymaps
     vim.keymap.set('n', '<F5>', function() dap.continue() end)

@@ -97,7 +97,8 @@ return {
                         else
                             local client = vim.lsp.get_client_by_id(ctx.client_id)
                             if client then
-                                vim.lsp.util.show_document(loc, client.offset_encoding, { reuse_win = true, focus = true })
+                                vim.lsp.util.show_document(loc, client.offset_encoding,
+                                    { reuse_win = true, focus = true })
                             end
                         end
                     end)
@@ -148,7 +149,8 @@ return {
                         else
                             local client = vim.lsp.get_client_by_id(ctx.client_id)
                             if client then
-                                vim.lsp.util.show_document(loc, client.offset_encoding, { reuse_win = true, focus = true })
+                                vim.lsp.util.show_document(loc, client.offset_encoding,
+                                    { reuse_win = true, focus = true })
                             end
                         end
                     end)
@@ -196,7 +198,8 @@ return {
             filetypes = { "kotlin" },
             capabilities = capabilities,
             init_options = {
-                storageUri = "file://" .. vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
+                storageUri = "file://" ..
+                    vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
             },
             root_markers = {
                 "settings.gradle.kts",
@@ -236,11 +239,17 @@ return {
                 vim.keymap.set("n", "<CR>", function()
                     local items = vim.fn.getqflist()
                     local item = items[vim.fn.line(".")]
-                    if not item then vim.cmd("normal! \r") return end
+                    if not item then
+                        vim.cmd("normal! \r")
+                        return
+                    end
                     local fname = item.filename
                         or (item.bufnr ~= 0 and vim.fn.bufname(item.bufnr) or "")
                     local jar_path, inner_path = fname:match("^jar://(/[^!]+)!/(.+)$")
-                    if not jar_path then vim.cmd("normal! \r") return end
+                    if not jar_path then
+                        vim.cmd("normal! \r")
+                        return
+                    end
                     vim.cmd("cclose")
                     vim.cmd("edit zipfile://" .. jar_path .. "::" .. inner_path)
                     if item.lnum and item.lnum > 0 then
@@ -464,7 +473,6 @@ return {
                     client.config.settings.python = client.config.settings.python or {}
                     client.config.settings.python.analysis = client.config.settings.python.analysis or {}
                     client.config.settings.python.analysis.diagnosticMode = new_mode
-
                     client.notify("workspace/didChangeConfiguration", {
                         settings = client.config.settings,
                     })

@@ -21,6 +21,11 @@ return {
       ";f", -- try it if you didn't it is a banger keybinding for a picker
       function() require('fff').find_files() end,
       desc = 'FFFind files',
+    },
+    {
+      ";r",
+      function() require('fff').live_grep() end,
+      desc = 'FFF grep in files',
     }
   }
 }

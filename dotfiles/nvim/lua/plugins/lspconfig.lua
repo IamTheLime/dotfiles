@@ -1,23 +1,10 @@
 return {
     -- LSP Support
-    'neovim/nvim-lspconfig',                     -- Required
+    'neovim/nvim-lspconfig',
     dependencies = {
-        { 'williamboman/mason.nvim' },           -- Optional
-        { 'williamboman/mason-lspconfig.nvim' }, -- Optional
-
-        -- Autocompletion
-        { 'hrsh7th/nvim-cmp' },         -- Required
-        { 'hrsh7th/cmp-nvim-lsp' },     -- Required
-        { 'hrsh7th/cmp-buffer' },       -- Optional
-        { 'hrsh7th/cmp-path' },         -- Optional
-        { 'saadparwaiz1/cmp_luasnip' }, -- Optional
-        { 'hrsh7th/cmp-nvim-lua' },     -- Optional
-
-        -- Snippets
-        { 'L3MON4D3/LuaSnip' },             -- Required
-
-        { 'rafamadriz/friendly-snippets' }, -- Optional
-        { 'onsails/lspkind-nvim' },         -- vscode-like pictograms
+        { 'williamboman/mason.nvim' },
+        { 'williamboman/mason-lspconfig.nvim' },
+        { 'saghen/blink.cmp' },
     },
     config = function()
         vim.opt.signcolumn = 'yes'
@@ -38,21 +25,21 @@ return {
                 },
             },
         })
-        local lsp_config = require("lspconfig")
-        local lsp_defconf = lsp_config.util.default_config
-        local lspkind = require("lspkind")
-
-        lsp_defconf.capabilities = vim.tbl_deep_extend(
-            "force",
-            lsp_defconf.capabilities,
-            require("cmp_nvim_lsp").default_capabilities()
-        )
+        -- Apply blink.cmp capabilities to all LSP servers via wildcard config
+        vim.lsp.config("*", {
+            capabilities = require("blink.cmp").get_lsp_capabilities(),
+        })
 
         vim.api.nvim_create_autocmd('LspAttach', {
             desc = "LSP actions",
             callback = function(event)
                 local opts = { buffer = event.buf }
-                vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+                vim.keymap.set('n', 'K', function()
+                    vim.lsp.buf.hover({ border = "single", title = " Hover ", title_pos = "center" })
+                end, opts)
+                vim.keymap.set({ 'n', 'i' }, '<C-s>', function()
+                    vim.lsp.buf.signature_help({ border = "single", title = " Signature Help ", title_pos = "center" })
+                end, opts)
                 vim.keymap.set('n', 'gd', function()
                     local client = vim.lsp.get_clients({ bufnr = event.buf })[1]
                     local params = vim.lsp.util.make_position_params(0, client and client.offset_encoding)
@@ -156,14 +143,16 @@ return {
                     end)
                 end, opts)
                 vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
-                vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
+                vim.keymap.set('n', 'gs', function()
+                    vim.lsp.buf.signature_help({ border = "single", title = " Signature Help ", title_pos = "center" })
+                end, opts)
                 vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, opts)
                 vim.keymap.set({ 'n', 'x' }, '<F3>', vim.lsp.buf.format, opts)
                 vim.keymap.set('n', '<F4>', vim.lsp.buf.code_action, opts)
 
                 -- Open diagnostics
                 vim.keymap.set({ 'n' }, 'gl', function()
-                    vim.diagnostic.open_float()
+                    vim.diagnostic.open_float({ border = "single", header = "Diagnostics" })
                 end)
 
                 -- Format
@@ -184,22 +173,36 @@ return {
             end,
         })
 
-        local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
         vim.fn.mkdir(vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"), "p")
+
+        -- =====================================================================
+        -- Kotlin LSP Configuration
+        -- =====================================================================
+        -- kotlin-lsp (JetBrains) has known issues as of 2026-04:
+        --
+        -- 1. textEdit off-by-one: completion textEdits place cursor at wrong
+        --    offset. Fixed in blink-cmp.lua transform_items by stripping
+        --    textEdit and forcing plain label insertion.
+        --
+        -- 2. jar:/kls: URI navigation: Neovim can't natively open jar: or
+        --    kls: URIs that kotlin-lsp returns for go-to-definition into
+        --    compiled classes. Handled via custom gd/go keymaps, quickfix
+        --    <CR> override, and BufReadCmd for kls: buffers below.
+        -- =====================================================================
+        local kotlin_lsp_storage = vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+
+        -- Native LSP server configurations (Neovim 0.12+)
 
         vim.lsp.config("kotlin_lsp", {
             cmd = {
                 "env",
                 "JAVA_TOOL_OPTIONS=-Xmx4g -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=50 -XX:+UseStringDeduplication",
                 "kotlin-lsp", "--stdio",
-                "--system-path", vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
+                "--system-path", kotlin_lsp_storage,
             },
             filetypes = { "kotlin" },
-            capabilities = capabilities,
             init_options = {
-                storageUri = "file://" ..
-                    vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t"),
+                storageUri = "file://" .. kotlin_lsp_storage,
             },
             root_markers = {
                 "settings.gradle.kts",
@@ -208,26 +211,75 @@ return {
                 "build.gradle",
                 "pom.xml",
             },
-            handlers = {
-                ["textDocument/completion"] = function(err, result, ctx, config)
-                    -- Strip textEdit from completion items to work around
-                    -- kotlin-lsp off-by-one cursor placement bug
-                    if result and result.items then
-                        for _, item in ipairs(result.items) do
-                            item.textEdit = nil
-                        end
-                    elseif result and not result.items then
-                        for _, item in ipairs(result) do
-                            item.textEdit = nil
-                        end
-                    end
-                    return vim.lsp.handlers["textDocument/completion"](err, result, ctx, config)
-                end,
+        })
+
+        vim.lsp.config("yamlls", {
+            on_attach = function(client, bufnr)
+                client.server_capabilities.documentFormattingProvider = true
+            end,
+            settings = {
+                yaml = {
+                    format = { enable = true },
+                    schemaStore = { enable = true },
+                },
             },
         })
 
-        -- vim.lsp.config only registers config; enable is needed to auto-start on filetype
-        vim.lsp.enable("kotlin_lsp")
+        vim.lsp.config("pyright", {
+            settings = {
+                python = {
+                    analysis = {
+                        extraPaths = { ".venv" },
+                        autoSearchPaths = false,
+                        useLibraryCodeForTypes = true,
+                        diagnosticMode = "openFilesOnly",
+                    },
+                },
+            },
+            single_file_support = true,
+            flags = {
+                debounce_text_changes = 250,
+            },
+        })
+
+        vim.lsp.config("lua_ls", {
+            settings = {
+                Lua = {
+                    diagnostics = {
+                        globals = { "vim" },
+                    },
+                },
+            },
+        })
+
+        vim.lsp.config("bqls", {
+            filetypes = { "sql", "mysql" },
+            settings = {
+                project_id = "urbanjungle-data",
+                location = "EU",
+            },
+        })
+
+        vim.lsp.config("angularls", {
+            filetypes = { "angular.html" },
+        })
+
+        vim.lsp.config("tailwindcss", {
+            filetypes = { "angular.html" },
+        })
+
+        vim.lsp.config("zls", {
+            settings = {
+                zls = {
+                    enable_build_on_save = true,
+                },
+            },
+        })
+
+        vim.lsp.enable({
+            "kotlin_lsp", "yamlls", "pyright", "lua_ls",
+            "bqls", "angularls", "tailwindcss", "zls",
+        })
 
         -- Handle jar: entries opened from the quickfix list (gr references, etc.)
         -- vim.lsp.buf.definition's inline handler bypasses vim.lsp.handlers in nvim 0.11,
@@ -289,178 +341,16 @@ return {
             end,
         })
 
-        require("mason-lspconfig").setup(
-            {
-                ensure_installed = {},
-                automatic_enable = true,
-                handlers = {
-
-                    ["yamlls"] = function()
-                        require("lspconfig").yamlls.setup({
-                            on_attach = function(client, bufnr)
-                                client.server_capabilities.documentFormattingProvider = true
-                            end,
-                            capabilities = capabilities,
-                            settings = {
-                                yaml = {
-                                    format = {
-                                        enable = true,
-                                    },
-                                    schemaStore = {
-                                        enable = true,
-                                    },
-                                },
-                            },
-                        })
-                    end,
-
-                    ["pyright"] = function()
-                        require("lspconfig").pyright.setup({
-                            on_attach = function(client, bufnr)
-                                print("PYTHON")
-                            end,
-                            capabilities = capabilities,
-                            settings = {
-                                python = {
-                                    analysis = {
-                                        extraPaths = { ".venv" },
-                                        autoSearchPaths = false,
-                                        useLibraryCodeForTypes = true,
-                                        diagnosticMode = "openFilesOnly",
-                                    },
-                                },
-                            },
-                            single_file_support = true,
-                            flags = {
-                                debounce_text_changes = 250,
-                            },
-                        })
-                    end,
-
-                    ["lua_ls"] = function()
-                        require("lspconfig").lua_ls.setup({
-                            capabilities = capabilities,
-                            settings = {
-                                Lua = {
-                                    diagnostics = {
-                                        globals = { "vim" },
-                                    },
-                                },
-                            },
-                        })
-                    end,
-                    ["bqls"] = function()
-                        require("lspconfig").bqls.setup({
-                            capabilities = capabilities,
-                            filetypes = { "sql", "mysql" },
-                            settings = {
-                                project_id = "urbanjungle-data",
-                                location = "EU",
-                            },
-                        })
-                    end,
-
-                    ["angularls"] = function()
-                        require("lspconfig").angularls.setup({
-                            capabilities = capabilities,
-                            filetypes = { "angular.html" },
-                        })
-                    end,
-
-                    ["tailwindcss"] = function()
-                        require("lspconfig").tailwindcss.setup({
-                            capabilities = capabilities,
-                            filetypes = { "angular.html" },
-                        })
-                    end,
-
-                    ["zls"] = function()
-                        require("lspconfig").zls.setup({
-                            capabilities = capabilities,
-                            settings = {
-                                zls = {
-                                    enable_build_on_save = true,
-                                },
-                            },
-                        })
-                    end,
-                    ["kotlin_lsp"] = function() end, -- configured via vim.lsp.config below
-                },
-            })
-
-        local status, cmp = pcall(require, "cmp")
-        if (not status) then
-            return
-        end
-
-
-        require('luasnip.loaders.from_snipmate').lazy_load()
-        require('luasnip.loaders.from_vscode').lazy_load()
-        cmp.setup({
-            sources = {
-                { name = 'nvim_lsp' },
-                { name = 'path' },
-                { name = 'luasnip' },
-            },
-            snippet = {
-                expand = function(args)
-                    vim.snippet.expand(args.body)
-                end,
-            },
-            window = {
-                completion = cmp.config.window.bordered({
-                    winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None",
-                    col_offset = -3,
-                    side_padding = 1,
-                    scrollbar = true,
-                }),
-                documentation = cmp.config.window.bordered({
-                    winhighlight = "Normal:CmpDoc,FloatBorder:CmpDocBorder",
-                    max_width = 80,
-                    max_height = 20,
-                }),
-            },
-            formatting = {
-                fields = { 'kind', 'abbr', 'menu' }, -- Reordered for better readability
-                format = lspkind.cmp_format({
-                    mode = 'symbol_text',
-                    maxwidth = 50, -- Prevent text from being too wide
-                    ellipsis_char = '...',
-                    before = function(entry, vim_item)
-                        -- Add wrapping by truncating long text
-                        vim_item.abbr = string.sub(vim_item.abbr, 1, 50)
-                        return vim_item
-                    end
-                }),
-            },
-            mapping = cmp.mapping.preset.insert({
-                ['<CR>'] = cmp.mapping.confirm({ select = false }),
-                ['<C-Space>'] = cmp.mapping.complete(),
-                ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-                ['<C-u>'] = cmp.mapping.scroll_docs(4),
-            })
+        require("mason-lspconfig").setup({
+            automatic_enable = false,
         })
-
-        vim.api.nvim_create_autocmd("FileType", {
-            pattern = { "sql", "mysql", "plsql" },
-            callback = function()
-                require("cmp").setup.buffer({
-                    sources = {
-                        { name = 'nvim_lsp' },              -- Add this line to enable BQLS!
-                        { name = 'vim-dadbod-completion' }, -- Keep this if you use vim-dadbod
-                        { name = 'luasnip' },               -- Optional: keep snippets working
-                    }
-                })
-            end,
-        })
-
 
         local default_pyright_mode = "openFilesOnly"
         local function toggle_pyright_workspace_mode()
             local bufnr = vim.api.nvim_get_current_buf()
             for _, client in pairs(vim.lsp.get_clients({ bufnr = bufnr })) do
                 if client.name == "pyright" then
-                    curr_mode = client.config.settings.python.analysis.diagnosticMode
+                    local curr_mode = client.config.settings.python.analysis.diagnosticMode
 
                     local new_mode = default_pyright_mode
                     if curr_mode == default_pyright_mode then
@@ -484,52 +374,8 @@ return {
 
         vim.keymap.set("n", "<leader>wm", function() toggle_pyright_workspace_mode() end)
 
-        -- Ensures that the treesitter tockens priority is higher than then
-        -- lsp priority otherwise it will generate this jarring color changing effectV
+        -- Ensures that the treesitter tokens priority is higher than the
+        -- lsp priority otherwise it will generate this jarring color changing effect
         vim.highlight.priorities.semantic_tokens = 95
-
-        lspkind.init({
-            -- enables text annotations
-            --
-            -- default: true
-            mode = 'text_symbol',
-
-            -- default symbol map
-            -- can be either 'default' (requires nerd-fonts font) or
-            -- 'codicons' for codicon preset (requires vscode-codicons font)
-            --
-            -- default: 'default'
-            preset = 'codicons',
-            -- override preset symbols
-            --
-            -- default: {}
-            symbol_map = {
-                Text = "T",
-                Method = " ",
-                Function = " ",
-                Constructor = " ",
-                Field = "ﰠ ",
-                Variable = " ",
-                Class = "ﴯ ",
-                Interface = " ",
-                Module = " ",
-                Property = "ﰠ ",
-                Unit = "塞 ",
-                Value = " ",
-                Enum = " ",
-                Keyword = " ",
-                Snippet = " ",
-                Color = " ",
-                File = " ",
-                Reference = " ",
-                Folder = " ",
-                EnumMember = " ",
-                Constant = " ",
-                Struct = "פּ ",
-                Event = " ",
-                Operator = " ",
-                TypeParameter = " "
-            },
-        })
     end
 }

@@ -342,7 +342,7 @@ return {
         })
 
         require("mason-lspconfig").setup({
-            automatic_enable = false,
+            automatic_enable = true,
         })
 
         local default_pyright_mode = "openFilesOnly"

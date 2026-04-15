@@ -143,6 +143,26 @@ gor() {
     cd $(git rev-parse --show-toplevel)
 }
 
+newworktree() {
+  local repo branch wt_name main_dir
+  repo=$(ls -1 "$REPOS_DIR" | fzf --prompt="Repo> " \
+    --preview 'bat --color=always $REPOS_DIR/{}/main/README.md 2>/dev/null || echo "No README found in {}/main"') || return
+  [[ -z "$repo" ]] && return 1
+
+  echo "Selected repo: $repo"
+
+  read "branch?Branch name: "
+  [[ -z "$branch" ]] && { echo "Branch name required"; return 1; }
+
+  read "wt_name?Worktree directory name: "
+  [[ -z "$wt_name" ]] && { echo "Worktree name required"; return 1; }
+
+  main_dir="${REPOS_DIR}/${repo}/main"
+  [[ -d "$main_dir" ]] || { echo "No main/ in $repo"; return 1; }
+
+  git -C "$main_dir" worktree add "../${wt_name}" -b "$branch" && cd "${REPOS_DIR}/${repo}/${wt_name}"
+}
+
 # Aliases
 
 alias more='bat'

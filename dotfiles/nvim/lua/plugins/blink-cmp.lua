@@ -77,6 +77,7 @@ return {
                             [1]  = -6, -- Text
                         }
                         local is_kotlin = vim.bo[ctx.bufnr].filetype == "kotlin"
+                            and require("lima_the_lime.kotlin_lsp").workarounds_enabled()
                         for _, item in ipairs(items) do
                             local boost = kind_scores[item.kind] or 0
                             -- Kwargs: pyright labels them as "param="

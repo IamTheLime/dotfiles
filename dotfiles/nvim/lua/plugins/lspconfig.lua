@@ -223,16 +223,16 @@ return {
         --- Handle a Location / LocationLink response. File URIs go through
         --- vim.lsp.util.show_document; jar:/jrt: URIs route into
         --- open_kotlin_library_uri instead. Empty responses and errors are
-        --- surfaced to the user.
+        --- surfaced to the user, prefixed with the responding server's name.
         handle_location_result = function(err, result, ctx)
+            local client = vim.lsp.get_client_by_id(ctx.client_id)
+            local tag = (client and client.name or "lsp") .. ": " .. ctx.method
             if err then
-                vim.notify("kotlin: " .. ctx.method .. " error: " .. vim.inspect(err),
-                    vim.log.levels.WARN)
+                vim.notify(tag .. " error: " .. vim.inspect(err), vim.log.levels.WARN)
                 return
             end
             if not result or (vim.islist(result) and #result == 0) then
-                vim.notify("kotlin: " .. ctx.method .. " returned no result",
-                    vim.log.levels.INFO)
+                vim.notify(tag .. " returned no result", vim.log.levels.INFO)
                 return
             end
             local locs = vim.islist(result) and result or { result }
@@ -245,7 +245,7 @@ return {
             if uri:match("^jar:") or uri:match("^jrt:") then
                 open_kotlin_library_uri(uri, row, col)
             elseif uri == "" then
-                vim.notify("kotlin: response has no URI: " .. vim.inspect(loc),
+                vim.notify(tag .. " response has no URI: " .. vim.inspect(loc),
                     vim.log.levels.WARN)
             else
                 local client = vim.lsp.get_client_by_id(ctx.client_id)
@@ -257,14 +257,29 @@ return {
         end
 
         --- Send a definition / typeDefinition request for `buf`, handling
-        --- both project and library buffers. If the response is empty and
-        --- we're in a library buffer, fall back to grepping the gradle
-        --- cache for a file named after the symbol under cursor (see
-        --- jar_symbol_fallback).
+        --- both project and library buffers. Only JVM buffers (kotlin/java)
+        --- and kotlin virtual library buffers use this custom path — every
+        --- other filetype defers to `vim.lsp.buf.*`, which dispatches to
+        --- clients that actually advertise the method. This avoids sending
+        --- definition requests to servers like eslint-lsp that respond with
+        --- JSON-RPC -32601 ("Unhandled method") and then surface via
+        --- handle_location_result as confusing errors.
         goto_location = function(method, buf)
             local is_virtual = vim.b[buf].kotlin_virtual_uri ~= nil
+            local ft = vim.bo[buf].filetype
+            local is_jvm = ft == "kotlin" or ft == "java"
+
+            if not (is_virtual or is_jvm) then
+                if method == "textDocument/typeDefinition" then
+                    vim.lsp.buf.type_definition({ reuse_win = true })
+                else
+                    vim.lsp.buf.definition({ reuse_win = true })
+                end
+                return
+            end
+
             local client = is_virtual and get_kotlin_client()
-                or vim.lsp.get_clients({ bufnr = buf })[1]
+                or vim.lsp.get_clients({ bufnr = buf, method = method })[1]
             if not client then return end
 
             local cword = vim.fn.expand("<cword>")
@@ -449,6 +464,10 @@ return {
             desc = "LSP actions",
             callback = function(event)
                 local opts = { buffer = event.buf }
+                local client = vim.lsp.get_client_by_id(event.data.client_id)
+                if client and client:supports_method('textDocument/inlayHint') then
+                    vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
+                end
                 vim.keymap.set('n', 'K', function()
                     vim.lsp.buf.hover({ border = "single", title = " Hover ", title_pos = "center" })
                 end, opts)
@@ -484,6 +503,13 @@ return {
                 vim.keymap.set('n', 'gtr', '<cmd>Telescope lsp_references<cr>', { buffer = false })
             end
         })
+
+        vim.api.nvim_create_user_command("InlayhintsToggle", function()
+            local bufnr = vim.api.nvim_get_current_buf()
+            vim.lsp.inlay_hint.enable(
+                not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }),
+                { bufnr = bufnr })
+        end, { desc = "Toggle LSP inlay hints in the current buffer" })
 
         require('mason').setup({})
 

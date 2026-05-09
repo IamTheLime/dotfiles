@@ -1,0 +1,57 @@
+" ~/.ideavimrc - IdeaVim config for IntelliJ IDEA
+
+" Note: no leader is set — Space is mapped to cycle panes (matches nvim config).
+" If a future mapping needs <leader>, pick a different key (e.g. ',') first.
+
+" --- Telescope-like pickers ---
+" ;f - find files across project
+nmap ;f <Action>(GotoFile)
+" ;r - grep across project
+nmap ;r <Action>(FindInPath)
+" ;t - workspace symbols
+nmap ;t <Action>(GotoSymbol)
+" ;; - recent files (closest analogue to telescope resume)
+nmap ;; <Action>(RecentFiles)
+" ;q - problems / quickfix-ish
+nmap ;q <Action>(ActivateProblemsViewToolWindow)
+" ;c - command palette (Find Action)
+nmap ;c <Action>(GotoAction)
+" ;b - branches popup (entry point for worktree create/switch/remove)
+nmap ;b <Action>(Git.Branches)
+" ;w - cycle to next IDE window (each worktree = one window)
+nmap ;w <Action>(NextProjectWindow)
+
+" --- Splits (matching your nvim sv/sh) ---
+nmap sv <Action>(SplitVertically)
+nmap sh <Action>(SplitHorizontally)
+
+" --- LSP-style navigation (matches nvim lspconfig keymaps) ---
+nmap gd <Action>(GotoDeclaration)
+nmap gD <Action>(GotoTypeDeclaration)
+nmap gi <Action>(GotoImplementation)
+nmap gr <Action>(FindUsages)
+nmap go <Action>(GotoTypeDeclaration)
+nmap K  <Action>(QuickJavaDoc)
+
+" Cycle to next pane with Space (matches nvim config)
+nnoremap <Space> <C-w>w
+
+" Move between splits with Ctrl-h/j/k/l
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" --- Quality of life ---
+set number
+set relativenumber
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+set scrolloff=8
+set clipboard+=unnamed
+set clipboard+=ideaput
+
+" Keep IdeaVim and IDE in sync for some commands
+sethandler <C-c> a:ide

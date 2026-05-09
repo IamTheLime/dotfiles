@@ -269,6 +269,26 @@ else
     echo -e "${YELLOW}Skipping Sioyek config setup.${NC}"
 fi
 
+# Setup IdeaVim (IntelliJ IDEA Vim plugin)
+if ask_yes_no "Do you want to setup IdeaVim config?"; then
+    echo -e "${BLUE}Setting up IdeaVim config...${NC}"
+
+    # Backup existing ideavimrc if it exists and is not a symlink
+    if [ -f "$HOME/.ideavimrc" ] && [ ! -L "$HOME/.ideavimrc" ]; then
+        echo -e "${YELLOW}Backing up existing ~/.ideavimrc to ~/.ideavimrc.backup${NC}"
+        mv "$HOME/.ideavimrc" "$HOME/.ideavimrc.backup"
+    fi
+
+    # Remove existing symlink if it exists
+    [ -L "$HOME/.ideavimrc" ] && rm "$HOME/.ideavimrc"
+
+    # Create symlink
+    ln -sf "$DOTFILES_DIR/dotfiles/ideavimrc" "$HOME/.ideavimrc"
+    echo -e "${GREEN}✓ Created symlink: ~/.ideavimrc -> $DOTFILES_DIR/dotfiles/ideavimrc${NC}"
+else
+    echo -e "${YELLOW}Skipping IdeaVim config setup.${NC}"
+fi
+
 echo ""
 echo -e "${GREEN}======================================${NC}"
 echo -e "${GREEN}   Setup Complete!${NC}"

@@ -86,12 +86,12 @@ return {
                             end
                             item.score_offset = (item.score_offset or 0) + boost
 
-                            -- kotlin-lsp workaround: strip broken textEdits and
-                            -- force plain label insertion to avoid off-by-one cursor
+                            -- kotlin-lsp workaround: strip the broken main
+                            -- textEdit (off-by-one cursor) but keep
+                            -- additionalTextEdits + command so auto-import
+                            -- on accept still fires.
                             if is_kotlin then
                                 item.textEdit = nil
-                                item.additionalTextEdits = nil
-                                item.command = nil
                                 item.insertText = item.label
                                 item.insertTextFormat = 1
                             end

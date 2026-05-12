@@ -463,6 +463,52 @@ function M.setup()
     -- don't collide between repos.
     local kotlin_lsp_storage = vim.fn.stdpath("data") .. "/kotlin_lsp/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 
+    -- ─── workspace/applyEdit filter ──────────────────────────────────
+    -- After a completion accept, kotlin-lsp's `command` triggers a
+    -- workspace/applyEdit that contains:
+    --   * the auto-import (at file top — different line from cursor)
+    --   * a bogus "insert completion suffix" edit on the cursor's line
+    --     (computed against the pre-insert buffer, but applied to the
+    --     post-insert buffer — splices a duplicate after the just-
+    --     inserted text).
+    --
+    -- We drop edits on the cursor's current line while in insert mode
+    -- (i.e., during accept). Imports survive because they land on a
+    -- different line; the bogus duplicate gets dropped.
+    local function drop_cursor_line_edits(edits, cur_line)
+        local kept = {}
+        for _, e in ipairs(edits) do
+            local r = e.range or {}
+            local s = r.start and r.start.line
+            local fin = r["end"] and r["end"].line
+            if s ~= cur_line and fin ~= cur_line then
+                table.insert(kept, e)
+            end
+        end
+        return kept
+    end
+
+    local function kotlin_apply_edit(err, params, ctx)
+        if vim.fn.mode():sub(1, 1) == "i" and params and params.edit then
+            local cur_line = vim.api.nvim_win_get_cursor(0)[1] - 1
+            if params.edit.changes then
+                for uri, edits in pairs(params.edit.changes) do
+                    params.edit.changes[uri] =
+                        drop_cursor_line_edits(edits, cur_line)
+                end
+            end
+            if params.edit.documentChanges then
+                for _, change in ipairs(params.edit.documentChanges) do
+                    if change.edits then
+                        change.edits =
+                            drop_cursor_line_edits(change.edits, cur_line)
+                    end
+                end
+            end
+        end
+        return vim.lsp.handlers["workspace/applyEdit"](err, params, ctx)
+    end
+
     vim.lsp.config("kotlin_lsp", {
         cmd = {
             "env",
@@ -473,6 +519,9 @@ function M.setup()
         filetypes = { "kotlin" },
         init_options = {
             storageUri = "file://" .. kotlin_lsp_storage,
+        },
+        handlers = {
+            ["workspace/applyEdit"] = kotlin_apply_edit,
         },
         root_markers = {
             "settings.gradle.kts",

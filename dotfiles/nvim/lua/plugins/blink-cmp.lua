@@ -24,7 +24,18 @@ return {
         },
         completion = {
             accept = {
-                auto_brackets = { enabled = true },
+                auto_brackets = {
+                    enabled = true,
+                    -- kotlin-lsp marks many items (incl. kwargs and
+                    -- some properties) as kind=Function, which makes
+                    -- blink's auto-bracket logic append `()` and pull
+                    -- the cursor back by 1. The parens are then often
+                    -- overwritten by kotlin-lsp's server-side command
+                    -- applyEdit, leaving only the -1 cursor offset
+                    -- visible — e.g. caret lands at `tru|e` instead
+                    -- of `true|`.
+                    blocked_filetypes = { "kotlin" },
+                },
             },
             list = {
                 selection = {

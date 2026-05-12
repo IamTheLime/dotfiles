@@ -24,16 +24,21 @@ return {
         },
         completion = {
             accept = {
+                -- blink writes completions to vim's `.` register for
+                -- dot-repeat by spinning up a temporary floating
+                -- window, calling `vim.fn.complete()`, then queueing
+                -- `<C-x><C-z>` via `nvim_feedkeys('in', false)`. That
+                -- feedkeys runs on the next event tick (~7ms) and
+                -- leaves the cursor one column to the left of where
+                -- apply_text_edits put it — a deferred off-by-one
+                -- that's especially visible when kotlin-lsp's
+                -- command applyEdit also runs (the trace shows the
+                -- cursor drifting from saved → saved-1 after handler).
+                -- We don't use dot-repeat for LSP completions; turn
+                -- it off to keep the cursor stable.
+                dot_repeat = false,
                 auto_brackets = {
                     enabled = true,
-                    -- kotlin-lsp marks many items (incl. kwargs and
-                    -- some properties) as kind=Function, which makes
-                    -- blink's auto-bracket logic append `()` and pull
-                    -- the cursor back by 1. The parens are then often
-                    -- overwritten by kotlin-lsp's server-side command
-                    -- applyEdit, leaving only the -1 cursor offset
-                    -- visible — e.g. caret lands at `tru|e` instead
-                    -- of `true|`.
                     blocked_filetypes = { "kotlin" },
                 },
             },

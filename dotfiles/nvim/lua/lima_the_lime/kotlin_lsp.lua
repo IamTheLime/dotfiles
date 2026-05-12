@@ -489,7 +489,9 @@ function M.setup()
     end
 
     local function kotlin_apply_edit(err, params, ctx)
+        local saved_col
         if vim.fn.mode():sub(1, 1) == "i" and params and params.edit then
+            saved_col = vim.api.nvim_win_get_cursor(0)[2]
             local cur_line = vim.api.nvim_win_get_cursor(0)[1] - 1
             if params.edit.changes then
                 for uri, edits in pairs(params.edit.changes) do
@@ -506,7 +508,29 @@ function M.setup()
                 end
             end
         end
-        return vim.lsp.handlers["workspace/applyEdit"](err, params, ctx)
+        local result = vim.lsp.handlers["workspace/applyEdit"](err, params, ctx)
+        if saved_col ~= nil then
+            -- Some nvim/LSP cursor adjustment after the import edits
+            -- (likely a buffer-mode-aware off-by-one in apply_text_edits
+            -- when inserting at file top) nudges the column back by 1
+            -- a few ms after our handler returns. Snap it back to where
+            -- we saved it whenever it lands at saved-1 in the brief
+            -- post-accept window.
+            local watch_id
+            watch_id = vim.api.nvim_create_autocmd("CursorMovedI", {
+                callback = function()
+                    local cur = vim.api.nvim_win_get_cursor(0)
+                    if cur[2] == saved_col - 1 then
+                        pcall(vim.api.nvim_win_set_cursor, 0,
+                            { cur[1], saved_col })
+                    end
+                end,
+            })
+            vim.defer_fn(function()
+                pcall(vim.api.nvim_del_autocmd, watch_id)
+            end, 1000)
+        end
+        return result
     end
 
     vim.lsp.config("kotlin_lsp", {

@@ -537,7 +537,7 @@ function M.setup()
         cmd = {
             "env",
             "JAVA_TOOL_OPTIONS=-Xmx4g -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=50 -XX:+UseStringDeduplication",
-            "kotlin-lsp", "--stdio",
+            "intellij-server", "--stdio",
             "--system-path", kotlin_lsp_storage,
         },
         filetypes = { "kotlin" },

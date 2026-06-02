@@ -31,6 +31,8 @@ nmap gD <Action>(GotoTypeDeclaration)
 nmap gi <Action>(GotoImplementation)
 nmap gr <Action>(FindUsages)
 nmap go <Action>(GotoTypeDeclaration)
+nmap gl <Action>(ShowErrorDescription)
+nmap gs <Action>(ParameterInfo)
 nmap K  <Action>(QuickJavaDoc)
 
 " Cycle to next pane with Space (matches nvim config)
@@ -52,6 +54,10 @@ set hlsearch
 set scrolloff=8
 set clipboard+=unnamed
 set clipboard+=ideaput
+
+" Silence beeps on jump-list edges (e.g. <C-o>/<C-i>) and other no-ops
+set visualbell
+set noerrorbells
 
 " Keep IdeaVim and IDE in sync for some commands
 sethandler <C-c> a:ide

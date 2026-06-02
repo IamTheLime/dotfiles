@@ -165,9 +165,20 @@ return {
             },
         })
 
+        vim.lsp.config("arduino_language_server", {
+            cmd = {
+                "arduino-language-server",
+                "-cli-config", vim.fn.expand("~/.arduino15/arduino-cli.yaml"),
+                "-fqbn", "arduino:avr:uno",
+                "-clangd", "clangd",
+                "-cli", "arduino-cli",
+            },
+        })
+
         vim.lsp.enable({
             "kotlin_lsp", "yamlls", "pyright", "lua_ls",
             "bqls", "angularls", "tailwindcss", "zls",
+            "arduino_language_server",
         })
 
         require("mason-lspconfig").setup({

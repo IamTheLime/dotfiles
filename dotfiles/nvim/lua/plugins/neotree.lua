@@ -34,7 +34,7 @@ return {
                         enable_character_fade = true,
                     },
                     indent = {
-                        indent_size = 2,
+                        indent_size = 4,
                         padding = 1, -- extra padding on left hand side
                         -- indent guides
                         with_markers = true,
@@ -205,6 +205,11 @@ return {
                 },
                 nesting_rules = {},
                 filesystem = {
+                    -- "deep" avoids a neo-tree bug where `expand_all_nodes` (E) crashes
+                    -- with `group_empty_dirs = true` under the default "shallow" scan:
+                    -- the lazy-load grouping path hands raw item tables to nui as tree
+                    -- children, which lack `get_id`. Deep scan routes through create_nodes.
+                    scan_mode = "deep",
                     filtered_items = {
                         visible = false, -- when true, they will just be displayed differently than normal items
                         hide_dotfiles = true,
@@ -241,9 +246,9 @@ return {
                     follow_current_file = {
                         enabled = false,                    -- This will find and focus the file in the active buffer every time
                         --               -- the current file is changed while the tree is open.
-                        leave_dirs_open = false,            -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+                        leave_dirs_open = true,            -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
                     },
-                    group_empty_dirs = false,               -- when true, empty folders will be grouped together
+                    group_empty_dirs = true,               -- when true, empty folders will be grouped together
                     hijack_netrw_behavior = "disabled", -- netrw disabled, opening a directory opens neo-tree
                     -- in whatever position is specified in window.position
                     -- "open_current",  -- netrw disabled, opening a directory opens within the

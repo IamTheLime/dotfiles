@@ -132,7 +132,7 @@ nn() {
     else
       cd "$(dirname "${1}")"
     fi
-  nvim .
+  nvim
 }
 
 pn() {

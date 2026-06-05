@@ -533,8 +533,85 @@ function M.setup()
         return result
     end
 
+    -- ── EAP expiry workaround ────────────────────────────────────────────
+    -- kotlin-lsp ships an IntelliJ "intellij-server" EAP build that self-
+    -- expires ~30-40 days after its build date:
+    --   "This build of intellij-server has expired. The IDE will now close."
+    -- As of 2026-06, v262.4739.0 is BOTH the newest build JetBrains has
+    -- published and the one that expired, so there's nothing newer to grab.
+    --
+    -- `faketime` feeds the LSP process a pre-expiry date. The catch on macOS:
+    -- the native `intellij-server` launcher loses the `DYLD_INSERT_LIBRARIES`
+    -- injection before the JVM's expiry check runs, so wrapping it does
+    -- nothing. The JBR `java` binary, however, *does* honour faketime (it
+    -- carries allow-dyld-environment-variables + disable-library-validation
+    -- entitlements). So we bypass the launcher and invoke `java` directly,
+    -- reconstructing the launch (classpath, jvm args, main class) from the
+    -- package's product-info.json — which keeps this resilient to version
+    -- bumps. Remove this whole block once JetBrains ships a build > 262.4739.
+    -- See https://github.com/Kotlin/kotlin-lsp/issues/217
+    --
+    -- Pick a date safely after the build date and before its expiry. Bump it
+    -- forward if the LSP starts erroring with "expired" again.
+    local FAKETIME_DATE = "2026-05-20"
+
+    local function build_kotlin_lsp_cmd(storage)
+        if vim.fn.executable("faketime") ~= 1 then
+            return nil -- faketime missing → caller falls back to native launcher
+        end
+        -- Resolve the package root from Mason's intellij-server symlink.
+        local launcher = vim.fn.resolve(
+            vim.fn.stdpath("data") .. "/mason/bin/intellij-server")
+        local pkg = vim.fn.fnamemodify(launcher, ":h:h") -- strip /bin/intellij-server
+        local info_path = pkg .. "/product-info.json"
+        if vim.fn.filereadable(info_path) ~= 1 then return nil end
+
+        local ok, info = pcall(function()
+            return vim.json.decode(table.concat(vim.fn.readfile(info_path), "\n"))
+        end)
+        local launch = ok and info and info.launch and info.launch[1]
+        if not launch then return nil end
+
+        local java = pkg .. "/" .. launch.javaExecutablePath
+        if vim.fn.executable(java) ~= 1 then return nil end
+
+        -- Classpath from bootClassPathJarNames (all under lib/).
+        local cp = {}
+        for _, jar in ipairs(launch.bootClassPathJarNames or {}) do
+            table.insert(cp, pkg .. "/lib/" .. jar)
+        end
+
+        local cmd = { "faketime", FAKETIME_DATE, java }
+
+        -- vmoptions file (skip blanks/comments).
+        for _, line in ipairs(vim.fn.readfile(pkg .. "/" .. launch.vmOptionsFilePath)) do
+            line = vim.trim(line)
+            if line ~= "" and not line:match("^#") then table.insert(cmd, line) end
+        end
+
+        vim.list_extend(cmd, { "-cp", table.concat(cp, ":") })
+
+        -- additionalJvmArguments, expanding the $APP_PACKAGE/Contents anchor.
+        for _, arg in ipairs(launch.additionalJvmArguments or {}) do
+            table.insert(cmd, (arg:gsub("%$APP_PACKAGE/Contents", pkg)))
+        end
+
+        -- Per-project index isolation (the native launcher took --system-path;
+        -- the direct invocation sets the property instead) + our heap/GC prefs
+        -- last so they win over the bundled vmoptions.
+        vim.list_extend(cmd, {
+            "-Didea.system.path=" .. storage,
+            "-Xmx4g", "-XX:+UseG1GC",
+            "-XX:SoftRefLRUPolicyMSPerMB=50", "-XX:+UseStringDeduplication",
+            launch.mainClass, "--stdio",
+        })
+        return cmd
+    end
+
     vim.lsp.config("kotlin_lsp", {
-        cmd = {
+        cmd = build_kotlin_lsp_cmd(kotlin_lsp_storage) or {
+            -- Fallback: faketime/product-info unavailable. Runs the native
+            -- launcher (will report "expired" until a newer build is installed).
             "env",
             "JAVA_TOOL_OPTIONS=-Xmx4g -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=50 -XX:+UseStringDeduplication",
             "intellij-server", "--stdio",

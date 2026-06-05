@@ -99,6 +99,46 @@ _prep() {
 }
 compdef _prep prep
 
+export ARDUINO_DIR="${HOME}/Arduino"
+export ARDUINO_FQBN="${ARDUINO_FQBN:-arduino:avr:uno}"
+zstyle ':fzf-tab:complete:sketch:*' fzf-preview 'bat --color=always "${ARDUINO_DIR}/$word/$word.ino" 2>/dev/null || echo "No .ino found"'
+sketch() {
+    local monitor=0
+    if [[ "$1" == "-m" ]]; then
+        monitor=1
+        shift
+    fi
+    local name="$1"
+    local sketch_dir="${ARDUINO_DIR}/$name"
+    if [[ -z "$name" || ! -d "$sketch_dir" ]]; then
+        echo "Usage: sketch [-m] <name>" >&2
+        return 1
+    fi
+    local port
+    port=$(arduino-cli board list | awk '/^\/dev\// {print $1; exit}')
+    if [[ -z "$port" ]]; then
+        echo "No board detected. Plug one in or set the port manually." >&2
+        return 1
+    fi
+    arduino-cli compile --fqbn "$ARDUINO_FQBN" "$sketch_dir" \
+        && arduino-cli upload -p "$port" --fqbn "$ARDUINO_FQBN" "$sketch_dir" \
+        || return $?
+    if (( monitor )); then
+        arduino-cli monitor -p "$port" -c "baudrate=${ARDUINO_BAUD:-9600}"
+    fi
+}
+_sketch() {
+    local -a entries
+    local sketch_dir
+    for sketch_dir in "${ARDUINO_DIR}"/*/; do
+        [[ -d "$sketch_dir" ]] || continue
+        local n=$(basename "$sketch_dir")
+        [[ -f "${sketch_dir}${n}.ino" ]] && entries+=("$n")
+    done
+    compadd -a entries
+}
+compdef _sketch sketch
+
 # Setting up zsh plugins
 #
 #

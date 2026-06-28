@@ -335,6 +335,14 @@ local setup_dap = function()
             return original_continue(opts)
         end
 
+        -- The async configs only make sense for Kotlin projects. For any
+        -- other filetype, defer to the stock picker so it shows the configs
+        -- registered for that filetype (e.g. arduino/cpp/python) instead of
+        -- the Kotlin menu.
+        if vim.bo.filetype ~= 'kotlin' then
+            return original_continue(opts)
+        end
+
         -- Build combined list: standard kotlin configs + async configs
         local configs = dap.configurations.kotlin or {}
         local items = {}
@@ -343,14 +351,6 @@ local setup_dap = function()
         end
         for _, acfg in ipairs(async_kotlin_configs) do
             table.insert(items, { name = acfg.name, type = 'async', run = acfg.run })
-        end
-
-        -- Check if we have configs for the current filetype too
-        local ft = vim.bo.filetype
-        if ft ~= 'kotlin' and dap.configurations[ft] then
-            for _, cfg in ipairs(dap.configurations[ft]) do
-                table.insert(items, { name = cfg.name, type = 'config', config = cfg })
-            end
         end
 
         if #items == 0 then

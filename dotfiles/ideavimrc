@@ -21,6 +21,12 @@ nmap ;b <Action>(Git.Branches)
 " ;w - cycle to next IDE window (each worktree = one window)
 nmap ;w <Action>(NextProjectWindow)
 
+" <C-q> - focus the Find tool window (last Find-in-Path / usages results) = :copen.
+" NB: IdeaVim can't map keys inside the Find popup, so this is the editor-side half
+" of Telescope's <C-q>. In the popup, ⌘⇧↵ ("Open in Find Window") docks the results;
+" then <C-q> re-focuses them. Walk matches with ⌃⌥↓/⌃⌥↑ (Next/PreviousOccurence).
+nmap <C-q> <Action>(ActivateFindToolWindow)
+
 " --- Splits (matching your nvim sv/sh) ---
 nmap sv <Action>(SplitVertically)
 nmap sh <Action>(SplitHorizontally)
@@ -34,6 +40,26 @@ nmap go <Action>(GotoTypeDeclaration)
 nmap gl <Action>(ShowErrorDescription)
 nmap gs <Action>(ParameterInfo)
 nmap K  <Action>(QuickJavaDoc)
+
+" F2 - rename symbol project-wide; IntelliJ's refactor updates references + imports
+" across all files. Works in normal and insert (nvim binds it in normal only).
+nmap <F2> <Action>(RenameElement)
+imap <F2> <Action>(RenameElement)
+
+" Ctrl-S - parameter info (function signature) so you can see the next arg to type.
+" Bound in normal AND insert, mirroring nvim's vim.lsp.buf.signature_help on {n,i}.
+nmap <C-s> <Action>(ParameterInfo)
+imap <C-s> <Action>(ParameterInfo)
+
+" F3 - reformat code: whole file in normal, selection in visual. Mirrors nvim's
+" vim.lsp.buf.format on {n,x}. Uses IntelliJ's code-style / .editorconfig formatter.
+nmap <F3> <Action>(ReformatCode)
+xmap <F3> <Action>(ReformatCode)
+
+" --- Commentary (bundled IdeaVim extension, emulates vim-commentary) ---
+" gcc toggles a line comment; gc{motion} and gc in visual toggle a range.
+" Mirrors your Comment.nvim gcc/gc; uses IntelliJ's language-aware comment action.
+set commentary
 
 " Cycle to next pane with Space (matches nvim config)
 nnoremap <Space> <C-w>w
@@ -61,3 +87,10 @@ set noerrorbells
 
 " Keep IdeaVim and IDE in sync for some commands
 sethandler <C-c> a:ide
+
+" Let IdeaVim own these in every mode (incl. insert) so the mappings above win:
+"  - <C-s> would otherwise never reach the imap in insert mode
+"  - <F2> overrides the IDE default (GotoNextError) so rename fires everywhere
+sethandler <C-s> a:vim
+sethandler <F2> a:vim
+sethandler <F3> a:vim

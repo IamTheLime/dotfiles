@@ -30,6 +30,13 @@ nmap <C-q> <Action>(ActivateFindToolWindow)
 " --- Splits (matching your nvim sv/sh) ---
 nmap sv <Action>(SplitVertically)
 nmap sh <Action>(SplitHorizontally)
+" sc - close THIS split, keep every file open (buffer stays). = vim :close / <C-w>c.
+"      'Unsplit' collapses the pane and merges its tabs into the neighbour; nothing
+"      is closed. (Note: ⌘W = CloseContent closes the TAB/file; :bd deletes the
+"      buffer — both evict the file, which is not what we want here.)
+nmap sc <Action>(Unsplit)
+" so - keep only this split, collapse all the others. = vim <C-w>o / :only.
+nmap so <Action>(UnsplitAll)
 
 " --- LSP-style navigation (matches nvim lspconfig keymaps) ---
 nmap gd <Action>(GotoDeclaration)

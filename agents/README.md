@@ -34,6 +34,10 @@ because paying for it on unrelated turns is what makes context expensive.
 - **`evidence-before-conclusions`** — verifying load-bearing assumptions before
   building on them.
 - **`testing`** — how tests read, and what they shouldn't distort.
+- **`figjam-diagrams`** — diagrams that survive a projector and stay editable:
+  theming (dark by default), text as its own nodes rather than shape labels,
+  real columns, spacing that doesn't collide. References for both palettes and
+  the FigJam API's traps.
 
 ## Install
 

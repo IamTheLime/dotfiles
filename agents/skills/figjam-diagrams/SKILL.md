@@ -21,8 +21,8 @@ including the semantic accent roles, are in `references/themes.md`.
 
 Pick accents semantically and keep them consistent across every section of a
 board: one colour per concept, reused wherever that concept appears. A reader
-who learns "orange means the warehouse asserts a destination" in the first
-section should not have to relearn it in the fourth.
+who learns "orange means an external system" in the first section should not
+have to relearn it in the fourth.
 
 Text colour follows the surface it sits on, and the test is contrast, not
 palette membership. Anything floating on the section background — connector
@@ -47,7 +47,7 @@ colour, and the ability to bold or recolour one line without touching the rest.
 ## Columns are columns
 
 Never simulate a table with spaces inside one text node. Inter is proportional;
-`ADVANCE          → StepAction` will not line up with the row beneath it, and it
+`SOME_KEY         → itsValue` will not line up with the row beneath it, and it
 looks broken on a projector.
 
 One text node per cell, positioned on a shared x. Then colour the value column
@@ -68,7 +68,7 @@ Numbers that work, as a starting point rather than a law:
   is the most common way a board becomes unreadable.
 - 60px of section padding around content.
 - Anything a reader must scan (a state, a pill) wants a fixed size — pick one and
-  reuse it, e.g. 230×86 for a status, 380–470 wide for a panel.
+  reuse it, e.g. 230×86 for a flow box, 380–470 wide for a panel.
 
 Long connector labels collide with boxes, because FigJam pins a label to the
 line's midpoint. Keep labels to a few words and put the detail in a box. If a

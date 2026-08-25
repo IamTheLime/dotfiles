@@ -92,3 +92,31 @@ Each of these fails in a way that is not obvious from the error.
 
 - `upload_assets` is the only supported way to place an image on a board.
   `figma.createImage()` / `createImageAsync()` are not available.
+
+## Restyling existing text
+
+- Rewriting `characters` on a node that contains **mixed fonts** requires every
+  font present in the node to be loaded, not just the one you are setting —
+  discover them with `getStyledTextSegments(['fontName'])` or preload every
+  family the board uses.
+- Keyword colouring is range styling: set the node-level font/size/fill first,
+  then `setRangeFontName` / `setRangeFontSize` / `setRangeFills` per keyword.
+  Ranges are start-inclusive, end-exclusive.
+- Swapping `fontName` on existing nodes can leave stale fixed widths behind —
+  text starts wrapping mid-word. After a font pass, re-hug the nodes that
+  should size to content: `textAutoResize = 'WIDTH_AND_HEIGHT'` (skip the
+  fixed-width bodies, which stay `'HEIGHT'`).
+- Diamond labels have no vertical centring — after any font or size change,
+  recompute `x`/`y` from the shape's centre minus half the text's size.
+
+## After any restyle: refit, then renormalise
+
+- Boxes do not grow with their text. After font or copy changes, refit each
+  group's shape to its text extents (grow-only: `max(text.x+width)+pad`).
+- Refits and moves silently drift wrapper sections — a wrapper can end up
+  thousands of pixels too large with the content huddled in one corner. Fix by
+  shifting all children so the min corner sits at the padding, then
+  shrink-wrapping the section. Check the wrapper's reported size at the end of
+  every editing session, not just after the first layout.
+- Group ids go stale once you regroup or reparent — re-list `section.children`
+  and match by name instead of trusting ids stored from earlier calls.

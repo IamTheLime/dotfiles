@@ -130,10 +130,10 @@ return {
                         nowait = true,
                     },
                     mappings = {
-                        ["<space>"] = {
-                            "toggle_node",
-                            nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use
-                        },
+                        -- "noop" makes neo-tree skip creating this buffer mapping entirely
+                        -- (not a no-op mapping), so the global <Space> -> <C-w>w from
+                        -- maps.lua still works in the tree. <cr> already toggles folders.
+                        ["<space>"] = "noop",
                         ["<2-LeftMouse>"] = "open",
                         ["<cr>"] = "open",
                         ["<esc>"] = "cancel", -- close preview or floating neo-tree window

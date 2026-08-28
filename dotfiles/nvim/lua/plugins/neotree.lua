@@ -211,7 +211,10 @@ return {
                     -- children, which lack `get_id`. Deep scan routes through create_nodes.
                     scan_mode = "deep",
                     filtered_items = {
-                        visible = false, -- when true, they will just be displayed differently than normal items
+                        -- Show filtered items rather than hiding them: they still count as
+                        -- filtered, so `use_filtered_colors` on name/icon renders them dimmed
+                        -- (NeoTreeGitIgnored) and the git_status column shows the ignored icon.
+                        visible = true,
                         hide_dotfiles = true,
                         hide_gitignored = true,
                         hide_ignored = true, -- hide files that are ignored by other gitignore-like files
@@ -254,8 +257,11 @@ return {
                     -- "open_current",  -- netrw disabled, opening a directory opens within the
                     -- window like netrw would, regardless of window.position
                     -- "disabled",    -- netrw left alone, neo-tree does not handle opening dirs
-                    use_libuv_file_watcher = false, -- This will use the OS level file watchers to detect changes
-                    -- instead of relying on nvim autocmd events.
+                    -- OS-level (libuv) watchers. With this false, neo-tree only refreshes on
+                    -- VIM_BUFFER_CHANGED — i.e. writes made by this nvim — so edits from git
+                    -- checkout, another editor, or a build tool never show up. Also gates the
+                    -- git worktree watcher, so git status decorations go stale too.
+                    use_libuv_file_watcher = true,
                     window = {
                         mappings = {
                             ["<bs>"] = "navigate_up",

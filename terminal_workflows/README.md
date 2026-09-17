@@ -65,11 +65,14 @@ native title bar is gone: the top strip holds the tabs and its own minimize
 (–) and close (×) buttons; drag the `◆ terminal_workflows` label to move
 the window.
 
-- **Tabs:** `cmd-t` new, `cmd-w` close, `cmd-shift-]` / `cmd-shift-[`
-  next / previous, `cmd-1`..`cmd-9` jump, click a tab or `+`. Reorder with
-  `cmd-shift-left` / `cmd-shift-right`, or drag a tab: drop it on another
-  tab to take that slot, or on the empty strip to send it to the end. The
-  window itself moves only by dragging the `◆ terminal_workflows` label.
+- **Tabs:** `cmd-t` new, `cmd-w` or the tab's × closes, `cmd-shift-]` /
+  `cmd-shift-[` next / previous, `cmd-1`..`cmd-9` jump, click a tab or `+`.
+  Reorder with `cmd-shift-left` / `cmd-shift-right`, or drag a tab: drop it
+  on another tab to take that slot, or on the empty strip to send it to the
+  end. Every move or close slides the affected tabs from their old slot to
+  the new one (220 ms), so it is visible what went where. The strip scrolls
+  sideways when tabs overflow and follows the active tab. The window itself
+  moves only by dragging the `◆ terminal_workflows` label.
 - **Terminal:** drag to select (double-click a word, triple-click a line,
   hold `alt` for a rectangle), `cmd-c` copy, `cmd-v` paste (bracketed when
   the app asked for it), `cmd-a` select all, wheel to scroll the
@@ -449,18 +452,25 @@ Phase 5 — terminal polish (later)
   API yet, so search runs over the formatter's plain-text dump and uses
   `Point::Screen` coordinates, which match the dump line by line. The match
   is shown by scrolling the viewport and setting a Ghostty selection.
+- **Tab moves animate with FLIP.** The strip reports its children's bounds
+  after every layout (`on_children_prepainted`); on a move or close the
+  new x of each tab is predicted from the measured widths and the gap, and
+  each tab that changed slot starts at `old_x - new_x` and eases to zero
+  with gpui's `with_animation`, keyed by a generation counter so every
+  change restarts it. Nothing else in the layout is touched.
 - **Markdown is rendered, not embedded.** pulldown-cmark gives blocks,
   gpui's `StyledText` highlights give bold, italic, inline code and links,
   and each code line is one text element with syntect's colours, so nothing
   wraps or re-flows inside a fence. Tables become one line per row.
 - **Title strip over native bar.** gpui's transparent title bar keeps the
   native rounded corners, shadow and edge resizing; hiding the three
-  standard buttons is a 20-line Objective-C call in `titlebar.rs`. Window
-  dragging is AppKit's own title-bar-region behaviour (`mouseDownCanMoveWindow`
-  defaults to YES on gpui's view), and gpui 0.2.2's `start_window_move` is a
-  no-op on macOS, so `titlebar.rs` adds a NO answer to gpui's view class at
-  startup and starts `performWindowDragWithEvent:` itself from the title
-  label. Without that, dragging a tab moved the window.
+  standard buttons is a short Objective-C call in `titlebar.rs`. AppKit's own
+  title-region dragging swallowed tab drags and ignored a
+  `mouseDownCanMoveWindow` override on gpui's view, and gpui 0.2.2's
+  `start_window_move` is a no-op on macOS. So the window is created with
+  `is_movable: false` and moved by hand: a mouse-down on the title label
+  records the pointer and frame origin in screen space (`cocoa`), and every
+  mouse-move while the button is down sets the frame origin to follow.
 
 ## Risks and open questions
 

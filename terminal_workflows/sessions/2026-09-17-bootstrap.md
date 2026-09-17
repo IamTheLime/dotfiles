@@ -20,8 +20,11 @@ us, and how to pick the work up again.
   plugin buttons, socket, Neovim `K` mirror, image.nvim, fff previews.
 - Not verified by hand in this session (no Screen Recording or Accessibility
   permission): the look of the title strip, tab drag-and-drop feel, the find
-  bar, mouse selection in the live window. The user confirmed tabs drag,
-  `K` mirrors, and fff previews are "blazingly fast".
+  bar, mouse selection in the live window. The user confirmed `K` mirrors
+  and fff previews are "blazingly fast". Tab dragging was NOT confirmed: the
+  `mouseDownCanMoveWindow` override did not stop AppKit from moving the
+  window, so a later session must take a different route (see the follow-up
+  session log).
 
 ## What the user asked for, in order
 
@@ -96,6 +99,23 @@ us, and how to pick the work up again.
   frame-path crates ran unoptimised (dev `opt-level = 2` for `tw-terminal`
   and `tw-app`). Result: 1600x1000 PNG in 3 ms decode + under 1 ms upload,
   nothing on the way back thanks to an 8-entry recent-texture cache.
+
+## Follow-up in the same day: tab dragging, take three
+
+The user reported tabs still moved the window and asked for a scrollable tab
+strip. Root cause of the drag: AppKit drags a window from the transparent
+title region on its own, ignores `mouseDownCanMoveWindow` on gpui's view,
+and gpui 0.2.2's `start_window_move` is a no-op on macOS. Fix: create the
+window with `is_movable: false` so AppKit never drags it, and move it by
+hand from the title label (`titlebar::WindowDrag`: pointer and frame origin
+in screen space via `cocoa`, frame origin follows each mouse-move). Tabs
+live in an `overflow_x_scroll` container with a `ScrollHandle` that
+`scroll_to_item`s the active tab. Then: a × on each tab (its mouse-down
+stops propagation so it neither selects nor drags), and a FLIP slide
+animation on move and close (bounds measured with `on_children_prepainted`,
+new positions predicted from widths + gap, `with_animation` + `ease_out_quint`,
+keyed by a generation counter). None of these could be verified by mouse
+from the agent session; the user tests them.
 
 ## How the app was tested without a mouse
 

@@ -30,6 +30,8 @@ fn main() {
                 // Transparent title bar: the content view fills the window and
                 // our tab strip lives where the title would be.
                 titlebar: Some(TitlebarOptions { title: None, appears_transparent: true, traffic_light_position: None }),
+                // AppKit must not drag the window itself (that steals tab drags); titlebar.rs moves it.
+                is_movable: false,
                 ..Default::default()
             },
             |window, cx| {

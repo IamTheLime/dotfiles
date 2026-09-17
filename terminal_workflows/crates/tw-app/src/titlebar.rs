@@ -1,34 +1,28 @@
 //! The window has no native title bar: gpui draws our tab strip in that area
-//! (`TitlebarOptions::appears_transparent`). Two AppKit behaviours have to be
-//! switched off for that to work on macOS:
-//!
-//! - the three traffic-light buttons are hidden, so the strip's own minimize
-//!   and close buttons are the only ones;
-//! - AppKit drags the window on any mouse-down in the title-bar region when
-//!   the view under the mouse answers YES to `mouseDownCanMoveWindow`
-//!   (NSView's default for non-opaque views). That swallowed tab drags, and
-//!   gpui 0.2.2's `Window::start_window_move` is a no-op on macOS, so the
-//!   answer is set to NO on gpui's view class and the window drag is started
-//!   explicitly from the title label with `performWindowDragWithEvent:`.
+//! (`TitlebarOptions::appears_transparent`), the macOS traffic lights are
+//! hidden, and AppKit's own title-region dragging is switched off with
+//! `WindowOptions::is_movable = false`, because it swallowed tab drags and
+//! ignored every view-level override. Moving the window is done by hand:
+//! a mouse-down on the title label records the pointer and frame origin in
+//! screen space, and each mouse-move sets the frame origin to follow it.
 
 use gpui::Window;
 
 #[cfg(target_os = "macos")]
 mod mac {
+    use cocoa::appkit::NSWindow;
+    use cocoa::base::id;
+    use cocoa::foundation::NSPoint;
     use gpui::Window;
-    use objc::runtime::{BOOL, Class, Imp, NO, Object, Sel, class_addMethod, object_getClass};
+    use objc::runtime::{Object, YES};
     use objc::{class, msg_send, sel, sel_impl};
     use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
-    fn ns_view(window: &Window) -> Option<*mut Object> {
+    fn ns_window(window: &Window) -> Option<id> {
         let handle = HasWindowHandle::window_handle(window).ok()?;
         let RawWindowHandle::AppKit(appkit) = handle.as_raw() else { return None };
-        Some(appkit.ns_view.as_ptr() as *mut Object)
-    }
-
-    fn ns_window(window: &Window) -> Option<*mut Object> {
-        let view = ns_view(window)?;
-        let ns_window: *mut Object = unsafe { msg_send![view, window] };
+        let view = appkit.ns_view.as_ptr() as *mut Object;
+        let ns_window: id = unsafe { msg_send![view, window] };
         (!ns_window.is_null()).then_some(ns_window)
     }
 
@@ -37,63 +31,65 @@ mod mac {
         // NSWindowCloseButton = 0, NSWindowMiniaturizeButton = 1, NSWindowZoomButton = 2.
         for kind in 0u64..3 {
             unsafe {
-                let button: *mut Object = msg_send![ns_window, standardWindowButton: kind];
+                let button: id = msg_send![ns_window, standardWindowButton: kind];
                 if !button.is_null() {
-                    let _: () = msg_send![button, setHidden: objc::runtime::YES];
+                    let _: () = msg_send![button, setHidden: YES];
                 }
             }
         }
     }
 
-    extern "C" fn mouse_down_can_move_window(_this: &Object, _cmd: Sel) -> BOOL {
-        NO
+    /// Pointer position in screen space (origin bottom-left, like window frames).
+    fn mouse_location() -> NSPoint {
+        unsafe { msg_send![class!(NSEvent), mouseLocation] }
     }
 
-    /// Make gpui's view class answer NO to `mouseDownCanMoveWindow`, once.
-    pub fn disable_native_titlebar_drag(window: &Window) {
-        let Some(view) = ns_view(window) else { return };
-        unsafe {
-            let class = object_getClass(view) as *mut Class;
-            let imp: Imp = std::mem::transmute(mouse_down_can_move_window as extern "C" fn(&Object, Sel) -> BOOL);
-            // Type encoding: BOOL return, then self and _cmd. BOOL is `bool` on arm64, `signed char` on x86_64.
-            let types = if cfg!(target_arch = "aarch64") { c"B@:" } else { c"c@:" };
-            let added = class_addMethod(class, sel!(mouseDownCanMoveWindow), imp, types.as_ptr());
-            if added == NO {
-                log::warn!("mouseDownCanMoveWindow already defined on gpui's view class; tab drags may move the window");
-            } else {
-                log::info!("native title-bar drag disabled; the window moves from the title label only");
-            }
-        }
+    /// A window move in progress; lives in the view that started it.
+    pub struct WindowDrag {
+        ns_window: id,
+        mouse_start: NSPoint,
+        origin_start: NSPoint,
     }
 
-    /// Let AppKit move the window with the mouse-down being dispatched right now.
-    pub fn start_window_move(window: &Window) {
-        let Some(ns_window) = ns_window(window) else { return };
-        unsafe {
-            let app: *mut Object = msg_send![class!(NSApplication), sharedApplication];
-            let event: *mut Object = msg_send![app, currentEvent];
-            if !event.is_null() {
-                let _: () = msg_send![ns_window, performWindowDragWithEvent: event];
-            }
+    impl WindowDrag {
+        pub fn begin(window: &Window) -> Option<Self> {
+            let ns_window = ns_window(window)?;
+            let origin_start = unsafe { ns_window.frame() }.origin;
+            Some(Self { ns_window, mouse_start: mouse_location(), origin_start })
+        }
+
+        /// Move the window by however far the pointer travelled since `begin`.
+        pub fn follow_pointer(&self) {
+            let mouse = mouse_location();
+            let origin = NSPoint::new(
+                self.origin_start.x + (mouse.x - self.mouse_start.x),
+                self.origin_start.y + (mouse.y - self.mouse_start.y),
+            );
+            unsafe { self.ns_window.setFrameOrigin_(origin) };
         }
     }
+}
+
+#[cfg(target_os = "macos")]
+pub use mac::WindowDrag;
+
+#[cfg(not(target_os = "macos"))]
+pub struct WindowDrag;
+
+#[cfg(not(target_os = "macos"))]
+impl WindowDrag {
+    pub fn begin(window: &Window) -> Option<Self> {
+        window.start_window_move();
+        None
+    }
+
+    pub fn follow_pointer(&self) {}
 }
 
 /// Called once, right after the window is created.
 pub fn prepare(window: &Window) {
     #[cfg(target_os = "macos")]
-    {
-        mac::hide_traffic_lights(window);
-        mac::disable_native_titlebar_drag(window);
-    }
+    mac::hide_traffic_lights(window);
     #[cfg(not(target_os = "macos"))]
     let _ = window;
-}
-
-/// Start dragging the window from the mouse-down currently being handled.
-pub fn start_window_move(window: &Window) {
-    #[cfg(target_os = "macos")]
-    mac::start_window_move(window);
-    #[cfg(not(target_os = "macos"))]
-    window.start_window_move();
 }

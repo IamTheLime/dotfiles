@@ -1,14 +1,16 @@
 //! The window's root: the title strip (tabs plus window buttons), the active
 //! terminal, the plugin sidebar, and the one place that executes `AppCommand`.
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::time::Duration;
 
 use futures::StreamExt;
 use gpui::{
-    App, Context, CursorStyle, Entity, FocusHandle, Focusable, KeyDownEvent, MouseButton, Pixels, Point, Render,
-    Subscription, Window, div, prelude::*, px,
+    Animation, AnimationExt, App, Bounds, Context, CursorStyle, ElementId, Entity, FocusHandle, Focusable, KeyDownEvent,
+    MouseButton, MouseMoveEvent, MouseUpEvent, Pixels, Point, Render, ScrollHandle, Subscription, Window, div,
+    ease_out_quint, prelude::*, px,
 };
 use tw_control::{ControlEvent, ControlServer};
 use tw_scripting::{HostEvent, HostMessage, NodeHost, PluginState, PluginView, TabInfo};
@@ -20,6 +22,7 @@ use crate::command::{AppCommand, Direction, TabId};
 use crate::markdown::{self, Document};
 use crate::terminal_view::{TerminalView, TerminalViewEvent};
 use crate::theme;
+use crate::titlebar::WindowDrag;
 use crate::widgets::{self, Dispatch};
 
 const LOG_LINES: usize = 40;
@@ -47,6 +50,19 @@ enum Control {
 struct DraggedTab {
     index: usize,
     title: String,
+}
+
+/// Gap between tabs in the strip; the slide animation needs it to predict the new layout.
+const TAB_GAP: f32 = 4.0;
+const TAB_SLIDE: Duration = Duration::from_millis(220);
+
+/// The slide of the current layout change: for each tab, where it was
+/// relative to where it now is. Tabs start at that offset and ease to zero.
+/// `generation` restarts the animation on every change.
+#[derive(Default)]
+struct TabMotion {
+    generation: u64,
+    offsets: HashMap<TabId, Pixels>,
 }
 
 /// The pill that follows the pointer while a tab is dragged.
@@ -85,6 +101,13 @@ pub struct Workspace {
     document: Option<Document>,
     log: VecDeque<String>,
     focus_handle: FocusHandle,
+    /// Scroll position of the tab strip; follows the active tab.
+    tab_scroll: ScrollHandle,
+    /// Where each tab was painted last frame, measured after layout.
+    tab_bounds: HashMap<TabId, Bounds<Pixels>>,
+    tab_motion: TabMotion,
+    /// Set while the title label is being dragged.
+    window_drag: Option<WindowDrag>,
 }
 
 impl Workspace {
@@ -101,6 +124,10 @@ impl Workspace {
             document: None,
             log: VecDeque::new(),
             focus_handle: cx.focus_handle(),
+            tab_scroll: ScrollHandle::new(),
+            tab_bounds: HashMap::new(),
+            tab_motion: TabMotion::default(),
+            window_drag: None,
         };
         workspace.start_plugins(window, cx);
         workspace.start_control(window, cx);
@@ -208,12 +235,14 @@ impl Workspace {
 
     fn close_tab(&mut self, id: TabId, window: &mut Window, cx: &mut Context<Self>) {
         let Some(index) = self.tabs.iter().position(|t| t.id == id) else { return };
+        let before = self.tab_bounds.clone();
         // Dropping the entity drops the session, which kills the shell.
         self.tabs.remove(index);
         if self.tabs.is_empty() {
             cx.quit();
             return;
         }
+        self.animate_tab_layout(&before);
         let next = if index < self.active { self.active - 1 } else { self.active };
         self.select_tab(next.min(self.tabs.len() - 1), window, cx);
     }
@@ -223,10 +252,39 @@ impl Workspace {
         if from == to || from >= self.tabs.len() || to >= self.tabs.len() {
             return;
         }
+        let before = self.tab_bounds.clone();
         let active_id = self.tabs[self.active].id;
         let tab = self.tabs.remove(from);
         self.tabs.insert(to, tab);
         self.active = self.tabs.iter().position(|t| t.id == active_id).unwrap_or(0);
+        self.animate_tab_layout(&before);
+    }
+
+    /// FLIP: predict where each remaining tab lands (widths do not change on a
+    /// reorder or a close) and remember how far it has to slide from where it was.
+    fn animate_tab_layout(&mut self, before: &HashMap<TabId, Bounds<Pixels>>) {
+        let Some(first_x) = before.values().map(|b| b.origin.x).min_by(|a, b| a.partial_cmp(b).expect("finite")) else {
+            return;
+        };
+        let mut x = first_x;
+        let mut offsets = HashMap::new();
+        for tab in &self.tabs {
+            let Some(was) = before.get(&tab.id) else { return };
+            let offset = was.origin.x - x;
+            if offset != px(0.0) {
+                offsets.insert(tab.id, offset);
+            }
+            x += was.size.width + px(TAB_GAP);
+        }
+        if offsets.is_empty() {
+            return;
+        }
+        self.tab_motion = TabMotion { generation: self.tab_motion.generation + 1, offsets };
+    }
+
+    /// Called after the tab strip's children are laid out, in tab order.
+    fn record_tab_bounds(&mut self, bounds: Vec<Bounds<Pixels>>) {
+        self.tab_bounds = self.tabs.iter().zip(bounds).map(|(tab, b)| (tab.id, b)).collect();
     }
 
     fn select_tab(&mut self, index: usize, window: &mut Window, cx: &mut Context<Self>) {
@@ -234,6 +292,7 @@ impl Workspace {
         self.active = index;
         let handle = tab.view.read(cx).focus_handle(cx);
         window.focus(&handle);
+        self.tab_scroll.scroll_to_item(index);
         cx.notify();
     }
 
@@ -376,6 +435,18 @@ impl Workspace {
         }
     }
 
+    fn on_drag_move(&mut self, event: &MouseMoveEvent, _: &mut Window, _: &mut Context<Self>) {
+        match (&self.window_drag, event.pressed_button) {
+            (Some(drag), Some(MouseButton::Left)) => drag.follow_pointer(),
+            (Some(_), _) => self.window_drag = None,
+            (None, _) => {}
+        }
+    }
+
+    fn on_drag_end(&mut self, _: &MouseUpEvent, _: &mut Window, _: &mut Context<Self>) {
+        self.window_drag = None;
+    }
+
     /// `cmd-1`..`cmd-9` select a tab; everything else bubbles up untouched.
     fn on_key_down(&mut self, event: &KeyDownEvent, window: &mut Window, cx: &mut Context<Self>) {
         let keystroke = &event.keystroke;
@@ -390,18 +461,43 @@ impl Workspace {
     // --- rendering ---------------------------------------------------------------
 
     /// The strip where macOS would draw the title: brand, tabs, and our own
-    /// minimize/close buttons. Only the title label moves the window
-    /// (`start_window_move` hands the mouse to macOS, which swallows any
-    /// gpui drag started on the same press); dragging a tab reorders it.
+    /// minimize/close buttons. Only the title label moves the window (by
+    /// hand, see `titlebar.rs`); dragging a tab reorders it; the tab list
+    /// scrolls sideways when it overflows.
     fn render_titlebar(&self, cx: &mut Context<Self>) -> impl IntoElement {
         let last = self.tabs.len().saturating_sub(1);
+        let generation = self.tab_motion.generation;
         let tabs = self.tabs.iter().enumerate().map(|(index, tab)| {
             let active = index == self.active;
+            let id = tab.id;
             let title = tab.view.read(cx).title().to_owned();
             let dragged = DraggedTab { index, title: title.clone() };
-            div()
+            let close = div()
+                .id(("close-tab", index))
+                .size(px(16.0))
+                .rounded_full()
+                .flex()
+                .items_center()
+                .justify_center()
+                .text_xs()
+                .text_color(theme::muted())
+                .cursor_pointer()
+                .hover(|s| s.bg(theme::error()).text_color(theme::bg()))
+                .child("×")
+                // A press on × must not start a tab drag or count as selecting the tab.
+                .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                .on_click(cx.listener(move |ws, _, window, cx| {
+                    cx.stop_propagation();
+                    ws.execute(AppCommand::CloseTab(id), window, cx)
+                }));
+            let element = div()
                 .id(("tab", index))
-                .px_3()
+                .flex_none()
+                .flex()
+                .items_center()
+                .gap_2()
+                .pl_3()
+                .pr_2()
                 .py_1()
                 .rounded_md()
                 .cursor_pointer()
@@ -409,6 +505,7 @@ impl Workspace {
                 .when(active, |el| el.bg(theme::raised()).text_color(theme::text()))
                 .when(!active, |el| el.text_color(theme::muted()).hover(|s| s.bg(theme::panel())))
                 .child(format!("{}  {}", index + 1, title))
+                .child(close)
                 .on_click(cx.listener(move |ws, _, window, cx| ws.execute(AppCommand::SelectTab(index), window, cx)))
                 .on_drag(dragged, |tab: &DraggedTab, position, _, cx| {
                     let title = tab.title.clone();
@@ -419,8 +516,20 @@ impl Workspace {
                 })
                 .on_drop(cx.listener(move |ws, tab: &DraggedTab, window, cx| {
                     ws.execute(AppCommand::MoveTab { from: tab.index, to: index }, window, cx)
-                }))
+                }));
+            // A tab that just changed slot starts where it was and eases into place.
+            match self.tab_motion.offsets.get(&id).copied() {
+                Some(slide) => element
+                    .with_animation(
+                        ElementId::NamedInteger(format!("tab-slide-{}", id.0).into(), generation),
+                        Animation::new(TAB_SLIDE).with_easing(ease_out_quint()),
+                        move |tab, delta| tab.relative().left(slide * (1.0 - delta)),
+                    )
+                    .into_any_element(),
+                None => element.into_any_element(),
+            }
         });
+        let measure = cx.entity();
         let window_button = |id: &'static str, glyph: &'static str, hover: gpui::Hsla| {
             div()
                 .id(id)
@@ -457,15 +566,29 @@ impl Workspace {
                     .text_color(theme::accent())
                     .cursor(CursorStyle::OpenHand)
                     .hover(|s| s.bg(theme::panel()))
-                    .on_mouse_down(MouseButton::Left, |_, window, _| crate::titlebar::start_window_move(window))
+                    .on_mouse_down(
+                        MouseButton::Left,
+                        cx.listener(|ws, _, window, _| ws.window_drag = WindowDrag::begin(window)),
+                    )
                     .child("◆ terminal_workflows"),
+            )
+            .child(
+                div()
+                    // Measured before it becomes stateful: the callback only exists on the plain Div.
+                    .on_children_prepainted(move |bounds, _, cx| measure.update(cx, |ws, _| ws.record_tab_bounds(bounds)))
+                    .id("tabs")
+                    .flex()
+                    .items_center()
+                    .gap_1()
+                    .min_w_0()
+                    .overflow_x_scroll()
+                    .track_scroll(&self.tab_scroll)
+                    .children(tabs),
             )
             .child(
                 div()
                     .flex()
                     .items_center()
-                    .gap_1()
-                    .children(tabs)
                     .child(
                         div()
                             .id("new-tab")
@@ -595,6 +718,9 @@ impl Render for Workspace {
             .on_action(cx.listener(|ws, _: &CloseDocument, window, cx| ws.execute(AppCommand::CloseDocument, window, cx)))
             .on_action(|_: &MinimizeWindow, window, _| window.minimize_window())
             .on_key_down(cx.listener(Self::on_key_down))
+            .on_mouse_move(cx.listener(Self::on_drag_move))
+            .on_mouse_up(MouseButton::Left, cx.listener(Self::on_drag_end))
+            .on_mouse_up_out(MouseButton::Left, cx.listener(Self::on_drag_end))
             .size_full()
             .flex()
             .flex_col()

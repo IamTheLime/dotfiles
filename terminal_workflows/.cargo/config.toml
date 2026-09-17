@@ -1,0 +1,6 @@
+[env]
+# The Zig side (libghostty-vt) is built once by the sys crate's build script. Its
+# default follows the cargo profile, and Zig's Debug mode makes Ghostty's VT parser
+# and image decoding many times slower, enough to stall the UI on large Kitty images.
+# Always build it optimised; Rust-side debugging is unaffected.
+LIBGHOSTTY_VT_SYS_OPTIMIZE = "ReleaseFast"

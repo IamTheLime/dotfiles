@@ -1,0 +1,14 @@
+{
+  "name": "terminal-workflows-plugins",
+  "private": true,
+  "type": "module",
+  "description": "Plugins for terminal_workflows. Each *.ts file default-exports a Plugin; host.ts runs them under Node.",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "host": "node --no-warnings --experimental-strip-types host.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

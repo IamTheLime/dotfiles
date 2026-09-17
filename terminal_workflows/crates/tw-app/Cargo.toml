@@ -1,0 +1,33 @@
+[package]
+name = "tw-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "gpui window: tabs of Ghostty terminals plus a TypeScript widget sidebar"
+
+[[bin]]
+name = "terminal-workflows"
+path = "src/main.rs"
+
+[dependencies]
+tw-terminal = { workspace = true }
+tw-scripting = { workspace = true }
+tw-control = { workspace = true }
+gpui = { workspace = true }
+futures = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+pulldown-cmark = { workspace = true }
+syntect = { workspace = true }
+image = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# Same versions gpui 0.2.2 links, to reach the NSWindow behind a gpui Window.
+objc = "0.2"
+raw-window-handle = "0.6"
+
+[lints.rust]
+# `objc` 0.2's msg_send! still probes the pre-2024 `cargo-clippy` feature.
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(feature, values("cargo-clippy"))'] }

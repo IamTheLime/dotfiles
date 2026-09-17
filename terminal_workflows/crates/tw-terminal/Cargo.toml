@@ -1,0 +1,19 @@
+[package]
+name = "tw-terminal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "One shell session: PTY + libghostty-vt terminal state + key encoding"
+
+[dependencies]
+libghostty-vt = { workspace = true, features = ["png"] }
+portable-pty = { workspace = true }
+futures = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+png = "0.18"
+
+[dev-dependencies]
+base64 = "0.22"

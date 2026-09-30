@@ -24,7 +24,7 @@ room; the reduction is what makes the standout elements land.
 | `mainDim` | `#dfb41d` | dashed callout-panel borders, quieter accents |
 | `mainBright` | `#efd54d` | the one standout border per section |
 | `body` | `#ffffff` | body prose, separators between keywords |
-| `note` | `#c2e5ff` | footnotes and side-notes (cursive voice) |
+| `note` | `#c2e5ff` | footnotes and side-notes (Simple voice) |
 | `warning` | `#ff6655` | footnote `*` markers, before/failure states |
 
 ```js
@@ -77,7 +77,7 @@ up with dark text on a dark fill:
 // ordinary box: borderless
 box.fills   = [{ type: 'SOLID', color: P.panel }]
 box.strokes = [{ type: 'SOLID', color: P.panel }]
-title.fills = [{ type: 'SOLID', color: P.main }]   // serif Bold
+title.fills = [{ type: 'SOLID', color: P.main }]   // Simple Bold
 body.fills  = [{ type: 'SOLID', color: P.body }]
 
 // the section's one standout
@@ -99,9 +99,7 @@ t.setRangeFills(0, 7, [{ type: 'SOLID', color: P.main }])
 
 ## Font roles (summary — the full rules live in SKILL.md)
 
-- Cursive display (`Figma Hand`) — scarce, attention only. Always `MAIN`
-  (hooks, headings) or `note` (footnote text); never body colour.
-- Bookish serif (`Merriweather`) — Bold `MAIN` for ordinary titles, Regular
-  `body` for prose.
+- Simple (`Inter`) — all prose and labels; Bold for headings, Medium for
+  labels, Regular for body and footnotes. Never use Scribbled (`Figma Hand`).
 - Mono (`Roboto Mono`) — `MAIN` for keywords embedded in prose, `body` for
   standalone code lines and key-columns.

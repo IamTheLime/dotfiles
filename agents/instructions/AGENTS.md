@@ -56,6 +56,13 @@ candidate, as is an `error` inside an auth filter or interceptor.
 
 ## Working together
 
+When reviewing PR comments, reply to every `To agent:` comment in its original
+thread, prefixed with `From agent: Codex` (or the responding agent name).
+Explain the actual change and reference its commit when available; if it is
+pending or deferred, say so rather than claiming it is done. This is standing
+authorization to post those replies. Never auto-resolve review threads; resolve
+them only when explicitly asked.
+
 Show the plan and wait for agreement before editing files.
 
 Ask before `git commit` and before `git push`, and propose the commit message

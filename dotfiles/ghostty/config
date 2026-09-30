@@ -2,7 +2,7 @@
 # For full options, see: https://github.com/mitchellh/ghostty
 
 # Font configuration
-# font-family = "IosevkaTiago Nerd Font"
+font-family = "IosevkaTiago Nerd Font"
 #font-family = "Cozette"
 font-size = 14
 
@@ -25,6 +25,8 @@ clipboard-write = allow
 
 # Performance
 window-vsync = true
+window-padding-x = 5
+window-padding-y = 5
 
 # Quick terminal (quake-style)
 quick-terminal-position = top

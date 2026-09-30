@@ -313,7 +313,103 @@ return {
                         },
                     },
 
-                    commands = {}, -- Add a custom command or override a global one using the same function name
+                    commands = {
+                        -- Overrides the built-in `expand_all_nodes` (mapped to E). The stock
+                        -- one recurses into every expandable child with no limit, which got
+                        -- painful once filtered_items.visible made build/ and .gradle/ show
+                        -- up. Skips anything flagged gitignored/ignored (the flag is
+                        -- inherited by children, so one check covers a whole subtree) and
+                        -- won't descend into a directory holding more than MAX_CHILDREN.
+                        expand_all_nodes = function(state, node)
+                            local renderer = require("neo-tree.ui.renderer")
+                            local utils = require("neo-tree.utils")
+                            local async = require("plenary.async")
+                            local prefetcher = require("neo-tree.sources.filesystem").prefetcher
+                            local MAX_CHILDREN = 50
+
+                            state.explicitly_opened_nodes = state.explicitly_opened_nodes or {}
+
+                            -- node.filtered_by.gitignored is unreliable here: it's set in
+                            -- fs_scan's job_complete, so freshly prefetched dirs (build/ in
+                            -- particular) are still nil when we inspect them. Ask git once
+                            -- instead — ~20ms, and `--directory` collapses wholly-ignored
+                            -- dirs to a single entry we can prefix-match against.
+                            local ignored_roots = {}
+                            do
+                                local out = vim.fn.systemlist({
+                                    "git", "-C", state.path, "ls-files",
+                                    "--others", "--ignored", "--exclude-standard", "--directory",
+                                })
+                                if vim.v.shell_error == 0 then
+                                    for _, rel in ipairs(out) do
+                                        ignored_roots[#ignored_roots + 1] =
+                                            state.path .. "/" .. rel:gsub("/$", "")
+                                    end
+                                end
+                            end
+
+                            local function is_ignored(n)
+                                local fby = n.filtered_by
+                                if type(fby) == "table" and (fby.gitignored or fby.ignored) then
+                                    return true
+                                end
+                                local id = n:get_id()
+                                for _, p in ipairs(ignored_roots) do
+                                    if id == p or id:sub(1, #p + 1) == p .. "/" then
+                                        return true
+                                    end
+                                end
+                                return false
+                            end
+
+                            local skipped = 0
+
+                            -- is_root: the node E was pressed on always expands, even if big;
+                            -- the size cap only stops us descending further.
+                            local function rec(current, is_root)
+                                -- Loading is what costs, so filter before prefetching: an
+                                -- ignored subtree is never scanned at all.
+                                if prefetcher.should_prefetch(current) then
+                                    prefetcher.prefetch(state, current)
+                                end
+                                local children = state.tree:get_nodes(current:get_id())
+                                if not is_root and #children > MAX_CHILDREN then
+                                    skipped = skipped + 1
+                                    return
+                                end
+                                if not current:is_expanded() then
+                                    current:expand()
+                                    state.explicitly_opened_nodes[current:get_id()] = true
+                                end
+                                for _, child in ipairs(children) do
+                                    if utils.is_expandable(child) then
+                                        if is_ignored(child) then
+                                            skipped = skipped + 1
+                                        else
+                                            rec(child, false)
+                                        end
+                                    end
+                                end
+                            end
+
+                            renderer.position.set(state, nil)
+                            async.run(function()
+                                for _, root in ipairs(node and { node } or state.tree:get_nodes()) do
+                                    if not is_ignored(root) then
+                                        rec(root, true)
+                                    end
+                                end
+                            end, function()
+                                renderer.redraw(state)
+                                if skipped > 0 then
+                                    require("neo-tree.log").info(
+                                        ("expand_all: skipped %d dir(s) (gitignored or >%d entries)")
+                                        :format(skipped, MAX_CHILDREN)
+                                    )
+                                end
+                            end)
+                        end,
+                    },
                 },
                 buffers = {
                     follow_current_file = {

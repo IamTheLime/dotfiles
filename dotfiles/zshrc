@@ -195,13 +195,21 @@ enable-fzf-tab
 export EDITOR="nvim"
 
 nn() {
-    if [[ -d "${1}" ]];
-    then 
-        cd "${1}"
-    else
-      cd "$(dirname "${1}")"
-    fi
-  nvim
+  local integration=0
+  if [[ "${1:-}" == "--integration" ]]; then
+    integration=1
+    shift
+  fi
+  if [[ -n "${1:-}" && -d "${1}" ]]; then
+    cd "${1}"
+  elif [[ -n "${1:-}" ]]; then
+    cd "$(dirname "${1}")"
+  fi
+  if (( integration )); then
+    TW_INTEGRATION=1 nvim
+  else
+    nvim
+  fi
 }
 
 pn() {

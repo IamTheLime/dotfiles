@@ -164,6 +164,9 @@ return {
                 },
             },
         })
+        
+        vim.lsp.config("rust_analyzer", {
+        })
 
         vim.lsp.config("arduino_language_server", {
             cmd = {

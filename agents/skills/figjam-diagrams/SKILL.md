@@ -1,6 +1,6 @@
 ---
 name: figjam-diagrams
-description: Building diagrams in FigJam that survive a projector and stay editable — a reduced single-accent palette, three font voices with cursive reserved for attention, product-readable prose with jargon pushed to footnotes, text as its own nodes rather than shape labels, real columns instead of space-padding, sections and groups so blocks move as units. Read when asked to draw, diagram, or map anything on a Figma board — flow charts, architecture, state machines, sequence or decision diagrams, comparison tables.
+description: Building diagrams in FigJam that survive a projector and stay editable — a reduced single-accent palette, readable Simple typography, product-readable prose with jargon pushed to footnotes, text as its own nodes rather than shape labels, real columns instead of space-padding, sections and groups so blocks move as units. Read when asked to draw, diagram, or map anything on a Figma board — flow charts, architecture, state machines, sequence or decision diagrams, comparison tables.
 ---
 
 # FigJam diagrams
@@ -28,27 +28,18 @@ different MAIN colour are in `references/themes.md`. Two things belong up here:
   a single hex/name for `MAIN` and propose derived anchors for confirmation),
   then derive every tone from those per `themes.md`.
 
-## Three font voices, and cursive is scarce
+## Simple typography; no handwritten fonts
 
-Every piece of text on the board speaks in one of three voices:
+Use FigJam **Simple** (`Inter`) for all prose, headings, annotations,
+connector labels and footnotes. Never use Scribbled (`Figma Hand`) or other
+handwritten fonts: they are difficult to read.
 
-- **Bookish serif** (`Merriweather`) — the workhorse. Ordinary box titles in
-  Bold `MAIN`; body prose in Regular white.
-- **Cursive display** (`Figma Hand`) — the attention voice, and it only works
-  while it is scarce. It is reserved for: the board headline, callout-panel
-  titles, decision-diamond labels, connector labels, floating annotations,
-  footnotes, and the **one standout element per section**. If most titles on a
-  board are cursive, none of them are loud — demote the ordinary ones back to
-  serif.
-- **Technical mono** (`Roboto Mono`) — anything that is code: identifiers,
-  table names, paths, commands, SQL. Inline keywords inside prose are mono in
-  `MAIN` so they read as *things*; separators between them (`·`) stay white so
-  the items separate visually. Standalone code lines and key-columns are mono
-  in white — reserve `MAIN` mono for keywords embedded in prose.
+Use Bold for headings and the one standout title per section, Medium for
+labels, and Regular for body text. Keep emphasis selective through size,
+weight and the single MAIN accent rather than a different font family.
 
-Example of an embedded list of code things:
-
-> `invoice` · `invoice_line` · `payment_attempt` — names in `MAIN` mono, dots in white serif.
+Technical identifiers may use `Roboto Mono`; use MAIN for code embedded in
+prose and white for standalone code. Keep separators in the body font.
 
 ## Write for product readers
 
@@ -60,7 +51,7 @@ The prose in a box must make sense to someone who does not work on the system.
   keyword or a footnote carry the technical detail.
 - **Footnotes carry the technicalia.** When the implementation detail matters
   but would clog the box, mark the statement with a red `*` and put the detail
-  below the box: `*` in red, the note in the note colour, cursive voice, any
+  below the box: `*` in red, the note in the note colour, Simple voice, any
   embedded code in `MAIN` mono. One `*` on the statement, one on the note —
   they find each other.
 - **Bullets over inline density.** A list of three or more things gets one
@@ -72,7 +63,7 @@ The prose in a box must make sense to someone who does not work on the system.
 
 Free-floating text explaining the *idea* of a section — the trick, the payoff,
 the problem breakdown — is a first-class element, not clutter. One or two per
-section, cursive voice, placed in clear space near what they explain.
+section, Simple voice, placed in clear space near what they explain.
 
 **Two-tone rule:** a short hook in `MAIN` ("the trick:", "the payoff:"), the
 explanation in white. A fully-`MAIN` sentence fights the headings; a fully-white
@@ -82,7 +73,7 @@ one disappears into the bodies.
 
 Each section names one element as its point — the mechanism the section exists
 to explain. That element gets the bright-`MAIN` border and (if titled) the
-cursive voice. Everything else is a borderless panel. Two standouts per section
+Simple voice. Everything else is a borderless panel. Two standouts per section
 is zero standouts.
 
 ## Text belongs in text nodes, not in shapes
@@ -95,7 +86,7 @@ Build every box as **shape + title node + body node**, then `figma.group(...)`
 them so dragging the box takes the text with it. Group name matches the shape
 name, which keeps the layer list navigable.
 
-This is what buys you a title in the serif `MAIN` voice, a body in white, and
+This is what buys you a title in the Simple `MAIN` voice, a body in white, and
 the ability to recolour one keyword without touching the rest.
 
 ## Columns are columns
@@ -105,14 +96,14 @@ will not line up, and it looks broken on a projector.
 
 One text node per cell, positioned on a shared x. Key-columns that name code
 things (script names, config keys) are mono white; key-columns that name
-concepts are cursive `MAIN`; the value column is serif white with `MAIN` mono
+concepts are Simple `MAIN`; the value column is Simple white with `MAIN` mono
 keywords where code appears.
 
 ## Density
 
 Numbers that work, as a starting point rather than a law:
 
-- Box padding 20–24px. Serif titles 15–17px Bold; cursive titles 20–24px;
+- Box padding 20–24px. Simple titles 15–17px Bold; Simple Bold titles 20–24px;
   body 11px at line-height 158%; mono ranges 10.5px.
 - ~20px between a title and its body. List row pitch 26–30px; panel rows with
   multi-line values 46–56px.
@@ -164,7 +155,7 @@ engineered.
 
 - **Square** — a thing that exists: a state, a component, a panel, a store.
 - **Diamond** — a decision. Use one wherever the diagram branches on a
-  question. Label in the cursive voice, centred.
+  question. Label in the Simple voice, centred.
 - **Dashed border** — commentary, a contract, a superseded/before state.
   Callout panels are dashed in dim-`MAIN`; before/failure states are dashed in
   the warning colour.
@@ -185,7 +176,7 @@ crossing that cannot happen. Reach for a connector only when the relationship
 is a *flow* between things that genuinely sit apart.
 
 Connectors are `MAIN` for live flow, warning-colour dashed for the before
-state. Labels are cursive white.
+state. Labels are Simple white.
 
 **Align to a column grid.** Boxes sharing an `x` or a `y` let elbow connectors
 run dead straight. Pick a few column positions and a row pitch, and reuse them.
@@ -201,7 +192,7 @@ all its branches.
 ## Comparisons are tables
 
 When the content is genuinely rows and columns — before/after, option matrices —
-use `figma.createTable()`, not a grid of shapes. Style the header row (cursive
+use `figma.createTable()`, not a grid of shapes. Style the header row (Simple
 `MAIN` headers work well) and let the body inherit; cell content that is code
 is mono. A shape grid pretending to be a table cannot be edited like one.
 
@@ -216,7 +207,7 @@ on the page root, every section's content inside its frame with even padding,
 no section left oversized around a small amount of content, no wrapper drift
 from refits.
 
-Then check the voice: cursive still scarce, exactly one standout per section,
+Then check the voice: Simple used consistently, exactly one standout per section,
 no jargon-suffixed sentences, every `*` paired with its footnote.
 
 Fix what you find; then say plainly what you left for the human to adjust,
@@ -226,8 +217,8 @@ rather than implying the layout is final.
 
 A section explaining a cache-fallback read in an imaginary `orders-service`:
 
-- Standout box (bright-`MAIN` border, cursive title): `2 · cache fallback`.
-- Ordinary boxes (borderless, serif `MAIN` titles): `Read request`,
+- Standout box (bright-`MAIN` border, Simple title): `2 · cache fallback`.
+- Ordinary boxes (borderless, Simple `MAIN` titles): `Read request`,
   `1 · Try the cache`, `Serve the row`.
 - Diamond: `hit?` — solid `MAIN` "yes" arrow with one arrowhead style, dashed
   warning "no" arrow with another.
@@ -236,4 +227,4 @@ A section explaining a cache-fallback read in an imaginary `orders-service`:
 - Annotation: "**the idea:** serve stale before serving slow — the miss rate
   tells us when to resize" (hook in `MAIN`, rest white).
 - Footnote: "`*` Note: a miss costs a full scan of `order_events`" — red `*`,
-  note-colour cursive, `order_events` in `MAIN` mono.
+  note-colour Simple, `order_events` in `MAIN` mono.

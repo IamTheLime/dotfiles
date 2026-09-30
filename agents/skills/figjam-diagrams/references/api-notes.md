@@ -63,6 +63,11 @@ Each of these fails in a way that is not obvious from the error.
   old text children, build new ones, then group again. A group whose children are
   all removed disappears on its own.
 - Groups expose `x`/`y`; setting them moves every child.
+- `figma.group(...)` inserts the new group at the z-index of its **topmost**
+  member. Group a shape *after* creating the text nodes that sit on it and
+  the group lands above them — the fill hides the text. Either group the
+  shape together with all of its text, or `section.insertChild(0, group)`
+  afterwards.
 
 ## Connectors
 

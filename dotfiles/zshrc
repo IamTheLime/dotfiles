@@ -65,14 +65,14 @@ _repos() {
   # First pass: collect each completion value and the dir it maps to.
   for repo_dir in "${REPOS_DIR}"/*/; do
     [[ -d "$repo_dir" ]] || continue
-    repo=$(basename "$repo_dir")
+    repo=${${repo_dir%/}:t}
     local -a subdirs=()
     for wt_dir in "${repo_dir}"*/; do
       [[ -d "$wt_dir" ]] && subdirs+=("$wt_dir")
     done
     if (( ${#subdirs[@]} > 0 )); then
       for wt_dir in "${subdirs[@]}"; do
-        entry="${repo}/$(basename "$wt_dir")"
+        entry="${repo}/${${wt_dir%/}:t}"
         entries+=("$entry"); dirs+=("${wt_dir%/}")
         (( ${#entry} > width )) && width=${#entry}
       done

@@ -53,58 +53,81 @@ zstyle :omz:plugins:ssh-agent quiet yes
 
 
 export REPOS_DIR="${HOME}/Documents/repos"
-zstyle ':fzf-tab:complete:repos:*' fzf-preview 'bat --color=always "${REPOS_DIR}/$word/README.md" 2>/dev/null || echo "No README found"'
-zstyle ':fzf-tab:complete:repos:*' fzf-flags --header='worktree  /  branch'
+zstyle ':fzf-tab:complete:repos:*' fzf-preview '
+  printf "Last changes\n\n"
+  if [[ -d "${REPOS_DIR}/$word/.git" || -f "${REPOS_DIR}/$word/.git" ]]; then
+    git --no-pager -C "${REPOS_DIR}/$word" log -10 --color=always --format="%C(yellow)%h%Creset %s %C(dim)(%ar, %an)%Creset" 2>/dev/null || echo "No commits found"
+  else
+    echo "No Git repository found"
+  fi
+  printf "\nREADME\n\n"
+  bat --style=plain --paging=never --color=always "${REPOS_DIR}/$word/README.md" 2>/dev/null || echo "No README found"
+'
+zstyle ':fzf-tab:complete:repos:*' single-group color
+zstyle ':fzf-tab:complete:repos:*' query-string input
+zstyle ':fzf-tab:complete:repos:*' prefix ''
+zstyle ':fzf-tab:complete:repos:*' show-group none
 repos() {
    cd "${REPOS_DIR}/$1"
 }
 _repos() {
   setopt localoptions nullglob
-  local -a entries dirs displays
-  local repo_dir wt_dir repo entry branch width=0 i
-  # First pass: collect each completion value and the dir it maps to.
+  local -a entries dirs trees repo_entries repo_displays tree_entries tree_displays group_colors
+  local repo_dir wt_dir repo entry branch width=0 i ret=1 header='repo / worktree'
+  # First pass: collect repository roots and immediate child checkouts.
   for repo_dir in "${REPOS_DIR}"/*/; do
     [[ -d "$repo_dir" ]] || continue
     repo=${${repo_dir%/}:t}
     local -a subdirs=()
     for wt_dir in "${repo_dir}"*/; do
-      [[ -d "$wt_dir" ]] && subdirs+=("$wt_dir")
+      [[ -d ${wt_dir}.git || -f ${wt_dir}.git ]] && subdirs+=("$wt_dir")
     done
-    if (( ${#subdirs[@]} > 0 )); then
-      for wt_dir in "${subdirs[@]}"; do
-        entry="${repo}/${${wt_dir%/}:t}"
-        entries+=("$entry"); dirs+=("${wt_dir%/}")
-        (( ${#entry} > width )) && width=${#entry}
-      done
-    else
-      entries+=("$repo"); dirs+=("${repo_dir%/}")
+    if [[ -d ${repo_dir}.git || -f ${repo_dir}.git ]] || (( ${#subdirs[@]} == 0 )); then
+      entries+=("$repo"); dirs+=("${repo_dir%/}"); trees+=(0)
       (( ${#repo} > width )) && width=${#repo}
     fi
+    for wt_dir in "${subdirs[@]}"; do
+      entry="${repo}/${${wt_dir%/}:t}"
+      entries+=("$entry"); dirs+=("${wt_dir%/}"); trees+=(1)
+      (( ${#entry} > width )) && width=${#entry}
+    done
   done
-  # Second pass: build aligned display strings with the checked-out branch.
-  # Read HEAD directly instead of spawning `git` per worktree (that made tab slow
-  # with 100+ entries). No ANSI colour: fzf-tab feeds the display back into the
-  # match query, so an escape prefix breaks completion.
-  local g gd head sym=$'\u2387'   # \u2387 branch glyph; swap to a Nerd-Font glyph if you prefer
+  (( ${#header} > width )) && width=${#header}
+  zstyle ':fzf-tab:complete:repos:*' fzf-flags --header="   ${(r:$width:)header}    branch" --preview-window=border-none
+  # Read HEAD directly to keep completion fast with 100+ entries.
+  local g gd head display marker sym=$'\u2387'
   for (( i = 1; i <= ${#entries}; i++ )); do
     g=${dirs[i]}/.git
-    if [[ -f $g ]]; then                 # linked worktree: .git is a pointer file
+    if [[ -f $g ]]; then
       gd=$(<$g); g=${gd#gitdir: }
       [[ $g != /* ]] && g=${dirs[i]}/$g
     fi
+    [[ -f $g/commondir || -d $g/worktrees ]] && trees[i]=1
     branch=""
     if [[ -r $g/HEAD ]]; then
       head=$(<$g/HEAD)
       [[ $head == ref:\ refs/heads/* ]] && branch=${head#ref: refs/heads/}
     fi
-    if [[ -n $branch ]]; then
-      entry=${entries[i]}
-      displays+=("${(r:$width:)entry}  ${sym} ${branch}")
+    marker='🦿'
+    (( trees[i] )) && marker='🌴'
+    entry=${entries[i]}
+    display="$marker $entry"
+    [[ -n $branch ]] && display="$marker ${(r:$width:)entry}  ${sym} ${branch}"
+    if (( trees[i] )); then
+      tree_entries+=("$entry"); tree_displays+=("$display")
     else
-      displays+=("${entries[i]}")
+      repo_entries+=("$entry"); repo_displays+=("$display")
     fi
   done
-  compadd -d displays -a entries
+  # A shared first SGR keeps the installed group filter from hiding either group.
+  if compadd -X repositories -J repositories -d repo_displays -a repo_entries; then
+    group_colors+=($'\e[0m'); ret=0
+  fi
+  if compadd -X worktrees -J worktrees -d tree_displays -a tree_entries; then
+    group_colors+=($'\e[0m\e[32m'); ret=0
+  fi
+  zstyle ':fzf-tab:complete:repos:*' group-colors "${group_colors[@]}"
+  return $ret
 }
 compdef _repos repos
 

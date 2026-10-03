@@ -93,7 +93,7 @@ _repos() {
     done
   done
   (( ${#header} > width )) && width=${#header}
-  zstyle ':fzf-tab:complete:repos:*' fzf-flags --header="   ${(r:$width:)header}    branch" --preview-window=border-none
+  zstyle ':fzf-tab:complete:repos:*' fzf-flags --header="   ${(r:$width:)header}    branch" --preview-window=border-none --height=80%
   # Read HEAD directly to keep completion fast with 100+ entries.
   local g gd head display marker sym=$'\u2387'
   for (( i = 1; i <= ${#entries}; i++ )); do

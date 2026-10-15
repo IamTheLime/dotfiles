@@ -84,6 +84,11 @@ shape for navigating those.
 
 ## Toolchain
 
+Repositories live in `~/Documents/repos`. Create worktrees as immediate child
+directories of the existing repository root, alongside `main`, so the `repos`
+command can discover them. Reuse existing clones; use `gitclonewithworktree`
+when cloning a new repository.
+
 Java and Gradle are managed through SDKMAN. Select versions with `sdk use`
 rather than reaching for `/usr/libexec/java_home` or assuming a system JDK.
 

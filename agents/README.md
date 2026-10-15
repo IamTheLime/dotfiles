@@ -39,6 +39,11 @@ because paying for it on unrelated turns is what makes context expensive.
   real columns, spacing that doesn't collide. References for both palettes and
   the FigJam API's traps.
 
+- **`bespoke-design`** — build bespoke presentations and websites through a
+  guided interview, random-string concept exploration and visual refinement.
+  Includes a question bank, seed generator and review guide. Invoke with
+  `$bespoke-design` and describe the subject and desired output.
+
 ## Install
 
 ```sh

@@ -1,4 +1,4 @@
-local active_integration = "codecompanion" -- "codecompanion", "claudecode" or "opencode"
+local active_integration = "opencode" -- "codecompanion", "claudecode" or "opencode"
 
 local integrations = {}
 
@@ -118,24 +118,31 @@ elseif active_integration == "claudecode" then
 elseif active_integration == "opencode" then
     integrations = {
         {
-            "NickvanDyke/opencode.nvim",
+            "nickjvandyke/opencode.nvim",
+            branch = "main", -- OpenCode V2; stable releases target V1.
             dependencies = {
                 { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
             },
             config = function()
-                vim.g.opencode_opts = {}
+                local terminal_opts = { win = { position = "right", enter = false } }
+
+                vim.g.opencode_opts = {
+                    server = {
+                        start = function()
+                            require("snacks.terminal").open("opencode", terminal_opts)
+                        end,
+                    },
+                }
                 vim.o.autoread = true
 
-                vim.keymap.set({ "n", "x" }, "<C-q>", function() require("opencode").ask("@this: ", { submit = true }) end,
-                    { desc = "Ask opencode" })
-                vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,
-                    { desc = "Execute opencode action…" })
-                vim.keymap.set({ "n", "x" }, "ga", function() require("opencode").prompt("@this") end,
-                    { desc = "Add to opencode" })
-                vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,
-                    { desc = "Toggle opencode" })
-                vim.keymap.set('n', '+', '<C-a>', { desc = 'Increment', noremap = true })
-                vim.keymap.set('n', '-', '<C-x>', { desc = 'Decrement', noremap = true })
+                -- Reuse the AI shortcuts; leave Ctrl-A/Ctrl-X, go and Harpoon's <leader>a alone.
+                vim.keymap.set({ "n", "x" }, "<C-q>", function() require("opencode").ask("@this: ") end,
+                    { desc = "Ask OpenCode about cursor/selection" })
+                vim.keymap.set({ "n", "x" }, "<leader>oa", function() require("opencode").select() end,
+                    { desc = "OpenCode actions" })
+                vim.keymap.set({ "n", "t" }, "<C-.>", function()
+                    require("snacks.terminal").toggle("opencode", terminal_opts)
+                end, { desc = "Toggle OpenCode terminal" })
             end,
         },
     }

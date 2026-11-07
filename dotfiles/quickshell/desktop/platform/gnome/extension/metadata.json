@@ -1,0 +1,7 @@
+{
+  "uuid": "quickshell-bridge@dotfiles.local",
+  "name": "Dotfiles Quickshell Bridge (experimental)",
+  "description": "Window state, panel placement and tab-group coordination for the dotfiles Quickshell UI. Native blur and decoration removal are unavailable.",
+  "shell-version": ["45", "46", "47", "48", "49", "50", "51"],
+  "version": 1
+}

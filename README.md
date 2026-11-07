@@ -23,7 +23,7 @@ Pulled in automatically: oh-my-zsh and the `fzf-tab`, `zsh-autosuggestions`,
 `zsh-syntax-highlighting` plugins (git-cloned by the installer).
 
 Config-only (installed if you have the app): Ghostty, Zed, Sioyek, Hyprland,
-tmux, IntelliJ (ideavim).
+tmux, IntelliJ (ideavim), Quickshell.
 
 ## Where things land
 
@@ -47,3 +47,9 @@ tmux, IntelliJ (ideavim).
 
 Override targets with `CLAUDE_HOME` / `CODEX_HOME`. A root-owned `~/.codex`
 isn't touched — the `sudo ln` lines are printed for you to run.
+
+## Quickshell on KDE
+
+See [installation, launch and customization](dotfiles/quickshell/README.md).
+The optional installer links the named `desktop` configuration; it does not
+enable autostart or change Plasma settings.

@@ -212,6 +212,22 @@ fi
 
 echo ""
 
+# Setup Quickshell (optional)
+if ask_yes_no "Do you want to setup Quickshell config?"; then
+    QUICKSHELL_TARGET="$HOME/.config/quickshell/desktop"
+    mkdir -p "$HOME/.config/quickshell"
+    if [ -e "$QUICKSHELL_TARGET" ] && [ ! -L "$QUICKSHELL_TARGET" ]; then
+        mv "$QUICKSHELL_TARGET" "$QUICKSHELL_TARGET.backup.$(date +%s%N)"
+    fi
+    [ -L "$QUICKSHELL_TARGET" ] && rm "$QUICKSHELL_TARGET"
+    ln -s "$DOTFILES_DIR/dotfiles/quickshell/desktop" "$QUICKSHELL_TARGET"
+    echo -e "${GREEN}✓ Quickshell config linked. Run: $DOTFILES_DIR/dotfiles/quickshell/run.sh${NC}"
+else
+    echo -e "${YELLOW}Skipping Quickshell config setup.${NC}"
+fi
+
+echo ""
+
 # Setup Hyprland (optional)
 if ask_yes_no "Do you want to setup Hyprland config?"; then
     echo -e "${BLUE}Setting up Hyprland config...${NC}"

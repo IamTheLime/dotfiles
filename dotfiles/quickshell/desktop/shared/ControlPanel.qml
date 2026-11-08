@@ -12,6 +12,7 @@ import Quickshell.Bluetooth
 
 PopupWindow {
     id: panel
+    grabFocus: true
     required property bool anchorHovered
     property int tab: 0
     property int bubbleSection: 2
@@ -40,7 +41,10 @@ PopupWindow {
     implicitWidth: 440
     implicitHeight: Math.min((panel.screen?.height ?? 900) - 100, 640)
     PwObjectTracker { objects: panel.visible ? Pipewire.nodes.values : [] }
-    onVisibleChanged: if (visible) opening.restart()
+    onVisibleChanged: {
+        if (visible) opening.restart();
+        else dismissed();
+    }
     NumberAnimation { id: opening; target: body; property: "scale"; from: 0.96; to: 1; duration: 190; easing.type: Easing.OutBack; easing.overshoot: 0.6 }
     component Heading: Text { color: Theme.text; font.pixelSize: 13; font.weight: Font.DemiBold }
     component Note: Text { color: Theme.secondaryText; font.pixelSize: 12; wrapMode: Text.Wrap }
@@ -59,7 +63,7 @@ PopupWindow {
             enabled: panel.visible
             NumberAnimation { duration: 170; easing.type: Easing.OutBack; easing.overshoot: 0.35 }
         }
-        readonly property real targetNeckX: Math.max(54, Math.min(width - 54, panel.bubbleCenter - x))
+        readonly property real targetNeckX: Math.max(neckWidth / 2 + 4, Math.min(width - neckWidth / 2 - 4, panel.bubbleCenter - x))
         property real neckX: targetNeckX
         Behavior on neckX {
             enabled: panel.visible
@@ -102,26 +106,30 @@ PopupWindow {
                 const half = surface.neckWidth / 2;
                 const leftTail = Math.min(0, surface.tailOffset);
                 const rightTail = Math.max(0, surface.tailOffset);
+                const leftRadius = Math.min(r, Math.max(0, (neck - half - inset) / 2));
+                const rightRadius = Math.min(r, Math.max(0, (right - neck - half) / 2));
+                const leftShoulder = Math.max(inset + leftRadius, neck - half - 16 + leftTail);
+                const rightShoulder = Math.min(right - rightRadius, neck + half + 16 + rightTail);
                 const tint = ctx.createLinearGradient(0, 0, 0, height);
                 tint.addColorStop(0, Theme.rimTop);
                 tint.addColorStop(0.45, Theme.rimMiddle);
                 tint.addColorStop(1, Theme.rimBottom);
                 ctx.beginPath();
-                ctx.moveTo(inset + r, top);
-                ctx.lineTo(neck - half - 16 + leftTail, top);
-                ctx.bezierCurveTo(neck - half + leftTail, top, neck - half, top - 8, neck - half, inset + 18);
+                ctx.moveTo(inset + leftRadius, top);
+                ctx.lineTo(leftShoulder, top);
+                ctx.bezierCurveTo(Math.max(leftShoulder, neck - half + leftTail), top, neck - half, top - 8, neck - half, inset + 18);
                 ctx.arcTo(neck - half, inset, neck - half + 18, inset, 18);
                 ctx.lineTo(neck + half - 18, inset);
                 ctx.arcTo(neck + half, inset, neck + half, inset + 18, 18);
-                ctx.bezierCurveTo(neck + half, top - 8, neck + half + rightTail, top, neck + half + 16 + rightTail, top);
-                ctx.lineTo(right - r, top);
-                ctx.arcTo(right, top, right, top + r, r);
+                ctx.bezierCurveTo(neck + half, top - 8, Math.min(rightShoulder, neck + half + rightTail), top, rightShoulder, top);
+                ctx.lineTo(right - rightRadius, top);
+                ctx.arcTo(right, top, right, top + rightRadius, rightRadius);
                 ctx.lineTo(right, bottom - r);
                 ctx.arcTo(right, bottom, right - r, bottom, r);
                 ctx.lineTo(inset + r, bottom);
                 ctx.arcTo(inset, bottom, inset, bottom - r, r);
-                ctx.lineTo(inset, top + r);
-                ctx.arcTo(inset, top, inset + r, top, r);
+                ctx.lineTo(inset, top + leftRadius);
+                ctx.arcTo(inset, top, inset + leftRadius, top, leftRadius);
                 ctx.closePath();
                 ctx.fillStyle = Theme.glass;
                 ctx.fill();

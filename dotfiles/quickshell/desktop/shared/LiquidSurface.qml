@@ -11,5 +11,7 @@ ShaderEffect {
     property real singleShape: 0
     property real cornerRadius: 14
     property real edgeFeather: 0
+    property real edgeHighlight: 1
+    property real settling: 0
     fragmentShader: Qt.resolvedUrl("shaders/liquid.frag.qsb")
 }

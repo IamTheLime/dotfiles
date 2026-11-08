@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import "../platform"
+import "theme"
 import Quickshell.Wayland
 
 PopupWindow {
@@ -10,74 +11,173 @@ PopupWindow {
     required property string title
     required property bool anchorHovered
     property var path: []
+    property real navigationHeight: 0
+    property bool browsingSubmenus: false
+    property bool filterOpen: false
+    property string filterText: ""
+    readonly property string query: filterText.trim().toLocaleLowerCase()
+    readonly property var entries: currentOpener.children.values.filter(entry =>
+        !query || (!entry.isSeparator && entry.text.replace(/&(.)/g, "$1").toLocaleLowerCase().includes(query)))
+    readonly property real entriesHeight: entries.length
+        ? entries.reduce((height, entry) => height + (entry.isSeparator ? 8 : 32) + 2, -2) : 40
+    readonly property real menuHeight: Math.min(implicitHeight,
+        Math.max(navigationHeight, 44 + (filterOpen ? 36 : 0) + entriesHeight))
+
+    function resetFilter() {
+        filterText = "";
+        filterOpen = false;
+    }
+    readonly property var currentOpener: path.length ? path[path.length - 1] : opener
+
+    function openSubmenu(entry) {
+        navigationHeight = Math.max(navigationHeight, surface.height);
+        browsingSubmenus = true;
+        navigationGuard.restart();
+        const child = submenuOpener.createObject(popup, {menu: entry});
+        if (child) path = path.concat([child]);
+    }
+    function goBack() {
+        if (!path.length) return;
+        navigationGuard.restart();
+        const child = path[path.length - 1];
+        path = path.slice(0, -1);
+        child.destroy();
+    }
+    function resetNavigation() {
+        const previous = path;
+        path = [];
+        for (let i = previous.length - 1; i >= 0; --i) previous[i].destroy();
+        resetFilter();
+        navigationHeight = 0;
+        browsingSubmenus = false;
+        navigationGuard.stop();
+    }
     signal dismissed()
     BackgroundEffect.blurRegion: Backend.capabilities.blur ? nativeBlur : null
     Region { id: nativeBlur; item: surface; radius: surface.radius }
     color: "transparent"
     implicitWidth: 280
-    implicitHeight: Math.min(560, menuColumn.implicitHeight + 12)
+    // Keep the native buffer stable while submenu content and blur bounds change.
+    implicitHeight: 560
+    mask: Region { item: surface }
+    grabFocus: true
 
-    onVisibleChanged: {
-        if (!visible)
-            path = [];
+    onVisibleChanged: if (!visible) resetNavigation()
+    onMenuHandleChanged: resetNavigation()
+    onCurrentOpenerChanged: {
+        resetFilter();
+        Qt.callLater(() => menuScroll.contentItem.contentY = 0);
     }
+    onQueryChanged: Qt.callLater(() => menuScroll.contentItem.contentY = 0)
 
     QsMenuOpener {
         id: opener
-        menu: popup.path.length ? popup.path[popup.path.length - 1] : popup.menuHandle
+        menu: popup.menuHandle
     }
+
+    Component { id: submenuOpener; QsMenuOpener {} }
+    Timer { id: navigationGuard; interval: 400 }
 
     Timer {
         interval: 450
-        running: popup.visible && !menuHover.hovered && !popup.anchorHovered
+        running: popup.visible && !popup.browsingSubmenus && !popup.filterOpen && !navigationGuard.running && !menuHover.hovered && !popup.anchorHovered
         onTriggered: popup.dismissed()
     }
 
     GlassSurface {
         id: surface
-        anchors.fill: parent
+        anchors { top: parent.top; left: parent.left; right: parent.right }
+        height: popup.menuHeight
         radius: 12
         HoverHandler { id: menuHover }
 
+        Row {
+            id: menuHeader
+            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 6 }
+            height: 30
+            ToolButton {
+                width: 32
+                height: 30
+                text: "‹"
+                enabled: popup.path.length > 0
+                onClicked: popup.goBack()
+            }
+            Text {
+                width: parent.width - 96
+                height: 30
+                verticalAlignment: Text.AlignVCenter
+                text: popup.title
+                color: "#e6e9ef"
+                elide: Text.ElideRight
+            }
+            ToolButton {
+                id: filterButton
+                width: 32
+                height: 30
+                Accessible.name: "Filter menu by name"
+                checked: popup.filterOpen
+                contentItem: Canvas {
+                    property color ink: filterButton.checked ? Theme.accent : Theme.foreground
+                    onInkChanged: requestPaint()
+                    onPaint: {
+                        const ctx = getContext("2d");
+                        ctx.reset();
+                        ctx.strokeStyle = ink;
+                        ctx.lineWidth = 1.5;
+                        ctx.lineJoin = "round";
+                        const x = (width - 16) / 2, y = (height - 16) / 2;
+                        ctx.beginPath();
+                        ctx.moveTo(x + 1, y + 2); ctx.lineTo(x + 15, y + 2);
+                        ctx.lineTo(x + 10, y + 8); ctx.lineTo(x + 10, y + 13);
+                        ctx.lineTo(x + 6, y + 15); ctx.lineTo(x + 6, y + 8);
+                        ctx.closePath(); ctx.stroke();
+                    }
+                }
+                onClicked: {
+                    popup.filterOpen = !popup.filterOpen;
+                    popup.filterText = "";
+                    if (popup.filterOpen) searchField.forceActiveFocus();
+                }
+            }
+            ToolButton {
+                width: 32
+                height: 30
+                text: "×"
+                onClicked: popup.dismissed()
+            }
+        }
+
+        TextField {
+            id: searchField
+            anchors { top: menuHeader.bottom; left: parent.left; right: parent.right; margins: 6; topMargin: 2 }
+            height: popup.filterOpen ? 34 : 0
+            visible: popup.filterOpen
+            placeholderText: "Filter names…"
+            text: popup.filterText
+            onTextEdited: popup.filterText = text
+            color: Theme.foreground
+            placeholderTextColor: Theme.muted
+            selectionColor: Theme.accent
+            font.pixelSize: 13
+            background: Rectangle { radius: 6; color: Theme.button }
+            Keys.onEscapePressed: popup.resetFilter()
+        }
+
         ScrollView {
-            anchors.fill: parent
-            anchors.margins: 6
+            id: menuScroll
+            anchors { top: searchField.bottom; bottom: parent.bottom; left: parent.left; right: parent.right; margins: 6; topMargin: 2 }
             contentWidth: availableWidth
+            contentHeight: popup.entriesHeight
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
             clip: true
 
             Column {
                 id: menuColumn
-                width: parent.width
+                width: menuScroll.availableWidth
                 spacing: 2
 
-                Row {
-                    width: parent.width
-                    height: 30
-                    ToolButton {
-                        width: 32
-                        height: 30
-                        text: "‹"
-                        enabled: popup.path.length > 0
-                        onClicked: popup.path = popup.path.slice(0, -1)
-                    }
-                    Text {
-                        width: parent.width - 64
-                        height: 30
-                        verticalAlignment: Text.AlignVCenter
-                        text: popup.title
-                        color: "#e6e9ef"
-                        elide: Text.ElideRight
-                    }
-                    ToolButton {
-                        width: 32
-                        height: 30
-                        text: "×"
-                        onClicked: popup.dismissed()
-                    }
-                }
-
                 Repeater {
-                    model: opener.children
+                    model: popup.entries
                     delegate: Item {
                         id: menuRow
                         required property var modelData
@@ -126,7 +226,7 @@ PopupWindow {
                                 enabled: menuRow.modelData.enabled
                                 onClicked: {
                                     if (menuRow.modelData.hasChildren) {
-                                        popup.path = popup.path.concat([menuRow.modelData]);
+                                        popup.openSubmenu(menuRow.modelData);
                                     } else {
                                         menuRow.modelData.triggered();
                                         popup.dismissed();
@@ -137,8 +237,8 @@ PopupWindow {
                     }
                 }
                 Text {
-                    visible: opener.children.values.length === 0
-                    text: "Loading…"
+                    visible: popup.entries.length === 0
+                    text: popup.query ? "No matching entries" : "No entries"
                     color: "#e6e9ef"
                     padding: 12
                 }

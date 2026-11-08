@@ -136,7 +136,7 @@ Scope {
                 role: "top"
 
                 readonly property bool joinedTarget: root.windowState[screen.name] ?? false
-                readonly property int maximizeDuration: 160
+                readonly property int maximizeDuration: 600
                 readonly property int restoreDuration: 620
                 property real joinProgress: joinedTarget ? 1 : 0
                 readonly property real joined: Math.max(0, Math.min(1, joinProgress))
@@ -191,8 +191,8 @@ Scope {
                     anchor.window: topBar.window
                     anchor.rect.x: Math.max(0, topBar.width - width - 4)
                     bubbleCenter: {
-                        const icon = controls.bubbleSection === 0 ? volume : controls.bubbleSection === 1 ? bluetoothIcon : controlCentreButton;
-                        return icon.mapToItem(topBar.contentItem, icon.width / 2, 0).x - anchor.rect.x;
+                        const icon = controls.bubbleSection === 0 ? volume : controls.bubbleSection === 1 ? bluetoothButton : controlCentreButton;
+                        return trayRow.x + icon.x + icon.width / 2 - anchor.rect.x;
                     }
                     anchor.rect.y: topBar.pillY - 4
                     anchor.adjustment: PopupAdjustment.SlideX
@@ -206,9 +206,8 @@ Scope {
                     id: joinAnimation
                     NumberAnimation {
                         duration: joinAnimation.targetValue === 1 ? topBar.maximizeDuration : topBar.restoreDuration
-                        easing.type: joinAnimation.targetValue === 1 ? Easing.OutElastic : Easing.OutCubic
-                        easing.amplitude: 1
-                        easing.period: 0.65
+                        easing.type: joinAnimation.targetValue === 1 ? Easing.BezierSpline : Easing.OutCubic
+                        easing.bezierCurve: [0.22, 0, 0.18, 1, 1, 1]
                     }
                 }
 
@@ -227,7 +226,13 @@ Scope {
                     rightBox: Qt.vector4d(trayBox.x, trayBox.y, trayBox.width, trayBox.height)
                     tint: Qt.vector4d(Theme.topBarGlass.r, Theme.topBarGlass.g, Theme.topBarGlass.b, Theme.topBarGlass.a)
                     joined: topBar.joined
-                    phase: topBar.surfacePhase
+                    phase: topBar.joinedTarget ? topBar.joined : topBar.surfacePhase
+                    settling: {
+                        if (!topBar.joinedTarget) return 0;
+                        const t = Math.max(0, Math.min(1, (topBar.surfacePhase - 0.45) / 0.55));
+                        return 2.4 * Math.sin(t * Math.PI * 2) * Math.pow(1 - t, 2);
+                    }
+                    edgeHighlight: topBar.joinedTarget ? Math.max(0, 1 - topBar.joined / 0.8) : 1
                 }
 
                 Rectangle {
@@ -418,6 +423,7 @@ Scope {
                         }
                     }
                     Rectangle {
+                        id: bluetoothButton
                         width: 34
                         height: 28
                         radius: 6

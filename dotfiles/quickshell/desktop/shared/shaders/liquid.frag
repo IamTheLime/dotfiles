@@ -14,6 +14,8 @@ layout(std140, binding = 0) uniform buf {
     float singleShape;
     float cornerRadius;
     float edgeFeather;
+    float edgeHighlight;
+    float settling;
 };
 
 float roundedBox(vec2 p, vec4 box, vec4 corners) {
@@ -56,11 +58,13 @@ void main() {
             overhang - length(p - vec2(surfaceSize.x - overhang, 34.0 + overhang)));
         whole = min(whole, min(leftCorner, rightCorner));
         d = mix(d, whole, smoothstep(0.8, 1.0, joined));
+        d -= settling * smoothstep(24.0, 34.0, p.y)
+            * sin(qt_TexCoord0.x * 3.14159265);
     }
     float coverage = edgeFeather > 0.0
         ? 1.0 - smoothstep(-edgeFeather, 0.0, d)
         : 1.0 - smoothstep(-0.7, 0.7, d);
-    float glint = exp(-abs(d + 2.0) * 0.5) * 0.10 + crest * 0.09;
+    float glint = exp(-abs(d + 2.0) * 0.5) * 0.10 * edgeHighlight + crest * 0.09;
     vec3 colour = tint.rgb + vec3(0.65, 0.8, 1.0) * glint * pulse;
     float alpha = tint.a * coverage * qt_Opacity;
     fragColor = vec4(colour * alpha, alpha);

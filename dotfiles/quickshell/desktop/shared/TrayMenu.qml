@@ -79,7 +79,7 @@ PopupWindow {
     Timer { id: navigationGuard; interval: 400 }
 
     Timer {
-        interval: 450
+        interval: Theme.menuHoverGrace
         running: popup.visible && !popup.browsingSubmenus && !popup.filterOpen && !navigationGuard.running && !menuHover.hovered && !popup.anchorHovered
         onTriggered: popup.dismissed()
     }
@@ -96,13 +96,14 @@ PopupWindow {
             anchors { top: parent.top; left: parent.left; right: parent.right; margins: 6 }
             height: 30
             ToolButton {
+                font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                 width: 32
                 height: 30
                 text: "‹"
                 enabled: popup.path.length > 0
                 onClicked: popup.goBack()
             }
-            Text {
+            UiText {
                 width: parent.width - 96
                 height: 30
                 verticalAlignment: Text.AlignVCenter
@@ -111,6 +112,7 @@ PopupWindow {
                 elide: Text.ElideRight
             }
             ToolButton {
+                font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                 id: filterButton
                 width: 32
                 height: 30
@@ -140,6 +142,7 @@ PopupWindow {
                 }
             }
             ToolButton {
+                font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                 width: 32
                 height: 30
                 text: "×"
@@ -148,6 +151,7 @@ PopupWindow {
         }
 
         TextField {
+            font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
             id: searchField
             anchors { top: menuHeader.bottom; left: parent.left; right: parent.right; margins: 6; topMargin: 2 }
             height: popup.filterOpen ? 34 : 0
@@ -199,13 +203,13 @@ PopupWindow {
                             visible: !menuRow.modelData.isSeparator
                             opacity: menuRow.modelData.enabled ? 1 : 0.45
 
-                            Text {
+                            UiText {
                                 x: 8
                                 anchors.verticalCenter: parent.verticalCenter
                                 text: menuRow.modelData.checkState === Qt.Checked ? "✓" : ""
                                 color: "#e6e9ef"
                             }
-                            Text {
+                            UiText {
                                 x: 30
                                 width: parent.width - 56
                                 anchors.verticalCenter: parent.verticalCenter
@@ -214,7 +218,7 @@ PopupWindow {
                                 elide: Text.ElideRight
                                 font.pixelSize: 13
                             }
-                            Text {
+                            UiText {
                                 anchors { right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
                                 text: menuRow.modelData.hasChildren ? "›" : ""
                                 color: "#e6e9ef"
@@ -236,7 +240,7 @@ PopupWindow {
                         }
                     }
                 }
-                Text {
+                UiText {
                     visible: popup.entries.length === 0
                     text: popup.query ? "No matching entries" : "No entries"
                     color: "#e6e9ef"

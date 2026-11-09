@@ -20,17 +20,18 @@ PopupWindow {
     implicitHeight: Math.min(380, windowList.implicitHeight + 20)
 
     component ActionPill: Button {
+        font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
         id: action
         property bool destructive: false
         height: 34
         hoverEnabled: true
         scale: down ? 0.97 : 1
         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-        contentItem: Text {
+        contentItem: UiText {
             text: action.text
             color: action.destructive ? Theme.closeText : Theme.secondaryText
             font.pixelSize: 12
-            font.weight: Font.Medium
+            font.weight: Theme.bodyWeight
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
         }
@@ -61,7 +62,7 @@ PopupWindow {
     onVisibleChanged: if (!visible) groupEditor.visible = false
 
     Timer {
-        interval: 300
+        interval: Theme.menuHoverGrace
         running: popup.visible && !groupEditor.visible && !popup.anchorHovered && !popupHover.hovered
         onTriggered: popup.dismissed()
     }
@@ -115,6 +116,7 @@ PopupWindow {
                             GradientStop { position: 1; color: closeButton.down ? Theme.closePressed : closeButton.hovered ? Theme.closeHover : Theme.closeEdge; Behavior on color { ColorAnimation { duration: 130 } } }
                         }
                         Button {
+                            font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                             id: selectButton
                             anchors.fill: parent
                             anchors.rightMargin: 44
@@ -123,18 +125,19 @@ PopupWindow {
                             rightPadding: 6
                             text: entry.modelData.title || entry.modelData.appId
                             background: Item {}
-                            contentItem: Text {
+                            contentItem: UiText {
                                 text: selectButton.text
                                 verticalAlignment: Text.AlignVCenter
                                 color: Theme.text
                                 font.pixelSize: 13
-                                font.weight: entry.modelData.active ? Font.DemiBold : Font.Normal
+                                font.weight: entry.modelData.active ? Theme.headingWeight : Theme.bodyWeight
                                 elide: Text.ElideRight
                                 opacity: selectButton.visualFocus || entry.hovered ? 1 : 0.9
                             }
                             onClicked: popup.selected(entry.modelData.id)
                         }
                         Button {
+                            font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                             id: closeButton
                             anchors.right: parent.right
                             anchors.top: parent.top
@@ -143,7 +146,7 @@ PopupWindow {
                             hoverEnabled: true
                             Accessible.name: "Close " + (entry.modelData.title || entry.modelData.appId)
                             background: Item {}
-                            contentItem: Text {
+                            contentItem: UiText {
                                 text: "×"
                                 color: "white"
                                 font.pixelSize: 23

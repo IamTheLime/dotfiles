@@ -22,8 +22,8 @@ gnome-extensions enable quickshell-bridge@dotfiles.local
 
 `run.sh` selects the desktop and sets Qt's no-decoration option for GNOME.
 Use `QS_PLATFORM=gnome ./run.sh` to override detection. Do not launch a second
-copy alongside the existing shell. No autostart or global GNOME preference is
-installed. Installing the dotfiles config through setup_environment.sh still
+copy alongside the existing shell. Autostart is optional; it does not enable
+the GNOME bridge for you. Installing the dotfiles config through setup_environment.sh still
 works; use this launcher on GNOME instead of plain `qs -c desktop`.
 
 The GNOME port provides the shared bar/dock, audio/Bluetooth/media UI,
@@ -60,9 +60,9 @@ retain native decorations in this port, so remain independently usable.
 ## KDE setup and behaviour
 
 
-A manually launched top bar and bottom launcher dock on each monitor.
-Configuration changes reload automatically. KDE panels, locking and session
-management stay in place; no autostart is installed.
+A top bar and bottom launcher dock on each monitor. Configuration changes reload
+automatically. KDE panels, locking and session management stay in place.
+Enable login startup using the installer below.
 
 ## Install and run
 
@@ -70,7 +70,7 @@ Requires Quickshell 0.3.2 or newer and a compositor supporting
 `ext-background-effect-v1` for native background blur. The top-bar and dock
 blur regions follow their pill geometry; the invisible dock hover buffer is
 excluded. Top-bar glass uses `#7020242c`; dock glass uses the same colour at 15% opacity.
-Dock glass fades over the inner 6 pixels of its edge. This feathers the tint;
+Dock glass uses a narrow antialiased edge. This softens the tint;
 KWin’s native blur region still has a hard boundary. Blur strength is controlled by KWin.
 
 On Nobara, use the existing repositories:
@@ -97,6 +97,26 @@ quickshell kill -c desktop
 
 Without a symlink, run `quickshell -p ./dotfiles/quickshell/desktop` from the
 repository root.
+
+## Start automatically at login
+
+From this directory, run:
+
+```sh
+python3 install-autostart.py
+```
+
+This creates `~/.config/autostart/dotfiles-quickshell.desktop` (or uses
+`XDG_CONFIG_HOME`) pointing at this checkout's `run.sh -n`. It runs in KDE and
+GNOME, uses the matching backend, and skips a second instance of the same
+configuration. On GNOME, enable the bridge extension first. Re-run the installer
+if you move the checkout. The main `setup_environment.sh` offers this step after
+linking the Quickshell config.
+
+For a manual start, use `./run.sh -n -d` so the configuration path matches
+autostart. To disable login startup, turn off **Quickshell desktop** in KDE's
+Autostart settings, or remove `dotfiles-quickshell.desktop` from the autostart
+directory. This does not stop the currently running shell.
 
 ## Window behaviour
 
@@ -295,3 +315,70 @@ reload and disposable grouped windows. GNOME rendering, input regions, scaling,
 Overview and client-specific minimum window sizes still require testing on the
 target machine. If GNOME Console is absent, change its launcher in
 `desktop/platform/gnome/Profile.qml`.
+
+
+### Clock calendar and Google sync
+
+Click the clock to open the themed month grid and daily agenda. The popup reuses
+MIT-licensed date/event logic from Derek Ross's omarchy-calendar; attribution and
+upstream version are in `desktop/shared/calendar/UPSTREAM.md`.
+
+Install the optional event tools in isolated user environments:
+
+```sh
+uv tool install khal
+uv tool install 'vdirsyncer[google]'
+python3 desktop/shared/calendar/setup-google.py
+```
+
+For Google, create a personal Google Cloud project, enable **CalDAV API**, set up
+OAuth consent (External with your account as a test user for testing), create a
+**Desktop app** OAuth client and download its JSON outside this repository.
+Then run from a terminal:
+
+```sh
+python3 desktop/shared/calendar/setup-google.py --oauth /path/to/client.json
+```
+
+Complete Google's browser consent and vdirsyncer's local collection prompts.
+Select offered calendars at https://calendar.google.com/calendar/syncselect.
+Credentials and tokens are written only under `~/.config/quickshell-calendar/`
+with private permissions. Google is read-only; the local cache is under
+`~/.local/share/quickshell-calendar/`. Existing khal configuration is preserved.
+The service polls local events every minute and syncs every 15 minutes after
+successful connection. OAuth apps in Testing may need repeated authorisation;
+use Google's production publishing mode for a durable personal setup when ready.
+No calendar accounts or tokens belong in dotfiles.
+
+Reference: https://vdirsyncer.pimutils.org/en/stable/config.html#google
+
+## Custom tray SVGs and dock motion
+
+Tray replacements live in `desktop/shared/icons/tray/`. To add an app, create an
+SVG and add its stable tray ID or tooltip title to `desktop/shared/TrayIcons.js`.
+Values are SVG filenames without the extension. Match a browser app by tooltip
+(e.g. `chatgpt`), not Chrome's shared tray ID.
+
+The SVGs use `#c0caf5` for foreground and `#283457` for dark details. `TrayIcon.qml`
+substitutes `Theme.trayIconBright` and `Theme.trayIconDark` directly into the SVG,
+so changing the theme updates them without a tint filter. Keep paths simple and
+check their optical size at 20 pixels. Unknown apps retain their original icons.
+Steam, Telegram and Handy retain their previous palette treatment. Custom icons
+show a small accent dot when the app reports `NeedsAttention`; app-specific
+badge counts embedded in original icon images are not reproduced.
+
+`DockBubble.qml` draws a single surface that rises from a droplet, grows to hold
+the icons, then pinches into pinned and running-app pills. The reverse merges
+and lowers it. With no unpinned running apps, it remains one pill. Its native
+blur follows the contour; tint opacity still comes from `Theme.dockOpacity`.
+Edit `dockShowDuration`, `dockHideDuration`, `dockHideDelay` and `menuHoverGrace`
+in `desktop/shared/theme/Theme.qml` to adjust timing. Current show/hide durations
+are 340/260 ms; dock hide delay is 600 ms and menu hover grace is 1200 ms.
+
+The dock's moving contour has an asymmetric wobble and a short directional
+motion-blur trail on the glass only. App icons stay sharp. Both effects reach
+zero at rest. Adjust `dockWobblePixels` and `dockMotionBlurPixels` in the shared
+theme, or set either to zero to disable it.
+
+Control-centre and calendar necks use continuously retargeted slide animations,
+so the OLED position drift cannot repeatedly restart and stall their movement.

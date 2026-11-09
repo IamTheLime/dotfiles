@@ -353,6 +353,7 @@ Scope {
                         onClicked: manager.ungroup(strip.modelData)
                     }
                     Button {
+                        font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                         id: groupLabel
                         width: 110; height: 36
                         hoverEnabled: true
@@ -360,7 +361,7 @@ Scope {
                         background: Rectangle { radius: 4; color: groupLabel.hovered ? Theme.buttonHover : "transparent" }
                         contentItem: Item {
                             Rectangle { x: 2; anchors.verticalCenter: parent.verticalCenter; width: 8; height: 8; radius: 3; color: strip.group?.accent || Theme.accent }
-                            Text {
+                            UiText {
                                 anchors.fill: parent; anchors.leftMargin: 18
                                 text: strip.group ? strip.group.name : ""
                                 color: strip.group?.accent || Theme.accent
@@ -436,7 +437,7 @@ Scope {
                                             color: Theme.tabUnderline
                                             Behavior on width { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                                         }
-                                        Text {
+                                        UiText {
                                             id: tabLabel
                                             anchors.fill: parent; anchors.leftMargin: 8; anchors.rightMargin: 30
                                             text: ((strip.group ? strip.group.ids.indexOf(tab.modelData) : 0) + 1) + "  " + (tab.window ? (manager.project(tab.window) ? tab.window.title.split(" — ").slice(1).join(" — ") : tab.window.title) : "")
@@ -444,12 +445,13 @@ Scope {
                                             verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight
                                         }
                                         Button {
+                                            font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                                             id: tabClose
                                             anchors.right: parent.right; anchors.top: parent.top; anchors.bottom: parent.bottom
                                             width: 28; hoverEnabled: true
                                             Accessible.name: "Close " + (tab.window ? tab.window.title : "window")
                                             background: Item {}
-                                            contentItem: Text { text: "×"; color: "white"; font.pixelSize: 19; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                            contentItem: UiText { text: "×"; color: "white"; font.pixelSize: 19; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                             onClicked: manager.command({close: [tab.modelData]})
                                         }
                             MouseArea {
@@ -513,7 +515,7 @@ Scope {
                         required property int index
                         width: 28; height: 28
                         color: controlMouse.containsMouse ? Theme.buttonHover : Theme.groupFrame
-                        Text { anchors.centerIn: parent; text: modelData; color: Theme.text; font.pixelSize: 18 }
+                        UiText { anchors.centerIn: parent; text: modelData; color: Theme.text; font.pixelSize: 18 }
                         MouseArea {
                             id: controlMouse
                             anchors.fill: parent; hoverEnabled: true

@@ -53,16 +53,16 @@ Item {
     Column {
         anchors.centerIn: parent
         spacing: 3
-        Text {
+        UiText {
             width: 170
             text: ghost.label
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             font.pixelSize: 12
-            font.bold: true
+            font.weight: Theme.headingWeight
             color: Theme.dragText
         }
-        Text {
+        UiText {
             width: 170
             text: ghost.side
             horizontalAlignment: Text.AlignHCenter

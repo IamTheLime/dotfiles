@@ -1,6 +1,7 @@
 //@ pragma UseQApplication
 import QtQuick
 import "theme"
+import "calendar" as CalendarData
 import "../platform"
 import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
@@ -23,6 +24,7 @@ Scope {
     readonly property var launchers: Backend.launchers
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
+    CalendarData.Service { id: calendarService }
     readonly property int dayPortions: 100
     readonly property real travelPixels: 100
     readonly property string debugPortion: Quickshell.env("QS_DAY_PORTION")
@@ -127,7 +129,7 @@ Scope {
                 screen: modelData
                 visible: !root.fullscreenState[modelData.name]
                 onVisibleChanged: {
-                    if (!visible) { controlsOpen = false; openTrayItem = null; }
+                    if (!visible) { controlsOpen = false; calendarOpen = false; openTrayItem = null; }
                 }
                 edge: "top"
                 implicitHeight: 48
@@ -155,14 +157,17 @@ Scope {
                 }
                 property var openTrayItem: null
                 property bool controlsOpen: false
-                onOpenTrayItemChanged: { if (openTrayItem) controlsOpen = false; }
+                property bool calendarOpen: false
+                onControlsOpenChanged: if (controlsOpen) calendarOpen = false
+                onOpenTrayItemChanged: { if (openTrayItem) { controlsOpen = false; calendarOpen = false; } }
 
                 IpcHandler {
                     target: "desktop-" + topBar.screen.name
                     function layout(): string {
                         return JSON.stringify({ target: topBar.joinedTarget, progress: topBar.joinProgress, joined: topBar.joined, reserved: topBar.exclusiveZone });
                     }
-                    function controlLayout(): string { return JSON.stringify({width: controls.width, height: controls.height, tab: controls.tab, section: controls.bubbleSection, bubbleX: controls.bubbleCenter}); }
+                    function calendar(): void { topBar.openTrayItem = null; topBar.controlsOpen = false; topBar.calendarOpen = true; }
+                    function controlLayout(): string { return JSON.stringify({width: controls.width, height: controls.height, tab: controls.tab, section: controls.bubbleSection, bubbleX: controls.bubbleCenter, neckX: controls.neckPosition, neckTarget: controls.neckTarget}); }
                     function audio(): void {
                         topBar.openTrayItem = null;
                         controls.tab = 0; controls.bubbleSection = 0;
@@ -180,6 +185,21 @@ Scope {
                     }
                 }
 
+                CalendarPanel {
+                    id: calendarPopup
+                    clockLabel: clockText.text
+                    clockWidth: clockMouse.width
+                    bubbleCenter: clockBox.x + clockMouse.x + clockMouse.width / 2 - anchor.rect.x
+                    service: calendarService
+                    visible: topBar.calendarOpen
+                    anchor.window: topBar.window
+                    anchor.rect.x: Math.max(4, Math.min(topBar.width - width - 4,
+                        clockBox.x + clockMouse.x + clockMouse.width / 2 - width / 2))
+                    anchor.rect.y: topBar.pillY - 4
+                    anchor.adjustment: PopupAdjustment.SlideX
+                    onDismissed: topBar.calendarOpen = false
+                }
+
                 ControlPanel {
                     id: controls
                     keepAwake: root.sleepBlocked
@@ -190,6 +210,9 @@ Scope {
                     anchorHovered: volumeMouse.containsMouse || bluetoothMouse.containsMouse
                     anchor.window: topBar.window
                     anchor.rect.x: Math.max(0, topBar.width - width - 4)
+                    topBarButtons: [volume, bluetoothButton, controlCentreButton].map(button =>
+                        Qt.rect(trayRow.x + button.x - controls.anchor.rect.x,
+                            trayRow.y + button.y - controls.anchor.rect.y, button.width, button.height))
                     bubbleCenter: {
                         const icon = controls.bubbleSection === 0 ? volume : controls.bubbleSection === 1 ? bluetoothButton : controlCentreButton;
                         return trayRow.x + icon.x + icon.width / 2 - anchor.rect.x;
@@ -217,7 +240,7 @@ Scope {
                     Region { item: trayBox; radius: trayBox.radius }
                 }
 
-                mask: Region { item: trayRow }
+                mask: Region { item: trayRow; Region { item: clockMouse } }
 
                 LiquidSurface {
                     anchors.fill: parent
@@ -243,7 +266,7 @@ Scope {
                     height: topBar.pillHeight
                     radius: height / 2 * (1 - topBar.joined)
                     color: "transparent"
-                    Text {
+                    UiText {
                         x: 12 + root.drift * topBar.joined
                         anchors.verticalCenter: parent.verticalCenter
                         text: "Desktop"
@@ -260,13 +283,24 @@ Scope {
                     height: topBar.pillHeight
                     radius: height / 2 * (1 - topBar.joined)
                     color: "transparent"
-                    Text {
+                    UiText {
                         id: clockText
+                        font.weight: Theme.clockWeight
                         anchors.centerIn: parent
                         anchors.horizontalCenterOffset: (root.drift - root.travelPixels / 2) * topBar.joined
                         text: Qt.formatDateTime(clock.date, "ddd dd MMM  ·  HH:mm")
                         color: Theme.topBarText
-                        font.pixelSize: 13
+                        font.pixelSize: Theme.clockSize
+                    }
+                    MouseArea {
+                        id: clockMouse
+                        x: clockText.x - 12; y: 0
+                        width: clockText.implicitWidth + 24; height: parent.height
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            topBar.openTrayItem = null; topBar.controlsOpen = false;
+                            topBar.calendarOpen = !topBar.calendarOpen;
+                        }
                     }
                 }
 
@@ -308,23 +342,11 @@ Scope {
                                 width: 20
                                 height: 20
 
-                                Image {
-                                    id: trayIcon
+                                TrayIcon {
                                     anchors.fill: parent
-                                    source: trayItem.modelData.icon
-                                    sourceSize: Qt.size(40 * topBar.screen.devicePixelRatio, 40 * topBar.screen.devicePixelRatio)
-                                    smooth: true
-                                    mipmap: true
-                                    visible: trayMouse.containsMouse
-                                }
-
-                                Colorize {
-                                    anchors.fill: trayIcon
-                                    source: trayIcon
-                                    hue: Theme.topBarIcon.hslHue
-                                    saturation: Theme.trayIconSaturation
-                                    lightness: 0
-                                    visible: !trayMouse.containsMouse
+                                    itemData: trayItem.modelData
+                                    hovered: trayMouse.containsMouse
+                                    pixelRatio: topBar.screen.devicePixelRatio
                                 }
                             }
 
@@ -398,7 +420,7 @@ Scope {
                                 layer.enabled: true
                                 layer.effect: ColorOverlay { color: Theme.topBarIcon }
                             }
-                            Text { text: volume.audio ? Math.round(volume.audio.volume * 100) + "%" : "—"; color: Theme.topBarText; font.pixelSize: 12 }
+                            UiText { text: volume.audio ? Math.round(volume.audio.volume * 100) + "%" : "—"; color: Theme.topBarText; font.pixelSize: Theme.volumeSize; font.weight: Theme.volumeWeight }
                         }
 
                         MouseArea {
@@ -412,7 +434,7 @@ Scope {
                                     volume.audio.muted = !volume.audio.muted;
                                 } else {
                                     topBar.openTrayItem = null;
-                                    const wasOpen = topBar.controlsOpen && controls.tab === 0;
+                                    const wasOpen = topBar.controlsOpen && controls.bubbleSection === 0;
                                     controls.tab = 0; controls.bubbleSection = 0;
                                     topBar.controlsOpen = !wasOpen;
                                 }
@@ -445,7 +467,7 @@ Scope {
                             hoverEnabled: true
                             onClicked: {
                                 topBar.openTrayItem = null;
-                                const wasOpen = topBar.controlsOpen && controls.tab === 1;
+                                const wasOpen = topBar.controlsOpen && controls.bubbleSection === 1;
                                 controls.tab = 1; controls.bubbleSection = 1;
                                 topBar.controlsOpen = !wasOpen;
                             }
@@ -510,28 +532,20 @@ Scope {
                 readonly property real amount: Math.max(0, Math.min(1, reveal))
                 Behavior on reveal {
                     NumberAnimation {
-                        duration: dock.expanded ? 180 : 140
-                        easing.type: dock.expanded ? Easing.OutBack : Easing.InCubic
-                        easing.overshoot: 0.65
+                        duration: dock.expanded ? Theme.dockShowDuration : Theme.dockHideDuration
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: [0.32, 0, 0.25, 1, 1, 1]
                     }
                 }
-                blurRegion: dock.amount > 0.01 ? dockBlur : null
-                Region {
-                    id: dockBlur
-                    Region {
-                        x: dockBody.x
-                        y: dockBody.y
-                        width: pinnedSurface.width
-                        height: pinnedSurface.height
-                        radius: pinnedSurface.cornerRadius
-                    }
-                    Region {
-                        x: dockBody.x + runningSurface.x
-                        y: dockBody.y
-                        width: dock.runningCount > 0 ? runningSurface.width : 0
-                        height: runningSurface.height
-                        radius: runningSurface.cornerRadius
-                    }
+                blurRegion: dock.amount > 0.01 ? dockBubble.blurRegion : null
+                DockBubble {
+                    id: dockBubble
+                    anchors.fill: parent
+                    progress: dock.amount
+                    rising: dock.expanded
+                    pinnedWidth: dock.pinnedWidth
+                    runningWidth: dock.runningWidth
+                    gap: dock.pillGap
                 }
                 mask: Region {
                     x: dock.expanded ? 0 : dockBody.x
@@ -543,7 +557,7 @@ Scope {
 
                 Timer {
                     id: hideTimer
-                    interval: 320
+                    interval: Theme.dockHideDelay
                     onTriggered: { if (!windowPicker.visible && !dockMouse.containsMouse) dock.expanded = false; }
                 }
 
@@ -561,42 +575,17 @@ Scope {
                     Item {
                         id: dockBody
                         x: (dock.width - width) / 2
-                        y: dock.height - (height + 8) * dock.reveal
-                        width: 22 + (dock.contentWidth - 22) * dock.amount
-                        height: 48 + 20 * dock.amount
-                        opacity: Math.min(1, dock.amount * 3)
-                        clip: true
-
-                        LiquidSurface {
-                            id: pinnedSurface
-                            width: (dockBody.width - dock.pillGap * dock.amount) * dock.pinnedWidth / (dock.pinnedWidth + dock.runningWidth)
-                            height: parent.height
-                            singleShape: 1
-                            edgeFeather: 6
-                            cornerRadius: Math.min(width, height) / 2
-                            phase: dock.amount
-                            tint: Qt.vector4d(Theme.dockTint.r, Theme.dockTint.g, Theme.dockTint.b, dock.glassOpacity)
-                        }
-                        LiquidSurface {
-                            id: runningSurface
-                            x: pinnedSurface.width + dock.pillGap * dock.amount
-                            width: dockBody.width - x
-                            height: parent.height
-                            visible: dock.runningCount > 0
-                            singleShape: 1
-                            edgeFeather: 6
-                            cornerRadius: Math.min(width, height) / 2
-                            phase: dock.amount
-                            tint: Qt.vector4d(Theme.dockTint.r, Theme.dockTint.g, Theme.dockTint.b, dock.glassOpacity)
-                        }
+                        y: dockBubble.bodyY
+                        width: dock.contentWidth
+                        height: 68
 
                         Item {
                             id: launcherRow
                             anchors.centerIn: parent
                             width: dock.contentWidth - 24
                             height: 52
-                            opacity: Math.max(0, (dock.amount - 0.3) / 0.7)
-                            enabled: dock.expanded
+                            opacity: dockBubble.smooth(0.28, 0.42, dock.amount)
+                            enabled: dock.expanded && dock.amount > 0.8
 
                             Repeater {
                                 id: launcherRepeater
@@ -609,6 +598,10 @@ Scope {
                                         : dock.pinnedWidth + dock.pillGap + (index - root.launchers.length) * 58
                                     readonly property var windows: root.windowsFor(modelData)
                                     readonly property bool hovered: launcherMouse.containsMouse
+                                    opacity: dockBubble.smooth(6, 24, -dockBubble.distance(
+                                        dockBody.x + launcherRow.x + x + width / 2,
+                                        dockBody.y + launcherRow.y + height / 2))
+                                    scale: 0.82 + 0.18 * dockBubble.spread
                                     width: 52
                                     height: 52
                                     radius: 10

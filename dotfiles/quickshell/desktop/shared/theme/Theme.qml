@@ -2,6 +2,15 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+    // Shared typography for current and future shell components.
+    readonly property string fontFamily: "Adwaita Sans"
+    readonly property int bodyWeight: Font.Medium
+    readonly property int headingWeight: Font.DemiBold
+    readonly property int clockWeight: Font.DemiBold
+    readonly property int clockSize: 14
+    readonly property int volumeSize: 13
+    readonly property int volumeWeight: Font.DemiBold
+
     // Shared Tokyo Night palette. Edit these colours to recolour shared components.
     readonly property color background: "#1a1b26"
     readonly property color surface: "#24283b"
@@ -30,10 +39,21 @@ QtObject {
     readonly property real topBarOpacity: 0.44
     readonly property color topBarText: foreground
     readonly property color topBarIcon: foreground
-    readonly property real trayIconSaturation: 0.20
+    // Smooth navy-to-lavender shading preserves fine lines and antialiasing.
+    readonly property color trayIconDark: "#283457"
+    readonly property color trayIconBright: foreground
+    // 0 keeps linear shading; 1 applies the full smooth contrast curve.
+    readonly property real trayIconContrast: 0.35
+    readonly property real trayIconHoverBoost: 0.08
     readonly property color topBarGlass: alpha(topBarTint, topBarOpacity)
 
     // Dock, grouped windows, and shared popup roles.
+    readonly property int menuHoverGrace: 1200
+    readonly property int dockHideDelay: 600
+    readonly property real dockWobblePixels: 7
+    readonly property real dockMotionBlurPixels: 14
+    readonly property int dockShowDuration: 340
+    readonly property int dockHideDuration: 260
     readonly property color dockTint: glassTint
     readonly property real dockOpacity: 0.15
     readonly property color groupFrame: background

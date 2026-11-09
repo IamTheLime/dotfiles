@@ -6,8 +6,11 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 Button {
+    font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
     id: button
     property string symbol: ""
+    property int textSize: 12
+    property int textWeight: Theme.bodyWeight
     property color iconTint: Theme.icon
     readonly property string customIcon: ({"ungroup-all": "ungroup-all", "unsplit": "unsplit", "swap-panes": "swap-panes", "configure": "controls", "preferences-system-bluetooth": "bluetooth", "audio-volume-high": "volume", "audio-volume-muted": "volume-muted"})[symbol] || ""
     property bool accent: false
@@ -43,10 +46,10 @@ Button {
                 layer.effect: MultiEffect { colorization: 1; colorizationColor: button.iconTint }
                 source: button.customIcon ? Qt.resolvedUrl("icons/" + button.customIcon + ".svg") : button.symbol ? Quickshell.iconPath(button.symbol) : ""
             }
-            Text {
+            UiText {
                 id: caption
                 visible: button.text !== ""
-                text: button.text; color: Theme.text; font.pixelSize: 12
+                text: button.text; color: Theme.text; font.pixelSize: button.textSize; font.weight: button.textWeight
                 width: Math.max(0, Math.min(implicitWidth, body.width - (button.symbol ? 26 : 0)))
                 height: 18
                 verticalAlignment: Text.AlignVCenter

@@ -222,6 +222,9 @@ if ask_yes_no "Do you want to setup Quickshell config?"; then
     [ -L "$QUICKSHELL_TARGET" ] && rm "$QUICKSHELL_TARGET"
     ln -s "$DOTFILES_DIR/dotfiles/quickshell/desktop" "$QUICKSHELL_TARGET"
     echo -e "${GREEN}✓ Quickshell config linked. Run: $DOTFILES_DIR/dotfiles/quickshell/run.sh${NC}"
+    if ask_yes_no "Start Quickshell automatically when you log in?"; then
+        python3 "$DOTFILES_DIR/dotfiles/quickshell/install-autostart.py"
+    fi
 else
     echo -e "${YELLOW}Skipping Quickshell config setup.${NC}"
 fi

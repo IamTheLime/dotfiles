@@ -36,8 +36,9 @@ PopupWindow {
         radius: 16
         ColumnLayout {
             anchors.fill: parent; anchors.margins: 16; spacing: 12
-            Text { text: editor.heading; color: Theme.text; font.pixelSize: 14; font.weight: Font.DemiBold }
+            UiText { text: editor.heading; color: Theme.text; font.pixelSize: 14; font.weight: Theme.headingWeight }
             TextField {
+                font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                 id: labelInput
                 Layout.fillWidth: true; Layout.preferredHeight: 38
                 placeholderText: "Group label"
@@ -54,6 +55,7 @@ PopupWindow {
                 Repeater {
                     model: Theme.splitPalette
                     Button {
+                        font.family: Theme.fontFamily; font.weight: Theme.bodyWeight
                         required property string modelData
                         Layout.preferredWidth: 32; Layout.preferredHeight: 32
                         hoverEnabled: true
@@ -61,7 +63,7 @@ PopupWindow {
                         Accessible.checkable: true
                         Accessible.checked: editor.draftColor === modelData
                         background: Rectangle { radius: 7; color: parent.modelData; scale: parent.hovered ? 1.08 : 1; Behavior on scale { NumberAnimation { duration: 120 } } }
-                        contentItem: Text { text: editor.draftColor === parent.modelData ? "✓" : ""; color: Theme.background; font.pixelSize: 18; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                        contentItem: UiText { text: editor.draftColor === parent.modelData ? "✓" : ""; color: Theme.background; font.pixelSize: 18; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                         onClicked: editor.draftColor = modelData
                     }
                 }

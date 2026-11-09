@@ -16,7 +16,10 @@ PopupWindow {
     required property bool anchorHovered
     property int tab: 0
     property int bubbleSection: 2
+    property var topBarButtons: []
     property real bubbleCenter: width - 48
+    readonly property real neckPosition: surface.neckX
+    readonly property real neckTarget: surface.targetNeckX
     readonly property real neckHeight: 34
     required property bool keepAwake
     required property bool awakePending
@@ -28,15 +31,27 @@ PopupWindow {
     readonly property var streams: Pipewire.nodes.values.filter(node => node.type === PwNodeType.AudioOutStream)
     readonly property var adapter: Bluetooth.defaultAdapter
     onTabChanged: { bubbleSection = tab; if (scroll.contentItem) scroll.contentItem.contentY = 0; }
-    BackgroundEffect.blurRegion: Backend.capabilities.blur ? nativeBlur : null
-    Region { id: nativeBlur;
-        item: glassBody; radius: 26
-        Region { item: glassNeck; radius: 18 }
+    BackgroundEffect.blurRegion: Backend.capabilities.blur ? surface.blurRegion : null
+    Region { id: audioHit; item: audioAnchor }
+    Region { id: bluetoothHit; item: bluetoothAnchor }
+    Region { id: settingsHit; item: settingsAnchor }
+    mask: Region { regions: [surface.blurRegion, audioHit, bluetoothHit, settingsHit] }
+    component AnchorButton: MouseArea {
+        required property int section
+        readonly property rect buttonRect: panel.topBarButtons[section] ?? Qt.rect(0, 0, 0, 0)
+        x: buttonRect.x; y: buttonRect.y
+        width: buttonRect.width; height: buttonRect.height
+        onClicked: {
+            if (panel.bubbleSection === section) panel.dismissed();
+            else {
+                if (section !== 2) panel.tab = section;
+                panel.bubbleSection = section;
+            }
+        }
     }
-    mask: Region {
-        item: glassBody; radius: 26
-        Region { item: glassNeck; radius: 18 }
-    }
+    AnchorButton { id: audioAnchor; section: 0; z: 10 }
+    AnchorButton { id: bluetoothAnchor; section: 1; z: 10 }
+    AnchorButton { id: settingsAnchor; section: 2; z: 10 }
     color: "transparent"
     implicitWidth: 440
     implicitHeight: Math.min((panel.screen?.height ?? 900) - 100, 640)
@@ -46,103 +61,26 @@ PopupWindow {
         else dismissed();
     }
     NumberAnimation { id: opening; target: body; property: "scale"; from: 0.96; to: 1; duration: 190; easing.type: Easing.OutBack; easing.overshoot: 0.6 }
-    component Heading: Text { color: Theme.text; font.pixelSize: 13; font.weight: Font.DemiBold }
-    component Note: Text { color: Theme.secondaryText; font.pixelSize: 12; wrapMode: Text.Wrap }
+    component Heading: UiText { color: Theme.text; font.pixelSize: 13; font.weight: Theme.headingWeight }
+    component Note: UiText { color: Theme.secondaryText; font.pixelSize: 12; wrapMode: Text.Wrap }
     component Card: Rectangle {
         default property alias contents: stack.data
         implicitHeight: stack.implicitHeight + 28
         radius: 22; color: Theme.card
         ColumnLayout { id: stack; anchors.fill: parent; anchors.margins: 14; spacing: 10 }
     }
-    Item {
+    GlassBubble {
         id: surface
-        anchors.fill: parent
-        anchors.margins: 4
-        property real neckWidth: panel.bubbleSection === 0 ? 82 : 36
-        Behavior on neckWidth {
-            enabled: panel.visible
-            NumberAnimation { duration: 170; easing.type: Easing.OutBack; easing.overshoot: 0.35 }
-        }
-        readonly property real targetNeckX: Math.max(neckWidth / 2 + 4, Math.min(width - neckWidth / 2 - 4, panel.bubbleCenter - x))
-        property real neckX: targetNeckX
-        Behavior on neckX {
-            enabled: panel.visible
-            NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
-        }
-        property real tailX: targetNeckX
-        Behavior on tailX {
-            enabled: panel.visible
-            SequentialAnimation {
-                PauseAnimation { duration: 30 }
-                NumberAnimation { duration: 230; easing.type: Easing.OutCubic }
-            }
-        }
-        readonly property real tailOffset: Math.max(-24, Math.min(24, tailX - neckX))
-        Item {
-            id: glassBody
-            anchors.fill: parent
-            anchors.topMargin: panel.neckHeight
-        }
-        Item {
-            id: glassNeck
-            x: surface.neckX - width / 2; y: 0
-            width: surface.neckWidth; height: panel.neckHeight + 12
-        }
-        Canvas {
-            id: glassPaint
-            anchors.fill: parent
-            onWidthChanged: requestPaint()
-            onHeightChanged: requestPaint()
-            Connections { target: surface; function onNeckXChanged() { glassPaint.requestPaint(); } function onNeckWidthChanged() { glassPaint.requestPaint(); } function onTailOffsetChanged() { glassPaint.requestPaint(); } }
-            onPaint: {
-                const ctx = getContext("2d");
-                ctx.reset();
-                const inset = Theme.rimWidth / 2;
-                const top = panel.neckHeight + inset;
-                const r = 26 - inset;
-                const right = width - inset;
-                const bottom = height - inset;
-                const neck = surface.neckX;
-                const half = surface.neckWidth / 2;
-                const leftTail = Math.min(0, surface.tailOffset);
-                const rightTail = Math.max(0, surface.tailOffset);
-                const leftRadius = Math.min(r, Math.max(0, (neck - half - inset) / 2));
-                const rightRadius = Math.min(r, Math.max(0, (right - neck - half) / 2));
-                const leftShoulder = Math.max(inset + leftRadius, neck - half - 16 + leftTail);
-                const rightShoulder = Math.min(right - rightRadius, neck + half + 16 + rightTail);
-                const tint = ctx.createLinearGradient(0, 0, 0, height);
-                tint.addColorStop(0, Theme.rimTop);
-                tint.addColorStop(0.45, Theme.rimMiddle);
-                tint.addColorStop(1, Theme.rimBottom);
-                ctx.beginPath();
-                ctx.moveTo(inset + leftRadius, top);
-                ctx.lineTo(leftShoulder, top);
-                ctx.bezierCurveTo(Math.max(leftShoulder, neck - half + leftTail), top, neck - half, top - 8, neck - half, inset + 18);
-                ctx.arcTo(neck - half, inset, neck - half + 18, inset, 18);
-                ctx.lineTo(neck + half - 18, inset);
-                ctx.arcTo(neck + half, inset, neck + half, inset + 18, 18);
-                ctx.bezierCurveTo(neck + half, top - 8, Math.min(rightShoulder, neck + half + rightTail), top, rightShoulder, top);
-                ctx.lineTo(right - rightRadius, top);
-                ctx.arcTo(right, top, right, top + rightRadius, rightRadius);
-                ctx.lineTo(right, bottom - r);
-                ctx.arcTo(right, bottom, right - r, bottom, r);
-                ctx.lineTo(inset + r, bottom);
-                ctx.arcTo(inset, bottom, inset, bottom - r, r);
-                ctx.lineTo(inset, top + leftRadius);
-                ctx.arcTo(inset, top, inset + leftRadius, top, leftRadius);
-                ctx.closePath();
-                ctx.fillStyle = Theme.glass;
-                ctx.fill();
-                ctx.lineWidth = Theme.rimWidth;
-                ctx.strokeStyle = tint;
-                ctx.stroke();
-            }
-        }
+        neckWidth: panel.bubbleSection === 0 ? 82 : 36
+        neckCenter: panel.bubbleCenter
+        neckHeight: panel.neckHeight
         PanelButton {
             x: surface.neckX - width / 2; y: 3
             width: surface.neckWidth - 4; height: 28
             text: panel.bubbleSection === 0 ? Math.round((panel.sink?.audio?.volume ?? 0) * 100) + "%" : ""
             flat: true; symbol: panel.bubbleSection === 0 ? (panel.sink?.audio?.muted ? "audio-volume-muted" : "audio-volume-high") : panel.bubbleSection === 1 ? "preferences-system-bluetooth" : "configure"; iconTint: Theme.topBarIcon
+            textSize: Theme.volumeSize
+            textWeight: Theme.volumeWeight
             Accessible.name: "Close control centre"
             onClicked: panel.dismissed()
         }
@@ -158,8 +96,10 @@ PopupWindow {
             RowLayout {
                 Layout.fillWidth: true
                 IconImage { source: Qt.resolvedUrl("icons/controls.svg"); implicitSize: 21 }
-                Text { text: "Control centre"; color: Theme.text; font.pixelSize: 18; font.weight: Font.DemiBold; Layout.fillWidth: true }
-                PanelButton { symbol: "window-close"; Accessible.name: "Close control centre"; onClicked: panel.dismissed() }
+                UiText { text: "Control centre"; color: Theme.text; font.pixelSize: 18; font.weight: Theme.headingWeight; Layout.fillWidth: true }
+                PanelButton { symbol: "window-close"; textSize: Theme.volumeSize
+            textWeight: Theme.volumeWeight
+            Accessible.name: "Close control centre"; onClicked: panel.dismissed() }
             }
             RowLayout {
                 spacing: 7; Layout.fillWidth: true
@@ -170,7 +110,7 @@ PopupWindow {
                         required property int index
                         Layout.fillWidth: true
                         text: modelData.name; symbol: modelData.icon; accent: panel.tab === index
-                        onClicked: panel.tab = index
+                        onClicked: { panel.tab = index; panel.bubbleSection = index; }
                     }
                 }
             }

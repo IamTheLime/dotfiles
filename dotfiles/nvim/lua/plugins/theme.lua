@@ -1,5 +1,9 @@
-local active_theme = "tokyonight" -- Changed from "rose-pine" to activate Tokyo Night
+local active_theme = "ember-grove"
 local themes = {
+    {
+        dir = vim.fn.stdpath("config") .. "/themes/ember-grove",
+        name = "ember-grove",
+    },
     {
         "rose-pine/neovim",
         name = "rose-pine",
@@ -22,26 +26,24 @@ for _, theme in ipairs(themes) do
     if theme.name == active_theme then
         theme.lazy = false
         theme.priority = 1000
-        if theme.name == "tokyonight" then
+        if theme.name == "ember-grove" then
             theme.config = function()
-                -- Configure Tokyo Night for pure black OLED experience
+                require("ember-grove").setup({ transparent = true })
+                vim.cmd("colorscheme ember-grove")
+            end
+        elseif theme.name == "tokyonight" then
+            theme.config = function()
+                -- Let the terminal background show through.
                 require("tokyonight").setup({
+                    transparent = true,
+                    styles = {
+                       sidebars = "transparent",
+                       floats = "transparent"
+                    },
                     style = "night", -- Use the night variant
-                    on_colors = function(c)
-                        -- Pure black backgrounds for all UI elements
-                        c.bg = "#000000"
-                        c.bg_dark = "#000000"
-                        c.bg_float = "#000000"
-                        c.bg_popup = "#000000"
-                        c.bg_sidebar = "#000000"
-                        c.bg_statusline = "#000000"
-                    end,
                 })
                 vim.opt.cursorline = false
                 vim.cmd("colorscheme tokyonight")
-
-                -- Ensure lualine uses the Tokyo Night theme (now with black backgrounds)
-                require("lualine").setup({ options = { theme = "tokyonight" } })
             end
         elseif theme.name == "rose-pine" then
             theme.config = function()

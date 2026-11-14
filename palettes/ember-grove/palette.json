@@ -1,0 +1,128 @@
+{
+  "format_version": 1,
+  "id": "ember-grove",
+  "name": "Ember Grove",
+  "mode": "dark",
+  "description": "Gold, amber and copper on a host-owned dark background, with restrained sage identifiers, mint emphasis and teal navigation.",
+  "provenance": {
+    "base": "The Aether-generated Omarchy palette used by the Sebenta SDL examples website.",
+    "sage": "OpenCode Matrix's muted text colour.",
+    "mint_and_teal": "Semantic extensions added to separate key text and mode labels from gold prose."
+  },
+  "background_policy": {
+    "default": "inherit",
+    "prefer_transparency": true,
+    "opaque_fallback": "background",
+    "notes": "Preserve the host/terminal background. Do not add a green wash. Solid fills are for small panels, menus, selections and diffs when needed for legibility."
+  },
+  "colors": {
+    "background": "#0a1109",
+    "dark_background": "#080d07",
+    "darker_background": "#050905",
+    "lighter_background": "#232922",
+    "foreground": "#ffd872",
+    "dark_foreground": "#bfa256",
+    "light_foreground": "#ffde87",
+    "bright_foreground": "#ffe295",
+    "accent": "#b56e52",
+    "muted": "#656a64",
+    "red": "#c18c5e",
+    "green": "#edbd70",
+    "yellow": "#ffe88e",
+    "blue": "#b56e52",
+    "magenta": "#eb9866",
+    "cyan": "#ffd766",
+    "orange": "#ca9d76",
+    "brown": "#795e47",
+    "bright_red": "#e19e63",
+    "bright_green": "#ffd168",
+    "bright_yellow": "#ffe06a",
+    "bright_blue": "#d67e5b",
+    "bright_magenta": "#ffa764",
+    "bright_cyan": "#ffe954",
+    "sage": "#8ca391",
+    "mint": "#a3d9b1",
+    "teal": "#7fcbbf",
+    "raised_background": "#343e30",
+    "diff_added_background": "#15271a",
+    "diff_removed_background": "#2a1b11",
+    "diff_added_highlight": "#284733",
+    "diff_removed_highlight": "#54331e",
+    "diff_added_gutter_background": "#112016",
+    "diff_removed_gutter_background": "#22170e"
+  },
+  "roles": {
+    "surface": {
+      "canvas": "inherit",
+      "panel": "dark_background",
+      "selection": "lighter_background",
+      "raised": "raised_background",
+      "border": "brown"
+    },
+    "text": {
+      "body": "foreground",
+      "secondary": "dark_foreground",
+      "muted": "sage",
+      "faint": "muted",
+      "strong": "mint",
+      "emphasis": "bright_magenta",
+      "heading": "teal",
+      "link": "teal",
+      "inline_code": "magenta",
+      "selection": "bright_foreground",
+      "on_accent": "background"
+    },
+    "syntax": {
+      "variable": "sage",
+      "parameter": "sage",
+      "field": "foreground",
+      "constant": "cyan",
+      "number": "cyan",
+      "type": "yellow",
+      "function": "bright_blue",
+      "keyword": "magenta",
+      "string": "green",
+      "comment": "muted",
+      "operator": "dark_foreground",
+      "punctuation": "dark_foreground"
+    },
+    "feedback": {
+      "error": "bright_red",
+      "warning": "yellow",
+      "success": "mint",
+      "info": "teal"
+    },
+    "navigation": {
+      "accent": "teal",
+      "rail": "magenta",
+      "branch": "sage",
+      "git_modifier": "magenta",
+      "clock": "dark_foreground"
+    },
+    "diff": {
+      "added": "mint",
+      "removed": "bright_red",
+      "context": "dark_foreground",
+      "hunk_header": "teal",
+      "added_background": "diff_added_background",
+      "removed_background": "diff_removed_background",
+      "added_highlight": "diff_added_highlight",
+      "removed_highlight": "diff_removed_highlight",
+      "added_gutter_background": "diff_added_gutter_background",
+      "removed_gutter_background": "diff_removed_gutter_background"
+    }
+  },
+  "typography": {
+    "text.strong": ["bold"],
+    "text.emphasis": ["italic"],
+    "syntax.constant": ["bold"],
+    "syntax.parameter": ["italic"]
+  },
+  "mode_cycle": ["teal", "magenta", "mint"],
+  "ansi": [
+    "background", "red", "green", "yellow",
+    "blue", "magenta", "cyan", "foreground",
+    "muted", "bright_red", "bright_green", "bright_yellow",
+    "bright_blue", "bright_magenta", "bright_cyan", "bright_foreground"
+  ]
+}

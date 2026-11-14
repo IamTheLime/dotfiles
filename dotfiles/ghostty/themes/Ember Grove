@@ -1,0 +1,26 @@
+# Ember Grove — the Aether/Omarchy palette used by the SDL examples website.
+background = #0a1109
+foreground = #ffd872
+cursor-color = #ffe295
+cursor-text = #0a1109
+# Gold selection text stays legible on the palette's green-black selection.
+selection-background = #232922
+selection-foreground = #ffe295
+split-divider-color = #795e47
+
+palette = 0=#0a1109
+palette = 1=#c18c5e
+palette = 2=#edbd70
+palette = 3=#ffe88e
+palette = 4=#b56e52
+palette = 5=#eb9866
+palette = 6=#ffd766
+palette = 7=#ffd872
+palette = 8=#656a64
+palette = 9=#e19e63
+palette = 10=#ffd168
+palette = 11=#ffe06a
+palette = 12=#d67e5b
+palette = 13=#ffa764
+palette = 14=#ffe954
+palette = 15=#ffe295

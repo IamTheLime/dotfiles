@@ -146,6 +146,62 @@ echo ""
 # Create .config directory if it doesn't exist
 mkdir -p "$HOME/.config"
 
+# Setup Starship
+if ask_yes_no "Do you want to setup Starship prompt config?"; then
+    STARSHIP_TARGET="$HOME/.config/starship.toml"
+    if [ -e "$STARSHIP_TARGET" ] || [ -L "$STARSHIP_TARGET" ]; then
+        if [ ! -L "$STARSHIP_TARGET" ] || [ "$(readlink "$STARSHIP_TARGET")" != "$DOTFILES_DIR/dotfiles/starship.toml" ]; then
+            mv "$STARSHIP_TARGET" "$STARSHIP_TARGET.backup.$(date +%s%N)"
+        fi
+    fi
+    ln -sfn "$DOTFILES_DIR/dotfiles/starship.toml" "$STARSHIP_TARGET"
+    echo -e "${GREEN}✓ Starship config linked (applies at the next prompt).${NC}"
+else
+    echo -e "${YELLOW}Skipping Starship config setup.${NC}"
+fi
+
+echo ""
+
+# Setup the OpenCode theme without replacing CLI settings or plugins
+if ask_yes_no "Do you want to install and activate the Ember Grove OpenCode theme?"; then
+    OPENCODE_THEME_TARGET="$HOME/.config/opencode/themes/ember-grove.json"
+    mkdir -p "$(dirname "$OPENCODE_THEME_TARGET")"
+    if [ -e "$OPENCODE_THEME_TARGET" ] || [ -L "$OPENCODE_THEME_TARGET" ]; then
+        if [ ! -L "$OPENCODE_THEME_TARGET" ] || [ "$(readlink "$OPENCODE_THEME_TARGET")" != "$DOTFILES_DIR/dotfiles/opencode/themes/ember-grove.json" ]; then
+            mv "$OPENCODE_THEME_TARGET" "$OPENCODE_THEME_TARGET.backup.$(date +%s%N)"
+        fi
+    fi
+    ln -sfn "$DOTFILES_DIR/dotfiles/opencode/themes/ember-grove.json" "$OPENCODE_THEME_TARGET"
+    # Merge just the portable theme selection, not local plugin paths/settings.
+    if python3 - "$DOTFILES_DIR/dotfiles/opencode/cli.json" "$HOME/.config/opencode/cli.json" <<'PY'
+from datetime import datetime
+import json
+from pathlib import Path
+import shutil
+import sys
+
+source, target = map(Path, sys.argv[1:])
+defaults = json.loads(source.read_text())
+current = json.loads(target.read_text()) if target.exists() else {}
+updated = {**current, "theme": defaults["theme"]}
+updated.setdefault("$schema", defaults["$schema"])
+if updated != current:
+    if target.exists():
+        stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        shutil.copy2(target, target.with_name(target.name + ".backup." + stamp))
+    target.write_text(json.dumps(updated, indent=2) + "\n")
+PY
+    then
+        echo -e "${GREEN}✓ OpenCode theme linked and selected; other CLI settings preserved.${NC}"
+    else
+        echo -e "${RED}Theme linked, but CLI settings could not be updated. Review the error above.${NC}"
+    fi
+else
+    echo -e "${YELLOW}Skipping OpenCode theme setup.${NC}"
+fi
+
+echo ""
+
 # Setup Neovim
 if ask_yes_no "Do you want to setup Neovim config?"; then
     echo -e "${BLUE}Setting up Neovim config...${NC}"

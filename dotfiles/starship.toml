@@ -1,0 +1,75 @@
+"$schema" = "https://starship.rs/config-schema.json"
+
+# Ember Grove: an orange rail marks each command, not its output.
+add_newline = true
+command_timeout = 200
+palette = "ember_grove"
+format = """
+[│](bold orange) $directory$git_status$git_branch$git_commit$git_state[—](muted) $time
+[│](bold orange) $character"""
+continuation_prompt = "[│](bold orange) [·](muted) "
+
+[palettes.ember_grove]
+orange = "#eb9866"
+gold = "#ffd872"
+muted = "#bfa256"
+sage = "#8ca391"
+error = "#e19e63"
+
+[directory]
+truncation_length = 3
+truncation_symbol = "…/"
+truncate_to_repo = false
+style = "gold"
+repo_root_style = "bold gold"
+before_repo_root_style = "muted"
+format = "[$path]($style)[$read_only]($read_only_style) "
+repo_root_format = "[$before_root_path]($before_repo_root_style)[$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style) "
+read_only = " ro"
+read_only_style = "orange"
+
+[git_branch]
+symbol = " "
+format = "[$symbol](muted)[$branch]($style) "
+style = "italic sage"
+truncation_length = 28
+truncation_symbol = "…"
+
+[git_status]
+# A compact modifier before the branch, hidden when the tree is clean.
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "orange"
+conflicted = "="
+modified = "!"
+staged = "+"
+untracked = "?"
+renamed = "»"
+deleted = "×"
+stashed = "≡"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇡${ahead_count}⇣${behind_count}"
+up_to_date = ""
+
+[git_commit]
+only_detached = true
+format = "[@$hash]($style) "
+style = "sage"
+
+[git_state]
+format = '([\($state( $progress_current/$progress_total)\)]($style) )'
+style = "bold orange"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+format = "[$time]($style)"
+style = "muted"
+
+[character]
+success_symbol = "[❯](bold gold)"
+error_symbol = "[✗](bold error)"
+vimcmd_symbol = "[❮](bold sage)"
+vimcmd_visual_symbol = "[V](bold gold)"
+vimcmd_replace_symbol = "[R](bold orange)"
+vimcmd_replace_one_symbol = "[R](bold orange)"

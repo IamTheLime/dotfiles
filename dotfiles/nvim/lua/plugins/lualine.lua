@@ -1,12 +1,12 @@
-
-local l =  require('plugins.telescope')
-
 return {
   'nvim-lualine/lualine.nvim',
   dependencies = { 'nvim-tree/nvim-web-devicons' },
   opts = {
     options = {
-      -- theme = 'auto', -- or 'tokyonight', 'gruvbox', etc.
+      -- Lualine re-evaluates this function on ColorScheme/background changes.
+      theme = function()
+        return require('lima_the_lime.lualine_theme').build()
+      end,
       icons_enabled = true,
       component_separators = '━',
       section_separators = '━',
@@ -31,4 +31,3 @@ return {
     extensions = {},
   },
 }
-

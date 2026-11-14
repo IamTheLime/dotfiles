@@ -7,6 +7,8 @@ dotfiles/tmux/plugins/
 *gitignore.lua
 *gitlab.lua
 *lazy-lock.json
+__pycache__/
+*.py[cod]
 
 # Claude Code local artifacts: machine-specific paths and scratch worktrees.
 # Not for a public repo.

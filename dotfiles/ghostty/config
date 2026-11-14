@@ -2,17 +2,15 @@
 # For full options, see: https://github.com/mitchellh/ghostty
 
 # Font configuration
-font-family = "IosevkaTiago Nerd Font"
+# font-family = "IosevkaTiago Nerd Font"
 #font-family = "Cozette"
 font-size = 14
 
-theme = "Blue Berry Pie"
-background = "#000000"
+theme = "Ember Grove"
 
 # Terminal
 cursor-style = "block"
 cursor-style-blink = false
-split-divider-color = #1D0122
 
 
 # Shell integration

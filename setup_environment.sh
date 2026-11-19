@@ -239,6 +239,10 @@ if ask_yes_no "Do you want to setup Ghostty config?"; then
     
     # Create symlink
     ln -sf "$DOTFILES_DIR/dotfiles/ghostty" "$HOME/.config/ghostty"
+    if ! bash "$DOTFILES_DIR/font/picker-icons/install.sh"; then
+        echo -e "${RED}Picker Icons font installation failed.${NC}"
+        exit 1
+    fi
     echo -e "${GREEN}✓ Created symlink: ~/.config/ghostty -> $DOTFILES_DIR/dotfiles/ghostty${NC}"
 else
     echo -e "${YELLOW}Skipping Ghostty config setup.${NC}"

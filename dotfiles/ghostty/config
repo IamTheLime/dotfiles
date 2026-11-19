@@ -4,15 +4,15 @@
 # Font configuration
 # font-family = "IosevkaTiago Nerd Font"
 #font-family = "Cozette"
-font-size = 14
+font-size = 9
+# Custom worktree and repository glyphs; installed by font/picker-icons/install.sh.
+font-codepoint-map = U+F5000-U+F5001=Picker Icons
 
 theme = "Ember Grove"
 
 # Terminal
 cursor-style = "block"
 cursor-style-blink = false
-
-
 # Shell integration
 shell-integration = zsh
 shell-integration-features = cursor,sudo,title

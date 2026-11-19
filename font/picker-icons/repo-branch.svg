@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" color="#ffd872" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <title>Repository and branch: a fork in Git history</title>
+  <path d="M3.5 4.125V11.875M3.5 10.5H7C10.5 10.5 12.5 8.5 12.5 5.125"/>
+  <circle cx="3.5" cy="2.5" r="1.625"/>
+  <circle cx="3.5" cy="13.5" r="1.625"/>
+  <circle cx="12.5" cy="3.5" r="1.625"/>
+</svg>

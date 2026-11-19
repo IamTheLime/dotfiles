@@ -101,6 +101,22 @@ Prompt, theme-reference and installer-merge checks:
 python3 -m unittest discover -s tests -v
 ```
 
+## Repository picker icons
+
+`repos <Tab>` uses the custom [Picker Icons](font/picker-icons/) companion font:
+stacked files and checkpoints for worktrees, a Git fork for repositories and
+branch names. Ghostty maps only two private-use codepoints to it.
+The Ghostty setup step installs the prebuilt font; for an existing setup:
+
+```sh
+bash font/picker-icons/install.sh
+```
+
+Fully restart Ghostty after installing the font. On Linux, you can instead
+open an independent process with `ghostty --gtk-single-instance=false`.
+New tabs in an existing process may reuse its old font cache.
+SVG sources and the reproducible font build script live in `font/picker-icons/`.
+
 ## Starship prompt
 
 `dotfiles/starship.toml` matches Ember Grove without background blocks.

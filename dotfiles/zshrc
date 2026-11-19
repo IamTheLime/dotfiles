@@ -95,7 +95,8 @@ _repos() {
   (( ${#header} > width )) && width=${#header}
   zstyle ':fzf-tab:complete:repos:*' fzf-flags --header="   ${(r:$width:)header}    branch" --preview-window=border-none --height=80%
   # Read HEAD directly to keep completion fast with 100+ entries.
-  local g gd head display marker sym=$'\u2387'
+   # Picker Icons companion font: worktree U+F5000, repo/branch U+F5001.
+   local g gd head display marker sym=$'\U000f5001'
   for (( i = 1; i <= ${#entries}; i++ )); do
     g=${dirs[i]}/.git
     if [[ -f $g ]]; then
@@ -108,11 +109,11 @@ _repos() {
       head=$(<$g/HEAD)
       [[ $head == ref:\ refs/heads/* ]] && branch=${head#ref: refs/heads/}
     fi
-    marker='🦿'
-    (( trees[i] )) && marker='🌴'
+     marker=$'\U000f5001'
+     (( trees[i] )) && marker=$'\U000f5000'
     entry=${entries[i]}
-    display="$marker $entry"
-    [[ -n $branch ]] && display="$marker ${(r:$width:)entry}  ${sym} ${branch}"
+     display="$marker  $entry"
+     [[ -n $branch ]] && display="$marker  ${(r:$width:)entry}  ${sym}  ${branch}"
     if (( trees[i] )); then
       tree_entries+=("$entry"); tree_displays+=("$display")
     else
@@ -206,7 +207,14 @@ fi
 
 # Default finder for fzf 
 export FZF_DEFAULT_COMMAND='fd .'
-export FZF_DEFAULT_OPTS="--ansi"
+# Match the Ember Grove terminal palette, including fzf-tab completions.
+export FZF_DEFAULT_OPTS="--ansi
+  --color=fg:#ffd872,bg:#0a1109,hl:#eb9866
+  --color=fg+:#ffe295,bg+:#232922,hl+:#ffa764
+  --color=pointer:#ffd168,marker:#ffd168,gutter:#232922
+  --color=prompt:#edbd70,info:#bfa256,header:#edbd70,spinner:#ffd168
+  --color=border:#795e47,separator:#795e47,scrollbar:#795e47,label:#edbd70"
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_CTRL_T_OPTS="--preview 'bat --color=always --line-range :500 {}'"
 # Set up fzf key bindings and fuzzy completion
@@ -314,3 +322,8 @@ if [ -d "$ZVM_INSTALL" ]; then
   export PATH="$PATH:$HOME/.zvm/bin"
   export PATH="$PATH:$ZVM_INSTALL"
 fi
+
+# Hostinger VPS; the private key stays in the 1Password SSH agent.
+sshhostinger() {
+  command ssh -o IdentitiesOnly=yes -i "$HOME/.ssh/hostinger.pub" root@tiagolima.io "$@"
+}

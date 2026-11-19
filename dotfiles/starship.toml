@@ -5,7 +5,7 @@ add_newline = true
 command_timeout = 200
 palette = "ember_grove"
 format = """
-[│](bold orange) $directory$git_status$git_branch$git_commit$git_state[—](muted) $time
+[│](bold orange) ${custom.local_context}${custom.ssh_context}$directory$git_status$git_branch$git_commit$git_state[—](muted) $time
 [│](bold orange) $character"""
 continuation_prompt = "[│](bold orange) [·](muted) "
 
@@ -73,3 +73,16 @@ vimcmd_symbol = "[❮](bold sage)"
 vimcmd_visual_symbol = "[V](bold gold)"
 vimcmd_replace_symbol = "[R](bold orange)"
 vimcmd_replace_one_symbol = "[R](bold orange)"
+
+# Keep local and remote shells distinguishable by text as well as colour.
+[custom.local_context]
+when = 'test -z "$SSH_CONNECTION$SSH_TTY"'
+command = 'printf "%s@%s" "$(id -un)" "$(hostname -s)"'
+shell = ["sh", "-c"]
+format = '[LOCAL $output](bold sage) '
+
+[custom.ssh_context]
+when = 'test -n "$SSH_CONNECTION$SSH_TTY"'
+command = 'printf "%s@%s" "$(id -un)" "$(hostname -s)"'
+shell = ["sh", "-c"]
+format = '[SSH $output](bold orange) '

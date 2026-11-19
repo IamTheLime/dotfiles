@@ -5,6 +5,7 @@ end
 
 return {
     dir = plugin_dir,
+    -- Local development plugin: skip it on servers without a BadTerm checkout.
     enabled = vim.fn.isdirectory(plugin_dir) == 1,
     name = "terminal_workflows",
     lazy = false,

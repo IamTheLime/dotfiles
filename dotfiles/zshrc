@@ -325,5 +325,5 @@ fi
 
 # Hostinger VPS; the private key stays in the 1Password SSH agent.
 sshhostinger() {
-  command ssh -o IdentitiesOnly=yes -i "$HOME/.ssh/hostinger.pub" root@tiagolima.io "$@"
+  command ssh -o IdentitiesOnly=yes -i "$HOME/.ssh/hostinger.pub" admin@tiagolima.io "$@"
 }

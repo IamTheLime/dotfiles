@@ -5,6 +5,7 @@ end
 
 return {
     dir = plugin_dir,
+    enabled = vim.fn.isdirectory(plugin_dir) == 1,
     name = "terminal_workflows",
     lazy = false,
     opts = {},

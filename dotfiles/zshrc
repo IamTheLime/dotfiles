@@ -195,7 +195,11 @@ compdef _sketch sketch
 # Setting up zsh plugins
 #
 #
-plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting ssh-agent )
+plugins=(git virtualenv zsh-autosuggestions fzf-tab zsh-syntax-highlighting)
+# Remote sessions use SSH_AUTH_SOCK when an agent is forwarded; do not start one.
+if [[ -z "${SSH_CONNECTION:-}" && -z "${SSH_TTY:-}" ]]; then
+    plugins+=(ssh-agent)
+fi
 #Remember, for ssh to work as you like it you need to add the AddKeysToAgent on the ssh config
 source $ZSH/oh-my-zsh.sh
 

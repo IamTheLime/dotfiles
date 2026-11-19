@@ -78,11 +78,11 @@ vimcmd_replace_one_symbol = "[R](bold orange)"
 [custom.local_context]
 when = 'test -z "$SSH_CONNECTION$SSH_TTY"'
 command = 'printf "%s@%s" "$(id -un)" "$(hostname -s)"'
-shell = ["sh", "-c"]
+shell = ["sh"]
 format = '[LOCAL $output](bold sage) '
 
 [custom.ssh_context]
 when = 'test -n "$SSH_CONNECTION$SSH_TTY"'
 command = 'printf "%s@%s" "$(id -un)" "$(hostname -s)"'
-shell = ["sh", "-c"]
+shell = ["sh"]
 format = '[SSH $output](bold orange) '

@@ -327,7 +327,21 @@ if [ -d "$ZVM_INSTALL" ]; then
   export PATH="$PATH:$ZVM_INSTALL"
 fi
 
-# Hostinger VPS; the private key stays in the 1Password SSH agent.
+# Prefer the VPS tailnet address; use public IPv4 only when private SSH is unreachable.
+# Private keys remain in 1Password. An SSH login failure never triggers a second login.
+# Optional override if the VPS is renamed: export HOSTINGER_TAILSCALE_HOST=100.x.y.z
 sshhostinger() {
-  command ssh -o IdentitiesOnly=yes -i "$HOME/.ssh/hostinger.pub" admin@tiagolima.io "$@"
+  local private_host="${HOSTINGER_TAILSCALE_HOST:-}" target_host="2.24.141.31"
+  if [[ -z "$private_host" ]] && (( $+commands[tailscale] && $+commands[jq] && $+commands[timeout] )); then
+    private_host=$(command timeout 3 tailscale status --json 2>/dev/null |
+      command jq -r '[.Peer // {} | .[] | select(((.DNSName // "") | split(".")[0]) == "hostinger-server") | .TailscaleIPs[]? | select(contains(":") | not)] | if length == 1 then .[0] else empty end' 2>/dev/null)
+  fi
+  if [[ -n "$private_host" ]] && command timeout 3 zsh -fc \
+    'zmodload zsh/net/tcp && ztcp "$1" 22 && ztcp -c' -- "$private_host" 2>/dev/null; then
+    target_host="$private_host"
+    print -u2 -- "Connecting to Hostinger over Tailscale ($target_host)."
+  else
+    print -u2 -- "Tailscale SSH unavailable; using public IPv4 ($target_host)."
+  fi
+  command ssh -o ConnectTimeout=10 -o IdentitiesOnly=yes -i "$HOME/.ssh/hostinger.pub" "admin@$target_host" "$@"
 }

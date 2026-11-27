@@ -14,22 +14,6 @@ keymap.set('n', '<C-a>', 'gg<S-v>G')
 
 -- New tab
 keymap.set('n', 'te', ':tabedit')
--- Split window
-keymap.set('n', 'sh', ':split<Return><C-w>w')
-keymap.set('n', 'sv', ':vsplit<Return><C-w>w')
--- Move window
-keymap.set('n', '<Space>', '<C-w>w')
---keymap.set('', 'sh', '<C-w>h')
--- keymap.set('', 'sk', '<C-w>k')
--- keymap.set('', 'sj', '<C-w>j')
--- keymap.set('', 'sl', '<C-w>l')
-
--- Resize window
-keymap.set('n', '<C-w><left>', '<C-w><')
-keymap.set('n', '<C-w><right>', '<C-w>>')
-keymap.set('n', '<C-w><up>', '<C-w>+')
-keymap.set('n', '<C-w><down>', '<C-w>-')
-
 
 keymap.set('t', '<C-Space>', "<C-\\><C-n>", { silent = true })
 
@@ -45,4 +29,3 @@ keymap.set('n', '<C-n>p', function()
         print("Hey dummy perhaps you want to try to create a quickfix list before")
     end
 end)
-

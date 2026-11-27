@@ -132,7 +132,7 @@ return {
                     mappings = {
                         -- "noop" makes neo-tree skip creating this buffer mapping entirely
                         -- (not a no-op mapping), so the global <Space> -> <C-w>w from
-                        -- maps.lua still works in the tree. <cr> already toggles folders.
+                        -- window_management.lua still works in the tree. <cr> already toggles folders.
                         ["<space>"] = "noop",
                         ["<2-LeftMouse>"] = "open",
                         ["<cr>"] = "open",
